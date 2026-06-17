@@ -127,11 +127,41 @@ This pull-request-based catalog governance ensures that agent capability creep i
 
 ## 5. Agent-to-Agent (A2A) and Audit Standards
 
-In multi-agent workflows — for example, a supervisor agent routing to a specialist PV or Regulatory agent — the A2A call passes the original user's identity claims, not the supervisor agent's identity. The downstream specialist agent's gateway sees the human's roles, not elevated supervisor permissions.
+### ADR-001 — Agent orchestration and the role of A2A
+
+**Status:** Accepted (current architecture). **Decision owners:** platform architecture. **Last reviewed:** 2026-06.
+
+**Context.** "Agent orchestration" spans three distinct layers that customer architects often conflate. Keeping them separate is what makes the suite auditable: (1) coordination *inside* one agent, (2) an agent acting on a *system of record*, and (3) one agent calling *another* agent. A2A (the Agent-to-Agent protocol) addresses only layer 3; it is **not** a substitute for the gateway, which governs layer 2.
+
+**Decision.** **In-process LangGraph today; A2A-through-AgentCore when multi-agent is needed.**
+- **Layer 1 — intra-agent:** each agent is a single compiled **LangGraph `StateGraph`**. Steps coordinate as in-process function calls within one runtime. No network protocol, no A2A.
+- **Layer 2 — agent → tool / system of record:** **every** call routes through the MCP authorization gateway (**Amazon Bedrock AgentCore Gateway + Identity**) and is authorized, scoped, and **written to the append-only audit trail**. This is where "log every interaction" happens.
+- **Layer 3 — agent → agent (A2A):** **not used in the current suite.** The eight agents are independent; none calls another. A2A is introduced **only** when a use case genuinely requires cross-process / cross-org multi-agent orchestration (a supervisor calling a specialist as a separate service, or interop with a partner/CRO agent).
+
+| Layer | Mechanism today | Governed / audited by |
+|---|---|---|
+| Inside an agent | LangGraph in-process DAG | The agent's own state + per-node audit entries |
+| Agent → system of record | MCP gateway = **AgentCore Gateway + Identity** | Authorized + audited on **every** call (this is "everything through AgentCore") |
+| Agent → agent (A2A) | **Not used yet** | When added: **A2A hop runs *through* AgentCore** — see invariant below |
+
+**A2A is complementary to AgentCore, never a bypass.** "Log everything through AgentCore" and "use A2A" are not alternatives: AgentCore governs agent→tool calls (and, when present, the A2A hop and the specialist's own tool calls); A2A is just the transport between agents. If you adopt A2A you still log every hop through AgentCore.
+
+**Governance invariant for any future A2A hop (non-negotiable):**
+1. **Identity propagation** — the call carries the *original human's* verified IdP claims, **not** the supervisor agent's identity. The specialist can never receive elevated permissions by virtue of being called by a supervisor.
+2. **Least-privilege intersection still applies** — the specialist's gateway authorizes against `AGENT_TOOL_GRANTS[specialist] ∩ ROLE_ENTITLEMENTS[human]`. A supervisor cannot widen what the human may do.
+3. **Every hop is audited** — the A2A invocation and all downstream tool calls are written to the same append-only trail, linked by `session_id`; AgentCore Observability traces the chain end-to-end.
+4. **Human gates are preserved** — a high-risk action reached *via* a specialist still pauses for the qualified human approver; the gate cannot be skipped by going through another agent.
+
+**Rationale.** Independent agents + AgentCore-audited tool access is the simplest posture to validate (CSV) and the one security/quality teams approve first. Premature A2A adds a distributed-systems surface (identity propagation, partial failure, cross-service trust) with no use-case payoff yet.
+
+**Consequences.** Today there is no A2A attack surface and no risk of permission elevation across agents. When multi-agent is needed, the invariant above plus the worked reference pattern (`platform_core/hcls_agent_platform/a2a/`) make adoption a contained, governed change — not a re-architecture.
+
+### Audit record standard (every layer-2 and future layer-3 hop)
 
 Audit records include:
-- `session_id` (links all calls in a workflow)
-- `agent_id` (which specialist handled the call)
+- `session_id` (links all calls in a workflow — including A2A hops)
+- `agent_id` (which agent/specialist handled the call)
+- `on_behalf_of` (the supervisor agent, when the call arrived via A2A; for lineage only — it never expands permissions)
 - `tool` (which system-of-record operation was attempted)
 - `decision` (ALLOW / DENY / PENDING_APPROVAL / ERROR)
 - `user_sub` (IdP subject identifier — PHI-masked)
@@ -140,6 +170,10 @@ Audit records include:
 - `lineage` (source documents and case state used in the decision)
 
 Audit records are written to an append-only DynamoDB table (no UpdateItem or DeleteItem allowed on the audit partition) with Point-in-Time Recovery enabled. For the highest-assurance use cases (e-signature linkage for Part 11 compliance), the same records are fanned to QLDB for cryptographically verified provenance.
+
+### Reference A2A pattern
+
+A small, runnable worked example — a supervisor invoking a specialist via an AgentCore-governed, identity-propagating, audited hop — lives in `platform_core/hcls_agent_platform/a2a/` (`README.md` + `supervisor.py` + tests). Use it when a customer asks "show me how multi-agent stays governed."
 
 ---
 

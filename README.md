@@ -75,6 +75,8 @@ Reference logic: `platform_core/hcls_agent_platform/mcp_gateway/` — this is th
 
 **New to positioning this layer with a customer?** `docs/WHY-THE-MCP-LAYER.md` is a plain-English explainer (with a talk track and objection handling) for why agents that *automate* systems need a governed access layer and why to fund it in Phase 1.
 
+**Multi-agent / A2A?** The orchestration stance is recorded as ADR-001 in `ENTERPRISE-PLATFORM.md` (§5): in-process LangGraph today; A2A-through-AgentCore when multi-agent is needed. A runnable, governed reference hop is in `platform_core/hcls_agent_platform/a2a/`.
+
 ### Connector Framework
 Adapter layer for each system category (RIM, DMS, Safety DB, EDC, CTMS, eTMF, RWD, QMS, CRM). Demo mode uses deterministic JSON fixtures; production connectors point at live Veeva, Medidata, and other vendor APIs. The connector interface is the same in both modes — the gateway does not know which backend is live.
 

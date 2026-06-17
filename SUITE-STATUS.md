@@ -31,6 +31,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 ## Changelog (most recent first)
 
+- **A2A orchestration stance + reference** — `ENTERPRISE-PLATFORM.md` §5 expanded to **ADR-001** (in-process LangGraph today; A2A-through-AgentCore when multi-agent is needed), plus a runnable governed reference hop `platform_core/hcls_agent_platform/a2a/` (identity-propagating, least-privilege, audited; 5 tests).
 - **`make handbooks` build tooling** — versioned generators in `tooling/handbooks/` + a repo-root `Makefile`; figures, the master PDF, and the 8 per-agent PDFs regenerate from source with dependency tracking (edit a profile -> only the affected PDFs rebuild).
 - **MCP-layer account explainer** — `docs/WHY-THE-MCP-LAYER.md`: plain-English why-and-why-now for the governed access layer, with a talk track and objection handling.
 - **Executive deck PDF** — `HCLS-Agentic-AI-Suite-Executive-Overview.pdf` (leave-behind export of the 16-slide deck).
