@@ -31,6 +31,8 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 ## Changelog (most recent first)
 
+- **Executive deck PDF** — `HCLS-Agentic-AI-Suite-Executive-Overview.pdf` (leave-behind export of the 16-slide deck).
+- **Per-agent deployment handbook PDFs** — `deliverables/agent-handbooks/HCLS-Deployment-Handbook-<agent>.pdf` for all 8 agents: each tailored with its own AgentId, systems, approver-role approval gate, native workflow, and agent-specific console mockups (Cognito/CloudFormation/Secrets/Step Functions/DynamoDB) under `docs/assets/console/<agent>/`.
 - **Deployment Handbook PDF** — `HCLS-Deployment-Handbook.pdf`: branded, print-ready leave-behind (cover + all 7 figures, 20 pages) rendered from the handbook.
 - **Console mockups** — 7 labeled, illustrative AWS Console screens (Figures 1–7) embedded in the Deployment Handbook and stored in `docs/assets/console/` (PNG + SVG source).
 - **Deployment Handbook** — `docs/DEPLOYMENT-HANDBOOK.md`: console-level (click-by-click) + CLI deployment book, empty AWS account to a running governed agent, with a per-agent appendix. Linked from the README and every per-agent AWS deployment guide.
