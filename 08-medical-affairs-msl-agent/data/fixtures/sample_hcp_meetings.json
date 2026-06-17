@@ -1,0 +1,138 @@
+{
+  "meetings": [
+    {
+      "request_id": "MSL-2026-0001",
+      "hcp_id": "HCP-DEMO-001",
+      "hcp_name": "Dr. Jane Smith",
+      "topic": "Demo-Drug in type 2 diabetes — Phase 3 data",
+      "meeting_date": "2026-02-15",
+      "meeting_purpose": "Scientific exchange following HCP unsolicited request for Phase 3 study data",
+      "instructions": "Focus on primary endpoint and cardiovascular safety. Anticipate questions on renal dosing. All responses must reference approved labeling only.",
+      "approved_doc_ids": ["DOC-PI-001", "DOC-CSR-001"],
+      "context": {
+        "expected_outcome": "APPROVE_BRIEF"
+      },
+      "acting_user_claims": {
+        "sub": "msl@demopharma.com",
+        "custom:hcls_role": "MSL"
+      },
+      "hcp_profile": {
+        "hcp_id": "HCP-DEMO-001",
+        "name": "Dr. Jane Smith",
+        "specialty": "Endocrinology",
+        "institution": "Metro Diabetes Center",
+        "clinical_interests": ["type 2 diabetes", "metabolic syndrome", "cardiovascular risk"],
+        "recent_publications": ["Glycemic control in T2D: a 2025 review"],
+        "tier": "KOL",
+        "meeting_history": [
+          {"date": "2025-10-15", "topic": "Phase 3 data overview", "outcome": "Requested references"},
+          {"date": "2025-07-20", "topic": "Mechanism of action discussion", "outcome": "Positive engagement"}
+        ]
+      },
+      "approved_documents": [
+        {
+          "doc_id": "DOC-PI-001",
+          "title": "Demo-Drug Prescribing Information",
+          "version": "3.0",
+          "status": "APPROVED",
+          "text": "Demo-Drug is indicated for the treatment of type 2 diabetes mellitus in adults. In STUDY-301 (n=450), Demo-Drug reduced HbA1c by 1.2 percentage points vs placebo. Common adverse events: upper respiratory infection (8%), nausea (6%). Contraindicated in severe renal impairment (eGFR < 30). Renal dosing adjustment required for eGFR 30-60."
+        },
+        {
+          "doc_id": "DOC-CSR-001",
+          "title": "STUDY-301 Clinical Study Report Summary",
+          "version": "1.0",
+          "status": "APPROVED",
+          "text": "Phase 3 STUDY-301: 450 subjects, 52 weeks. Primary endpoint met (HbA1c reduction 1.2 pp, p<0.001 vs placebo). Secondary endpoints: fasting plasma glucose reduced. Cardiovascular safety: no increase in MACE observed. On-label indication: T2D management in adults."
+        }
+      ]
+    },
+    {
+      "request_id": "MSL-2026-0002",
+      "hcp_id": "HCP-DEMO-002",
+      "hcp_name": "Dr. Robert Chen",
+      "topic": "Demo-Drug safety profile and renal dosing considerations",
+      "meeting_date": "2026-02-20",
+      "meeting_purpose": "Respond to unsolicited request for safety data in patients with moderate renal impairment",
+      "instructions": "Address renal dosing per approved prescribing information only. Flag that eGFR < 30 is contraindicated. Do not discuss any investigational use.",
+      "approved_doc_ids": ["DOC-PI-001"],
+      "context": {
+        "expected_outcome": "APPROVE_BRIEF"
+      },
+      "acting_user_claims": {
+        "sub": "msl@demopharma.com",
+        "custom:hcls_role": "MSL"
+      },
+      "hcp_profile": {
+        "hcp_id": "HCP-DEMO-002",
+        "name": "Dr. Robert Chen",
+        "specialty": "Nephrology",
+        "institution": "University Hospital Renal Center",
+        "clinical_interests": ["CKD management", "diabetes and kidney disease", "cardiorenal syndrome"],
+        "recent_publications": ["Renal outcomes in T2D: 2025 update"],
+        "tier": "Regional Thought Leader",
+        "meeting_history": []
+      },
+      "approved_documents": [
+        {
+          "doc_id": "DOC-PI-001",
+          "title": "Demo-Drug Prescribing Information",
+          "version": "3.0",
+          "status": "APPROVED",
+          "text": "Demo-Drug is indicated for the treatment of type 2 diabetes mellitus in adults. Renal dosing: dose reduction recommended for eGFR 30-60. Contraindicated in severe renal impairment (eGFR < 30). Monitor renal function periodically during treatment. Common adverse events: upper respiratory infection (8%), nausea (6%)."
+        }
+      ]
+    },
+    {
+      "request_id": "MSL-2026-0003",
+      "hcp_id": "HCP-DEMO-003",
+      "hcp_name": "Dr. Maria Lopez",
+      "topic": "Demo-Drug cardiovascular outcomes and MACE data",
+      "meeting_date": "2026-03-05",
+      "meeting_purpose": "Scientific exchange on cardiovascular safety data following HCP request at congress",
+      "instructions": "Focus on cardiovascular safety findings from STUDY-301. Cite only approved data. Anticipate questions on comparison with other agents — respond only with on-label data.",
+      "approved_doc_ids": ["DOC-PI-001", "DOC-CSR-001", "DOC-CV-001"],
+      "context": {
+        "expected_outcome": "APPROVE_BRIEF"
+      },
+      "acting_user_claims": {
+        "sub": "msl@demopharma.com",
+        "custom:hcls_role": "MSL"
+      },
+      "hcp_profile": {
+        "hcp_id": "HCP-DEMO-003",
+        "name": "Dr. Maria Lopez",
+        "specialty": "Cardiology",
+        "institution": "Heart & Vascular Institute",
+        "clinical_interests": ["cardiovascular risk reduction", "cardiometabolic disease", "heart failure"],
+        "recent_publications": ["Cardiometabolic risk in diabetic patients: 2025"],
+        "tier": "National KOL",
+        "meeting_history": [
+          {"date": "2025-11-10", "topic": "Cardiovascular safety overview", "outcome": "Requested MACE data"}
+        ]
+      },
+      "approved_documents": [
+        {
+          "doc_id": "DOC-PI-001",
+          "title": "Demo-Drug Prescribing Information",
+          "version": "3.0",
+          "status": "APPROVED",
+          "text": "Demo-Drug is indicated for the treatment of type 2 diabetes mellitus in adults. In STUDY-301 (n=450), no increase in MACE was observed. Cardiovascular safety was evaluated as a pre-specified secondary endpoint."
+        },
+        {
+          "doc_id": "DOC-CSR-001",
+          "title": "STUDY-301 Clinical Study Report Summary",
+          "version": "1.0",
+          "status": "APPROVED",
+          "text": "Phase 3 STUDY-301: 450 subjects, 52 weeks. Cardiovascular safety: no increase in MACE observed. Pre-specified secondary endpoint analysis. On-label indication: T2D management in adults."
+        },
+        {
+          "doc_id": "DOC-CV-001",
+          "title": "Cardiovascular Safety Summary — Demo-Drug",
+          "version": "1.0",
+          "status": "APPROVED",
+          "text": "Cardiovascular outcomes in STUDY-301: MACE rate was comparable to placebo. No new safety signals identified in the cardiovascular domain. Data support the approved cardiovascular safety profile."
+        }
+      ]
+    }
+  ]
+}

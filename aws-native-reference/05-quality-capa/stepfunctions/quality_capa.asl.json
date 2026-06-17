@@ -1,0 +1,52 @@
+{
+  "Comment": "AWS-native Quality CAPA. Step Functions orchestrates deterministic Lambdas; the LLM (Strands/Bedrock) only drafts the CAPA plan; the Qualified Person gate uses waitForTaskToken (framework-enforced HITL). Speculative language or missing elements trigger revision; escalation on HIGH-risk events routes to senior QP review; finalize creates the QMS CAPA draft only after approval.",
+  "StartAt": "Assemble",
+  "States": {
+    "Assemble": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${AssembleFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "Draft"
+    },
+    "Draft": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${DraftFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "Check"
+    },
+    "Check": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${CheckFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "RouteChoice"
+    },
+    "RouteChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {"Variable": "$.routing.next", "StringEquals": "Draft", "Next": "Draft"}
+      ],
+      "Default": "HumanReviewGate"
+    },
+    "HumanReviewGate": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${HitlNotifyFunctionArn}",
+        "Payload": {"input.$": "$", "task_token.$": "$$.Task.Token"}
+      },
+      "ResultPath": "$.review",
+      "TimeoutSeconds": 1209600,
+      "Next": "Finalize"
+    },
+    "Finalize": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${FinalizeFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "End": true
+    }
+  }
+}

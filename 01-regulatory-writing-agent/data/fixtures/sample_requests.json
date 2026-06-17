@@ -1,0 +1,49 @@
+{
+  "requests": [
+    {
+      "request_id": "REQ-2026-0001",
+      "document_type": "BENEFIT_RISK_SUMMARY",
+      "product": "Demo-Drug",
+      "indication": "type 2 diabetes",
+      "target_authority": "FDA",
+      "section_ref": "CTD Module 2.5.6",
+      "instructions": "Draft the integrated benefit-risk summary for the NDA based on the pivotal Phase 3 study. Neutral, non-promotional, grounded in the CSR.",
+      "study_data": {
+        "product": "Demo-Drug",
+        "indication": "type 2 diabetes",
+        "study": "STUDY-301",
+        "n_subjects": 450,
+        "primary_endpoint": "HbA1c reduction",
+        "hba1c_reduction_pct": 1.2,
+        "comparator": "placebo",
+        "authority": "FDA",
+        "source_ref": "CSR STUDY-301 Section 11"
+      },
+      "source_documents": [
+        {"doc_id": "CSR-301", "title": "Clinical Study Report STUDY-301", "version": "1.0",
+         "status": "Final", "text": "Primary endpoint met; HbA1c reduction of 1.2 percentage points vs placebo in 450 subjects. No new safety signals."}
+      ]
+    },
+    {
+      "request_id": "REQ-2026-0002",
+      "document_type": "HA_QUESTION_RESPONSE",
+      "product": "Demo-Drug",
+      "indication": "type 2 diabetes",
+      "target_authority": "EMA",
+      "section_ref": "Response to Day-120 Question 14",
+      "instructions": "Respond to the CHMP question on hepatic safety using only the integrated safety data.",
+      "study_data": {
+        "product": "Demo-Drug",
+        "study": "STUDY-301",
+        "alt_elevation_rate_pct": 1.8,
+        "comparator": "placebo",
+        "comparator_alt_rate_pct": 1.5,
+        "source_ref": "Integrated Summary of Safety Section 7"
+      },
+      "source_documents": [
+        {"doc_id": "ISS-1", "title": "Integrated Summary of Safety", "version": "2.0",
+         "status": "Final", "text": "ALT elevations >3x ULN occurred in 1.8% of Demo-Drug vs 1.5% placebo; no Hy's Law cases."}
+      ]
+    }
+  ]
+}

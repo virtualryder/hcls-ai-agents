@@ -1,0 +1,18 @@
+{
+  "request_id": "MSL-NATIVE-2026-0001",
+  "hcp_id": "HCP-DEMO-001",
+  "hcp_name": "Dr. Jane Smith",
+  "topic": "Demo-Drug in type 2 diabetes",
+  "meeting_date": "2026-02-15",
+  "meeting_purpose": "Scientific exchange following HCP unsolicited request for Phase 3 data",
+  "instructions": "Focus on primary endpoint and cardiovascular safety. All responses must reference approved labeling only.",
+  "approved_documents": [
+    {
+      "doc_id": "DOC-PI-001",
+      "title": "Demo-Drug Prescribing Information",
+      "version": "3.0",
+      "status": "APPROVED",
+      "text": "Demo-Drug is indicated for the treatment of type 2 diabetes mellitus in adults. In STUDY-301 (n=450), Demo-Drug reduced HbA1c by 1.2 percentage points vs placebo. Common adverse events: upper respiratory infection (8%), nausea (6%). Contraindicated in severe renal impairment (eGFR < 30)."
+    }
+  ]
+}

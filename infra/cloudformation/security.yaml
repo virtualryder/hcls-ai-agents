@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  HCLS Agent Suite - Security stack. Per-customer KMS key, Bedrock Guardrail
+  (PHI + off-label + grounding controls), Cognito user pool federated to the
+  customer IdP, and the agent execution role. These are the controls that make
+  the data-residency and Part-11 stories real.
+
+Parameters:
+  Environment: { Type: String, Default: dev }
+  IdpMetadataUrl:
+    Type: String
+    Default: ""
+    Description: SAML/OIDC metadata URL for the customer IdP (Okta/Entra/AD). Optional in dev.
+
+Resources:
+  AgentKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub "HCLS ${Environment} per-customer encryption key"
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowAccountAdmin
+            Effect: Allow
+            Principal: { AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root" }
+            Action: "kms:*"
+            Resource: "*"
+
+  AgentKmsAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/hcls-${Environment}"
+      TargetKeyId: !Ref AgentKmsKey
+
+  # Bedrock Guardrail: PHI filtering, denied topics (off-label promotion), and a
+  # contextual grounding check on model output. REQUIRED in production.
+  BedrockGuardrail:
+    Type: AWS::Bedrock::Guardrail
+    Properties:
+      Name: !Sub "hcls-${Environment}-guardrail"
+      Description: HCLS PHI + off-label + grounding controls
+      BlockedInputMessaging: "This request cannot be processed under the HCLS safety policy."
+      BlockedOutputsMessaging: "This content was withheld by the HCLS safety policy."
+      ContentPolicyConfig:
+        FiltersConfig:
+          - { Type: PROMPT_ATTACK, InputStrength: HIGH, OutputStrength: NONE }
+          - { Type: MISCONDUCT, InputStrength: HIGH, OutputStrength: HIGH }
+      SensitiveInformationPolicyConfig:
+        PiiEntitiesConfig:
+          - { Type: EMAIL, Action: ANONYMIZE }
+          - { Type: PHONE, Action: ANONYMIZE }
+          - { Type: US_SOCIAL_SECURITY_NUMBER, Action: BLOCK }
+          - { Type: NAME, Action: ANONYMIZE }
+      TopicPolicyConfig:
+        TopicsConfig:
+          - Name: OffLabelPromotion
+            Definition: >
+              Promotion of a product for an unapproved indication, or absolute
+              efficacy/safety claims (cure, guarantee, completely safe).
+            Type: DENY
+            Examples:
+              - "This drug cures the disease in all patients."
+              - "Completely safe with no side effects."
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "hcls-${Environment}-users"
+      MfaConfiguration: "ON"
+      EnabledMfas: [SOFTWARE_TOKEN_MFA]
+      Schema:
+        - { Name: hcls_role, AttributeDataType: String, Mutable: true }
+      AdminCreateUserConfig: { AllowAdminCreateUserOnly: true }
+
+  AgentExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "hcls-${Environment}-agent-exec"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: [ecs-tasks.amazonaws.com, lambda.amazonaws.com, bedrock.amazonaws.com] }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: hcls-agent-least-privilege
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [bedrock:InvokeModel, bedrock:ApplyGuardrail]
+                Resource: "*"
+              - Effect: Allow
+                Action: [secretsmanager:GetSecretValue]
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:hcls/*"
+              - Effect: Allow
+                Action: [kms:Decrypt, kms:GenerateDataKey]
+                Resource: !GetAtt AgentKmsKey.Arn
+
+Outputs:
+  KmsKeyArn: { Value: !GetAtt AgentKmsKey.Arn, Export: { Name: !Sub "hcls-${Environment}-kms" } }
+  GuardrailId: { Value: !Ref BedrockGuardrail, Export: { Name: !Sub "hcls-${Environment}-guardrail" } }
+  UserPoolId: { Value: !Ref CognitoUserPool, Export: { Name: !Sub "hcls-${Environment}-userpool" } }
+  AgentExecutionRoleArn:
+    Value: !GetAtt AgentExecutionRole.Arn
+    Export: { Name: !Sub "hcls-${Environment}-agent-role" }

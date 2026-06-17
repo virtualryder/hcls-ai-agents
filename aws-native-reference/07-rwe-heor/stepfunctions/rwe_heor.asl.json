@@ -1,0 +1,52 @@
+{
+  "Comment": "AWS-native RWE/HEOR Evidence Agent. Step Functions orchestrates deterministic Lambdas; the LLM (Strands/Bedrock) only synthesizes narrative; the Epidemiologist gate uses waitForTaskToken (framework-enforced HITL). Causal language or cell suppression forces escalation; clean synthesis routes to the Epidemiologist; finalize publishes evidence package only after approval.",
+  "StartAt": "Assemble",
+  "States": {
+    "Assemble": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${AssembleFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "Synthesize"
+    },
+    "Synthesize": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${SynthesizeFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "Check"
+    },
+    "Check": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${CheckFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "RouteChoice"
+    },
+    "RouteChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {"Variable": "$.routing.next", "StringEquals": "Synthesize", "Next": "Synthesize"}
+      ],
+      "Default": "HumanReviewGate"
+    },
+    "HumanReviewGate": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${HitlNotifyFunctionArn}",
+        "Payload": {"input.$": "$", "task_token.$": "$$.Task.Token"}
+      },
+      "ResultPath": "$.review",
+      "TimeoutSeconds": 1209600,
+      "Next": "Finalize"
+    },
+    "Finalize": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${FinalizeFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "End": true
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "requests": [
+    {
+      "request_id": "PROTO-2026-0001",
+      "indication": "non-small cell lung cancer",
+      "phase": "Phase 2",
+      "therapeutic_area": "Oncology",
+      "primary_objective": "evaluate progression-free survival with experimental PD-L1 inhibitor versus chemotherapy",
+      "target_population": "adults with locally advanced or metastatic NSCLC, ECOG performance status 0-1, PD-L1 TPS at least 1 percent",
+      "study_design": "Randomized Controlled Trial",
+      "instructions": "Draft endpoints (PFS primary, OS secondary), eligibility, and 12-month visit schedule.",
+      "acting_user_claims": {
+        "sub": "clinical.scientist@demopharma.com",
+        "custom:hcls_role": "CLINICAL_SCIENTIST"
+      },
+      "context": {
+        "expected_outcome": "APPROVE_DRAFT",
+        "expected_guidance_count": 3,
+        "rwd_eligible_estimate": 3240,
+        "regulatory_risks": ["surrogate endpoint in phase 3 requires health authority alignment"]
+      }
+    },
+    {
+      "request_id": "PROTO-2026-0002",
+      "indication": "type 2 diabetes mellitus",
+      "phase": "Phase 3",
+      "therapeutic_area": "Endocrinology",
+      "primary_objective": "demonstrate superiority of once-weekly GLP-1 receptor agonist on HbA1c reduction at 24 weeks versus placebo",
+      "target_population": "adults 18 to 75 years with type 2 diabetes mellitus, HbA1c 7.5 to 11 percent on stable metformin monotherapy",
+      "study_design": "Randomized Controlled Trial",
+      "instructions": "Draft HbA1c primary endpoint, cardiovascular safety secondary endpoints, eligibility per FDA guidance, and 52-week schedule.",
+      "acting_user_claims": {
+        "sub": "clinical.scientist@demopharma.com",
+        "custom:hcls_role": "CLINICAL_SCIENTIST"
+      },
+      "context": {
+        "expected_outcome": "APPROVE_DRAFT",
+        "expected_guidance_count": 2,
+        "rwd_eligible_estimate": 18400,
+        "regulatory_risks": []
+      }
+    },
+    {
+      "request_id": "PROTO-2026-0003",
+      "indication": "heart failure with reduced ejection fraction",
+      "phase": "Phase 3",
+      "therapeutic_area": "Cardiology",
+      "primary_objective": "evaluate MACE composite endpoint (cardiovascular death, hospitalization for heart failure, urgent heart failure visit)",
+      "target_population": "adults 40 years or older with heart failure with reduced ejection fraction (ejection fraction 40 percent or less), NYHA class II-III, optimal background therapy",
+      "study_design": "Randomized Controlled Trial",
+      "instructions": "Draft MACE primary endpoint, all-cause mortality and Kansas City Cardiomyopathy Questionnaire secondary endpoints, eligibility per ESC/ACC heart failure guidelines, and 36-month event-driven schedule.",
+      "acting_user_claims": {
+        "sub": "clinical.scientist.senior@demopharma.com",
+        "custom:hcls_role": "CLINICAL_SCIENTIST"
+      },
+      "context": {
+        "expected_outcome": "APPROVE_DRAFT",
+        "expected_guidance_count": 2,
+        "rwd_eligible_estimate": 5100,
+        "regulatory_risks": ["cardiovascular endpoint requires FDA/EMA alignment on MACE definition"]
+      }
+    }
+  ]
+}

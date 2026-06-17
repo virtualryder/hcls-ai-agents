@@ -1,0 +1,25 @@
+{
+  "description": "Golden ICSR/CIOMS narratives — reviewed, approved, production-quality outputs that CI holds the line behind (structural + grounding regression).",
+  "cases": [
+    {
+      "id": "icsr-001-nonserious-recovered",
+      "state": {
+        "case_id": "ICSR-2026-00042",
+        "patient": {"age": 54, "sex": "female"},
+        "product": "Cardizem",
+        "dose_mg": 120,
+        "route": "oral",
+        "event_verbatim": "headache",
+        "meddra_pt": "Headache",
+        "onset_days": 2,
+        "seriousness": "non-serious",
+        "outcome": "recovered",
+        "causality": "possibly related",
+        "dechallenge": "positive",
+        "reporter_country": "United States"
+      },
+      "artifact": "A 54-year-old female patient experienced headache approximately 2 days after starting Cardizem 120 mg administered by the oral route. The adverse event was assessed as non-serious, and the patient recovered following discontinuation. The reporter, located in the United States, considered the reaction possibly related to the suspect drug on the basis of the temporal association and a positive dechallenge. No rechallenge was performed. This narrative is prepared for medical review prior to any expedited submission decision; no reporting determination has been finalized.",
+      "expect": {"min_words": 60}
+    }
+  ]
+}

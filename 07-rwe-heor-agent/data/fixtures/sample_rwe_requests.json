@@ -1,0 +1,67 @@
+{
+  "requests": [
+    {
+      "request_id": "RWE-2026-0001",
+      "research_question": "In adults with type 2 diabetes, does SGLT2 inhibitor use reduce all-cause hospitalization compared to DPP4 inhibitor over 12 months in US claims data?",
+      "study_design_type": "Retrospective Cohort",
+      "indication": "type 2 diabetes",
+      "intervention": "SGLT2 inhibitor",
+      "comparator": "DPP4 inhibitor",
+      "outcome": "all-cause hospitalization",
+      "time_horizon": "12 months",
+      "data_source": "US Commercial Claims (Optum CDM)",
+      "instructions": "Generate a structured evidence synthesis. Flag data limitations including formulary differences and unmeasured confounders. All numbers must trace to the cohort query output.",
+      "context": {
+        "sponsor": "DemoPharma",
+        "study_code": "HEOR-001",
+        "expected_outcome": "APPROVE_SYNTHESIS"
+      },
+      "acting_user_claims": {
+        "sub": "epidemiologist@demopharma.com",
+        "custom:hcls_role": "EPIDEMIOLOGIST"
+      }
+    },
+    {
+      "request_id": "RWE-2026-0002",
+      "research_question": "What is the real-world treatment persistence at 12 months among patients initiating biologic therapy for moderate-to-severe psoriasis in US electronic health records?",
+      "study_design_type": "Retrospective Cohort",
+      "indication": "moderate-to-severe psoriasis",
+      "intervention": "IL-17A inhibitor",
+      "comparator": "TNF-alpha inhibitor",
+      "outcome": "treatment persistence at 12 months",
+      "time_horizon": "12 months",
+      "data_source": "US EHR Network (TriNetX)",
+      "instructions": "Quantify persistence and discontinuation rates. Note channeling bias risk due to prescribing patterns. All statistics from validated compute output only.",
+      "context": {
+        "sponsor": "DemoPharma",
+        "study_code": "HEOR-002",
+        "expected_outcome": "APPROVE_SYNTHESIS"
+      },
+      "acting_user_claims": {
+        "sub": "epidemiologist@demopharma.com",
+        "custom:hcls_role": "EPIDEMIOLOGIST"
+      }
+    },
+    {
+      "request_id": "RWE-2026-0003",
+      "research_question": "What is the economic burden of treatment-resistant depression in US Medicare beneficiaries over 24 months, comparing esketamine augmentation versus treatment-as-usual antidepressants?",
+      "study_design_type": "Comparative Cohort",
+      "indication": "treatment-resistant depression",
+      "intervention": "esketamine augmentation",
+      "comparator": "treatment-as-usual antidepressants",
+      "outcome": "total healthcare cost at 24 months",
+      "time_horizon": "24 months",
+      "data_source": "US Medicare Claims (CMS 100% Sample)",
+      "instructions": "Quantify total direct healthcare costs. Include inpatient, outpatient, and pharmacy components. Use HEOR cost-effectiveness framing per ISPOR guidelines.",
+      "context": {
+        "sponsor": "DemoPharma",
+        "study_code": "HEOR-003",
+        "expected_outcome": "APPROVE_SYNTHESIS"
+      },
+      "acting_user_claims": {
+        "sub": "epidemiologist@demopharma.com",
+        "custom:hcls_role": "EPIDEMIOLOGIST"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+services:
+  clinical-trial-ops-agent:
+    build: .
+    ports:
+      - "8503:8501"
+    environment:
+      - EXTRACT_MODE=${EXTRACT_MODE:-demo}
+      - CONNECTOR_MODE=${CONNECTOR_MODE:-fixture}
+      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      - ../platform_core:/platform_core:ro
+      - ../governance:/governance:ro

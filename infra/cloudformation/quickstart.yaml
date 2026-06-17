@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  HCLS Agent Suite - QUICK DEPLOY (master). One stack that provisions the whole
+  customer-isolated environment: network, security (KMS + Bedrock Guardrail +
+  Cognito + IAM), data (append-only audit, WORM store, review table), the MCP
+  layer as Bedrock AgentCore Gateway + Identity, and one agent service
+  (native Step Functions + Lambdas, or container on AgentCore Runtime).
+
+  Upload the component templates to an S3 bucket and pass its base URL as
+  TemplateBaseUrl, then deploy this template. See infra/cloudformation/README.md.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, test, prod]
+  AgentId:
+    Type: String
+    Default: 01-regulatory-writing
+    Description: Which agent to deploy first (others reuse the same shared stacks).
+  DeployMode:
+    Type: String
+    Default: native
+    AllowedValues: [native, container]
+  TemplateBaseUrl:
+    Type: String
+    Description: HTTPS base URL of the S3 location holding the component templates.
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket holding the agent lambdas.zip.
+  LambdaCodeKey:
+    Type: String
+    Default: lambdas.zip
+  IdpMetadataUrl:
+    Type: String
+    Default: ""
+
+Resources:
+  NetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseUrl}/network.yaml"
+      Parameters: { Environment: !Ref Environment }
+
+  SecurityStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseUrl}/security.yaml"
+      Parameters:
+        Environment: !Ref Environment
+        IdpMetadataUrl: !Ref IdpMetadataUrl
+
+  DataStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseUrl}/data.yaml"
+      Parameters:
+        Environment: !Ref Environment
+        KmsKeyArn: !GetAtt SecurityStack.Outputs.KmsKeyArn
+
+  GatewayStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseUrl}/agentcore-gateway.yaml"
+      Parameters:
+        Environment: !Ref Environment
+        UserPoolId: !GetAtt SecurityStack.Outputs.UserPoolId
+        AgentExecutionRoleArn: !GetAtt SecurityStack.Outputs.AgentExecutionRoleArn
+
+  AgentServiceStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseUrl}/agent-service.yaml"
+      Parameters:
+        Environment: !Ref Environment
+        AgentId: !Ref AgentId
+        DeployMode: !Ref DeployMode
+        LambdaCodeBucket: !Ref LambdaCodeBucket
+        LambdaCodeKey: !Ref LambdaCodeKey
+        AgentExecutionRoleArn: !GetAtt SecurityStack.Outputs.AgentExecutionRoleArn
+        BedrockGuardrailId: !GetAtt SecurityStack.Outputs.GuardrailId
+        ReviewTableName: !GetAtt DataStack.Outputs.ReviewTableName
+
+Outputs:
+  GatewayId:
+    Description: Bedrock AgentCore Gateway id (the MCP layer)
+    Value: !GetAtt GatewayStack.Outputs.GatewayId
+  AuditTable:
+    Value: !GetAtt DataStack.Outputs.AuditTableName
+  GuardrailId:
+    Value: !GetAtt SecurityStack.Outputs.GuardrailId

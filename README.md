@@ -1,0 +1,254 @@
+# HCLS AI Agent Suite
+### Governed AI Agents for Life Sciences — Built on AWS
+
+> **The agents are not the product. The governed platform that makes them deployable, auditable, and compliant is.**
+
+A large systems integrator deploying AI in a pharmaceutical, biotech, medtech, or CRO environment cannot hand a customer a collection of LLM calls and call it done. Every regulated artifact an agent touches — an ICSR report, a submission section, a CAPA record — carries data-integrity, e-signature, and accountability obligations that exist before the first line of agent code is written. This suite embeds those controls from the first commit: deny-by-default authorization, PHI masking, grounding verification, prompt version pinning, a human gate that is framework-enforced (not merely documented), and a tamper-evident audit trail that satisfies 21 CFR Part 11.
+
+The result is a deployable accelerator — not a certified product — that gives an SI engagement team a credible, compliant starting point across eight high-value life-sciences workflows.
+
+**Repository status (current):** all 8 agents built to flagship depth · 8 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **452 automated tests passing** with no API key · CloudFormation quick-deploy + Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included.
+
+---
+
+## Positioning
+
+| What this is | What this is not |
+|---|---|
+| A governed, auditable accelerator — bring your own LLM call without the compliance scaffolding and you still have a prototype | A certified, validated, production-ready SaaS product you can hand to a customer unchanged |
+| Eight agents with shared platform controls that compound across the portfolio | Eight point tools built independently with no governance consistency |
+| A reference for Amazon Bedrock AgentCore Gateway + Identity + Runtime semantics — testable locally, deployable on AWS | A vendor lock-in — the gateway semantics are replicated in `platform_core/` so the logic is readable and testable without an AWS account |
+| Decision-support — drafts, assembles, monitors, flags — with humans owning every consequential decision | Autonomous execution in regulated workflows |
+
+---
+
+## Maturity Ladder
+
+Every agent and platform component is positioned honestly against four levels:
+
+| Level | Description | What it means |
+|---|---|---|
+| **Documented** | Architecture, workflow, and compliance design are written and reviewed | Useful for customer discovery and architecture review; not runnable |
+| **Demonstrated** | Code runs end-to-end in `EXTRACT_MODE=demo` (no API key, deterministic fixtures) | Proof of concept; suitable for internal demos and early customer workshops |
+| **Deployable** | CloudFormation templates, container contracts (ARM64, `/invocations`, `/ping`), and CI pass; requires customer AWS account and Bedrock access | Suitable for a customer pilot with SI-managed infrastructure |
+| **Production-ready** | Customer computer-system validation (CSV) complete, IdP integrated, connectors tested against live systems, penetration test passed | Engagement milestone, not a day-one deliverable |
+
+**All eight agents are built to flagship depth** — a full LangGraph workflow, governed tool access, deterministic fixtures, flagship-level test suites, a Streamlit dashboard, a four-document doc set, and a matching **AWS-native rebuild** (Strands + Step Functions with a `waitForTaskToken` human gate). Agent 02 (Pharmacovigilance) additionally ships a **live path**: real Amazon Bedrock inference and a real HTTP system-of-record connector, exercised end-to-end (see `02-pharmacovigilance-agent/demo/`). The suite sits at **Demonstrated + Deployable-by-design**: 452 automated tests pass with no API key; production-readiness (CSV/CSA, live integration, penetration test) is the engagement.
+
+---
+
+## The Eight Agents
+
+| # | Agent | Problem it solves | Primary systems | Key regulations |
+|---|---|---|---|---|
+| **01** | Regulatory Writing & Intelligence | Medical writers spend the majority of their time retrieving evidence and reconciling figures rather than reasoning; a hallucinated number in a submission is a data-integrity defect | Veeva Vault RIM, Veeva Vault DMS, FDA/EMA/PMDA guidance portals | 21 CFR Part 11, ICH M4 (CTD), GxP ALCOA+, FDA/EMA good-AI principles (Jan 2026) |
+| **02** | Pharmacovigilance — ICSR Case Intake | Adverse-event volumes scale with portfolio breadth; triage, duplicate detection, MedDRA coding, and E2B narrative drafting are high-volume and time-critical | Argus Safety, Veeva Safety, MedDRA, WHO Drug | GVP/ICH E2B(R3), 21 CFR Part 314/600, EudraVigilance, HIPAA |
+| **03** | Clinical Trial Ops & TMF | Trial Master File gaps surface late — after database lock; query backlogs on EDC slow enrollment; completeness is continuous, not periodic | Veeva Vault eTMF, Medidata Rave/Veeva CTMS, Medidata EDC | ICH E6(R3) GCP, 21 CFR Part 11, FDA/EMA TMF inspection readiness |
+| **04** | Site Selection & Patient Matching | Feasibility studies rely on site-opinion surveys; historical performance data and real-world cohort sizing are rarely integrated at scale | CTMS, RWD/claims/registry databases | FDA Diversity Action Plan, ICH E17, HIPAA/de-identification (Safe Harbor/Expert Determination) |
+| **05** | Quality / CAPA & Complaints | Product complaint volumes are large; CAPA root-cause consistency and on-time closure rates are recurring inspection findings | QMS (TrackWise, Veeva Quality), complaint databases | 21 CFR Part 211/820, FDA QMSR (effective Feb 2026), ISO 13485, EU MDR/IVDR |
+| **06** | Clinical Protocol Design & Feasibility | First-draft protocols incorporate historical guidance and study data late; feasibility assumptions are not linked to RWD | RIM (guidance retrieval), RWD, CTMS historical data | ICH E8(R1) general principles, GCP, FDA/EMA protocol guidance |
+| **07** | Real-World Evidence / HEOR | RWE/HEOR analyses require cohort definition, confounding control, and structured code translation; analyst time is disproportionately spent on data wrangling | Claims databases, registry data, RWD platforms | FDA RWE framework, HEOR methodological standards, HIPAA de-identification |
+| **08** | Medical Affairs / MSL Copilot | Field medical teams need rapid, on-label, evidence-grounded responses for HCP interactions; off-label guardrails must be technical, not procedural | CRM (Veeva CRM), DMS/MSL portals, MLR workflow | FDA off-label promotion rules, OIG guidance, ABPI/EFPIA codes, MLR SOP |
+
+---
+
+## Shared Platform
+
+Every agent shares the same platform stack. Controls compound: a governance improvement to the PHI masker, the grounding checker, or the audit trail benefits all eight agents simultaneously.
+
+### LLM Factory
+A single abstraction layer routes inference to **Anthropic Claude** (API) or **Amazon Bedrock** (in-account, no data leaves the customer VPC) depending on deployment mode. `EXTRACT_MODE=demo` bypasses the LLM entirely for local testing.
+
+### PHI Masking
+Structured entity recognition (NER) replaces patient identifiers, dates of birth, and case-linkable fields with stable pseudonyms before any content enters a prompt or an audit record. The masking layer is stateless and runs before every gateway invocation.
+
+### MCP Authorization Gateway
+The governed front door between every agent and every system of record. **No agent calls a vendor system directly.** Every tool call passes through one enforcement point implementing:
+
+1. **Identity verification** — verified IdP claims; deny on missing `sub`
+2. **Deny-by-default authorization with least-privilege intersection** — `permitted(tool) ⇔ tool ∈ AGENT_TOOL_GRANTS[agent] ∩ ROLE_ENTITLEMENTS[user_roles]`. An agent can never do more than the human on whose behalf it acts.
+3. **Human approval gate** — high-risk (write/irreversible) tools block until a verified reviewer identity is bound into the record (21 CFR Part 11 e-signature linkage)
+4. **Short-lived scoped tokens** — minted per call via AgentCore Identity / STS; no standing service accounts
+5. **PHI-masked append-only audit** — every attempt (ALLOW/DENY/PENDING_APPROVAL/ERROR) logged with lineage to the system of record
+
+Reference logic: `platform_core/hcls_agent_platform/mcp_gateway/` — this is the testable Python model of **Amazon Bedrock AgentCore Gateway + AgentCore Identity**. Tool names (`connector_kind.operation`) map 1:1 to AgentCore Gateway targets. See `infra/cloudformation/agentcore-gateway.yaml` for the deployable registration.
+
+### Connector Framework
+Adapter layer for each system category (RIM, DMS, Safety DB, EDC, CTMS, eTMF, RWD, QMS, CRM). Demo mode uses deterministic JSON fixtures; production connectors point at live Veeva, Medidata, and other vendor APIs. The connector interface is the same in both modes — the gateway does not know which backend is live.
+
+### Governance & Evaluation Framework
+Built in from the first commit, not added after a pilot:
+
+| Control | Implementation |
+|---|---|
+| **Grounding verification** | Every number/entity in a regulated artifact is traceable to the source corpus; grounding fails fast rather than producing a hallucinated claim |
+| **Prompt version registry** | Prompts are registered and hash-pinned in `governance/prompt_manifest.json`; CI fails on un-bumped drift (model-risk change control per SR 11-7 posture) |
+| **Structural eval harness** | Golden artifact regression for CIOMS/E2B ICSR, benefit-risk section anatomy, CAPA completeness; runs in CI with no API keys |
+| **HITL gate tests** | Framework-enforced human approval is tested, not merely documented — `governance/tests/test_hitl_gates.py` |
+| **Red team** | Prompt injection, PHI exfiltration, and authorization bypass scenarios — `governance/redteam/` |
+| **Fairness checks** | Demographic representativeness flags in proposed cohorts (FDA Diversity Action Plan posture) |
+
+See `governance/README.md` for the full governance layer documentation.
+
+---
+
+## AWS Deployment
+
+### CloudFormation Quick Deploy (primary path)
+One master template provisions a customer-isolated environment:
+
+```
+infra/cloudformation/
+├── quickstart.yaml          # Master — nests all stacks
+├── network.yaml             # VPC, subnets, NAT, security groups
+├── security.yaml            # KMS, Bedrock Guardrail, Cognito (IdP federation), agent IAM role
+├── data.yaml                # Append-only DynamoDB audit, S3 Object Lock WORM, HITL table
+├── agentcore-gateway.yaml   # Bedrock AgentCore Gateway + Identity — one target per SoR
+└── agent-service.yaml       # Per-agent Step Functions + Lambdas (native) or AgentCore Runtime (container)
+```
+
+```bash
+aws cloudformation deploy \
+  --template-file infra/cloudformation/quickstart.yaml \
+  --stack-name hcls-dev \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --parameter-overrides \
+      Environment=dev \
+      AgentId=01-regulatory-writing \
+      DeployMode=native \
+      TemplateBaseUrl=https://my-cfn-bucket.s3.amazonaws.com/hcls \
+      LambdaCodeBucket=my-code-bucket \
+      IdpMetadataUrl=https://customer.okta.com/app/xxx/sso/saml/metadata
+```
+
+### Terraform Parity
+`infra/terraform/` provides equivalent IaC for customers whose platform engineering teams standardize on Terraform. Identical resource topology; different surface syntax.
+
+### AgentCore Runtime (container lift)
+All eight agents implement the AgentCore container contract (`/invocations`, `/ping`, port 8080, ARM64). Build the image, push to ECR, and the CloudFormation stack registers it with AgentCore Runtime. No code changes required.
+
+### Strands + Step Functions (native rebuild)
+Deterministic core functions run as Lambda; Strands Agents SDK handles Bedrock inference; Step Functions orchestrates the multi-step workflow with a `waitForTaskToken` HITL gate. Highest fidelity to the managed-serverless target.
+
+**Step-by-step console + CLI walkthrough:** [`docs/DEPLOYMENT-HANDBOOK.md`](docs/DEPLOYMENT-HANDBOOK.md) takes a delivery team from an empty AWS account to a running, governed, human-gated agent (Bedrock model access, Guardrail, Cognito/IdP, CloudFormation, AgentCore Gateway, Secrets, Step Functions smoke test + HITL approval, validation checklist, per-agent appendix).
+
+See `aws-native-reference/README.md` for the full AWS deployment guide and per-agent paths.
+
+---
+
+## Running the Demo (No API Key Required)
+
+```bash
+# Clone and set up (Agent 01 is the reference)
+cd 01-regulatory-writing-agent
+python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+pip install -e ../platform_core
+
+# Run in demo mode — deterministic, no LLM call
+export EXTRACT_MODE=demo
+streamlit run app.py                               # http://localhost:8501
+
+# Run the full test suite (governance + platform + agent)
+PYTHONPATH=platform_core pytest platform_core/tests governance tests/ -q
+
+# Run the eval harness (grades golden artifacts, no API key)
+python -m governance.evals.run_evals
+```
+
+### Live path (Agent 02 — Bedrock + real connector)
+
+Agent 02 ships a customer-ready live demo. It runs end-to-end with no API key (deterministic), and flips to live Amazon Bedrock inference and a real HTTP safety-system connector by configuration — swap one URL from the bundled local reference service to the customer's Argus / Veeva Safety gateway.
+
+```bash
+cd 02-pharmacovigilance-agent
+# runs the full ICSR workflow end-to-end against the live connector (local reference service);
+# auto-selects Bedrock -> Anthropic -> deterministic demo
+PYTHONPATH=.:../platform_core python demo/demo_live.py
+# point at real systems:
+#   export LLM_PROVIDER=bedrock BEDROCK_GUARDRAIL_ID=...
+#   export CONNECTOR_MODE=live SAFETY_BASE_URL=https://safety.customer.example
+```
+
+See `02-pharmacovigilance-agent/demo/DEMO-LIVE.md` for the full runbook (Bedrock prerequisites, env vars, Argus/Veeva endpoint mapping, security talking points).
+
+---
+
+## Field Enablement Collateral
+
+Ready-to-use GTM material lives at the repository root:
+
+| Artifact | Use |
+|---|---|
+| `HCLS-Agentic-AI-Suite-Executive-Overview.pptx` | 16-slide executive deck for sales, solution architects, and delivery |
+| `HCLS-Customer-Teaser-5slide.pptx` | 5-slide customer-facing teaser |
+| `HCLS-One-Pager.pdf` | One-page leave-behind (print-ready; editable `.pptx` source included) |
+
+Deeper written collateral: `offerings/` (POC, pilot, assessment, managed service, ROI, objection-handling, competitive, TPRM), `runbooks/` (incident, DR, HITL queue, model degradation), and `docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`.
+
+`EXTRACT_MODE=demo` routes every gateway call through the fixture connectors and bypasses the LLM. The full workflow — intake, regulatory intelligence retrieval, evidence assembly, draft section, grounding/compliance check, human review gate, finalize — executes against deterministic data. Suitable for customer demonstrations before any AWS account is configured.
+
+---
+
+## Repository Structure
+
+```
+hcls-ai-agents/
+├── README.md                            # This file
+├── SUITE-STATUS.md                     # Current state + changelog of latest changes
+├── SOLUTION-FIELD-GUIDE.md             # SI sales + SA qualification and adoption path
+├── ENTERPRISE-PLATFORM.md              # Platform story — API modernization, MCP gateway, compliance layers
+├── HCLS-Agentic-AI-Suite-Executive-Overview.pptx   # 16-slide field-enablement deck
+├── HCLS-Customer-Teaser-5slide.pptx    # 5-slide customer-facing teaser
+├── HCLS-One-Pager.pdf                  # One-page leave-behind (PDF) + .pptx source
+│
+├── 01-regulatory-writing-agent/        # Regulatory Writing & Intelligence (Demonstrated + Deployable reference)
+├── 02-pharmacovigilance-agent/         # Pharmacovigilance — ICSR Case Intake (+ demo/ live Bedrock + real-connector path)
+├── 03-clinical-trial-ops-agent/        # Clinical Trial Ops & TMF
+├── 04-site-patient-matching-agent/     # Site Selection & Patient Matching
+├── 05-quality-capa-agent/              # Quality / CAPA & Complaints
+├── 06-protocol-design-agent/           # Clinical Protocol Design & Feasibility
+├── 07-rwe-heor-agent/                  # Real-World Evidence / HEOR
+├── 08-medical-affairs-msl-agent/       # Medical Affairs / MSL Copilot
+│
+├── platform_core/                      # Shared platform — LLM factory, PHI masker, MCP gateway, connectors
+│   └── hcls_agent_platform/
+│       ├── mcp_gateway/                # Reference logic for Bedrock AgentCore Gateway + Identity
+│       ├── llm_factory.py               # Anthropic / in-account Bedrock + Guardrails
+│       ├── phi.py                        # PHI/PII masking (HIPAA Safe Harbor identifiers)
+│       ├── secrets.py · auth.py · tracing.py
+│       └── connectors/                   # fixture + live (incl. LiveSafetyConnector, real HTTP)
+│
+├── governance/                         # Governance & evaluation framework (grounding, evals, HITL tests, red team)
+│
+├── aws-native-reference/               # AWS-native deployment (container + native) for all 8 agents
+│
+├── infra/
+│   ├── cloudformation/                 # CloudFormation quick-deploy (primary path)
+│   └── terraform/                      # Terraform parity
+│
+├── docs/
+│   ├── DEPLOYMENT-HANDBOOK.md          # Console + CLI step-by-step deploy (empty account -> running agent)
+│   ├── SUITE-ARCHITECTURE.md           # 6-layer reference architecture + AWS service mapping
+│   └── STAKEHOLDER-SECURITY-BRIEFINGS.md  # Per-stakeholder security pitch (CIO/CISO/CMO/RegAffairs/PV/QA/ClinOps/CPO/MedAffairs/Procurement/IRB)
+│
+└── offerings/                          # Consulting packaging
+    ├── POC-OFFERING.md
+    ├── PILOT-OFFERING.md
+    ├── ASSESSMENT-OFFERING.md
+    ├── MANAGED-SERVICE-OFFERING.md
+    ├── COST-ROI-MODEL.md
+    ├── OBJECTION-HANDLING.md
+    ├── COMPETITIVE-POSITIONING.md
+    └── TPRM-DUE-DILIGENCE-PACKET.md
+```
+
+---
+
+## Compliance Disclaimer
+
+This suite is a **decision-support accelerator** for qualified life-sciences professionals. It is not a validated computer system, a certified medical device, or an approved regulatory submission tool. AI-generated content requires human review and approval by a qualified professional before any consequential action — submission, ICSR reporting, CAPA closure, or MLR approval. The AI never takes irreversible actions autonomously.
+
+Customers are responsible for: computer-system validation (CSV/CSA) for the intended use; IdP integration and role mapping to their HR system; connector validation against live vendor systems; Bedrock Guardrail configuration appropriate to their product and patient population; and change-control procedures for prompt and model updates.
+
+This accelerator provides the control design. The customer operationalizes, validates, and accepts accountability for it.

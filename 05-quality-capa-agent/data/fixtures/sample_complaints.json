@@ -1,0 +1,64 @@
+{
+  "complaints": [
+    {
+      "request_id": "CAPA-2026-0001",
+      "complaint_id": "COMP-2026-001",
+      "event_type": "COMPLAINT",
+      "product": "Demo-Parenteral",
+      "lot_number": "LOT-2026-001",
+      "site": "SITE-MFG-01",
+      "severity": "MAJOR",
+      "description": "Customer reported visible particulate matter in vial. Product lot LOT-2026-001 quarantined pending investigation. Two additional complaints received from same lot. Particulate tentatively identified as filter fiber. No patient harm reported.",
+      "acting_user_claims": {
+        "sub": "qa.specialist@demopharma.com",
+        "custom:hcls_role": "QUALIFIED_PERSON"
+      },
+      "context": {
+        "expected_outcome": "APPROVE_CAPA",
+        "regulatory_reporting_required": false,
+        "similar_event_count": 2,
+        "historical_capa_ids": ["CAPA-2025-088", "CAPA-2025-102"]
+      }
+    },
+    {
+      "request_id": "CAPA-2026-0002",
+      "complaint_id": "COMP-2026-002",
+      "event_type": "DEVIATION",
+      "product": "Demo-Tablet",
+      "lot_number": "LOT-2026-022",
+      "site": "SITE-MFG-02",
+      "severity": "MINOR",
+      "description": "Temperature excursion in storage area during weekend. Environmental monitoring system recorded 3.2 degrees above upper specification limit for approximately 4 hours. Product impact assessment performed; no adverse effect on product quality confirmed. Root cause suspected to be HVAC preventive maintenance overdue.",
+      "acting_user_claims": {
+        "sub": "qa.specialist@demopharma.com",
+        "custom:hcls_role": "QUALIFIED_PERSON"
+      },
+      "context": {
+        "expected_outcome": "APPROVE_CAPA",
+        "regulatory_reporting_required": false,
+        "similar_event_count": 2,
+        "historical_capa_ids": ["CAPA-2025-045", "CAPA-2025-067"]
+      }
+    },
+    {
+      "request_id": "CAPA-2026-0003",
+      "complaint_id": "COMP-2026-003",
+      "event_type": "OOS",
+      "product": "Demo-Injectable",
+      "lot_number": "LOT-2026-033",
+      "site": "SITE-MFG-01",
+      "severity": "CRITICAL",
+      "description": "Out-of-specification result for sterility test on lot LOT-2026-033 of injectable product. Initial sterility failure confirmed on re-test. Lot quarantined immediately. Potential patient safety impact cannot be excluded pending investigation. Environmental monitoring data under review. Regulatory reporting obligation under evaluation per 21 CFR 314.81.",
+      "acting_user_claims": {
+        "sub": "qa.director@demopharma.com",
+        "custom:hcls_role": "QUALIFIED_PERSON"
+      },
+      "context": {
+        "expected_outcome": "ESCALATE",
+        "regulatory_reporting_required": true,
+        "similar_event_count": 0,
+        "historical_capa_ids": []
+      }
+    }
+  ]
+}

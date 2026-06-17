@@ -1,0 +1,52 @@
+{
+  "Comment": "AWS-native Protocol Design. Step Functions orchestrates deterministic Lambdas; the LLM (Strands/Bedrock) only drafts protocol sections; the Medical/Clinical Reviewer gate uses waitForTaskToken (framework-enforced HITL). Missing elements or ungrounded data trigger revision; regulatory risk + quality issues escalate; finalize packages sections for IND/CTA only after reviewer approval.",
+  "StartAt": "Assemble",
+  "States": {
+    "Assemble": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${AssembleFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "Draft"
+    },
+    "Draft": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${DraftFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "Check"
+    },
+    "Check": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${CheckFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "RouteChoice"
+    },
+    "RouteChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {"Variable": "$.routing.next", "StringEquals": "Draft", "Next": "Draft"}
+      ],
+      "Default": "HumanReviewGate"
+    },
+    "HumanReviewGate": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${HitlNotifyFunctionArn}",
+        "Payload": {"input.$": "$", "task_token.$": "$$.Task.Token"}
+      },
+      "ResultPath": "$.review",
+      "TimeoutSeconds": 1209600,
+      "Next": "Finalize"
+    },
+    "Finalize": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${FinalizeFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "End": true
+    }
+  }
+}

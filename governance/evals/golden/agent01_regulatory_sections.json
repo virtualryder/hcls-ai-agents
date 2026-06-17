@@ -1,0 +1,21 @@
+{
+  "description": "Golden regulatory submission sections — reviewed, approved benefit-risk text that CI holds the line behind (structure, no off-label claims, grounding).",
+  "cases": [
+    {
+      "id": "reg-001-benefit-risk-summary",
+      "state": {
+        "product": "Demo-Drug",
+        "indication": "type 2 diabetes",
+        "study": "STUDY-301",
+        "n_subjects": 450,
+        "primary_endpoint": "HbA1c reduction",
+        "hba1c_reduction_pct": 1.2,
+        "comparator": "placebo",
+        "authority": "FDA",
+        "source_ref": "CSR STUDY-301 Section 11"
+      },
+      "artifact": "Purpose: this benefit-risk summary supports the marketing application for Demo-Drug in the treatment of type 2 diabetes. In the pivotal study, 450 subjects were randomized; the primary endpoint of HbA1c reduction demonstrated a mean reduction of 1.2 percentage points relative to placebo. The observed safety profile was consistent with the established class, and no new safety signals were identified during the analysis. The efficacy benefit in glycemic control is considered favorable relative to the identified risks. Source: CSR STUDY-301. In conclusion, the available data support a positive benefit-risk balance for the proposed indication, subject to routine pharmacovigilance.",
+      "expect": {"min_words": 60}
+    }
+  ]
+}

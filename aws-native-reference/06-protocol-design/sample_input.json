@@ -1,0 +1,21 @@
+{
+  "request_id": "PROTO-2026-0001",
+  "indication": "non-small cell lung cancer",
+  "phase": "Phase 2",
+  "therapeutic_area": "Oncology",
+  "primary_objective": "evaluate progression-free survival with experimental PD-L1 inhibitor versus chemotherapy",
+  "target_population": "adults with locally advanced or metastatic NSCLC, ECOG PS 0-1",
+  "study_design": "Randomized Controlled Trial",
+  "instructions": "Draft endpoints (PFS primary, OS secondary), eligibility, and 12-month visit schedule.",
+  "guidance_hits": [
+    {"ref": "ICH E9(R1)", "title": "Statistical Principles for Clinical Trials", "agency": "ICH"},
+    {"ref": "FDA-2018-ONCOLOGY-DOSE", "title": "Dose Optimization for Oncology Drugs", "agency": "FDA"},
+    {"ref": "ICH E8(R1)", "title": "General Considerations for Clinical Studies", "agency": "ICH"}
+  ],
+  "cohort_estimate": {
+    "total_eligible": 3240,
+    "screened_12m": 890,
+    "sites_with_data": 14,
+    "phi_note": "Aggregate de-identified counts only per HIPAA Safe Harbor."
+  }
+}

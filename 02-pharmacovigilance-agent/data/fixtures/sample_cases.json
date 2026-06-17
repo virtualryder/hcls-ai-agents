@@ -1,0 +1,53 @@
+{
+  "cases": [
+    {
+      "case_id": "ICSR-2026-0001",
+      "source_type": "EMAIL",
+      "acting_user_claims": {
+        "sub": "pv-processor-01",
+        "custom:hcls_role": "PV_PROCESSOR"
+      },
+      "raw_source": "From: Dr. Jane Williams, Cardiologist, St. Mary Hospital, United Kingdom. I am writing to report an adverse event in a 52 year old female patient who was receiving Metformin 1000 mg twice daily by oral route for type 2 diabetes. Approximately 14 days after starting therapy, the patient developed nausea and vomiting. The patient recovered fully within 3 days after the medication was discontinued (positive dechallenge). The event is considered possibly related to Metformin. This is a spontaneous consumer report.",
+      "context": {
+        "reporter_name": "Dr. Jane Williams",
+        "reporter_country": "United Kingdom",
+        "expected_seriousness": false,
+        "expected_outcome": "non-serious recovered"
+      }
+    },
+    {
+      "case_id": "ICSR-2026-0002",
+      "source_type": "CALL_CENTER",
+      "acting_user_claims": {
+        "sub": "pv-processor-02",
+        "custom:hcls_role": "PV_PROCESSOR"
+      },
+      "raw_source": "Call center intake — caller is Dr. Robert Chen, nephrologist, Toronto General Hospital, Canada. Patient is a 67 year old male with hypertension receiving Lisinopril 20 mg once daily by oral route for hypertension. Patient was hospitalized on 2026-01-15 with acute renal failure, 21 days after starting Lisinopril. Creatinine elevated to 4.2 mg/dL. Patient required intensive care and dialysis. The event is considered an unexpected serious adverse reaction. Dechallenge: Lisinopril was discontinued; renal function improved (positive dechallenge). This is a medically important event requiring expedited reporting.",
+      "context": {
+        "reporter_name": "Dr. Robert Chen",
+        "reporter_country": "Canada",
+        "expected_seriousness": true,
+        "expected_criteria": ["hospitalization", "other_medically_important"],
+        "expected_clock_days": 15,
+        "expected_outcome": "serious hospitalization"
+      }
+    },
+    {
+      "case_id": "ICSR-2026-0003",
+      "source_type": "LITERATURE",
+      "acting_user_claims": {
+        "sub": "pv-processor-03",
+        "custom:hcls_role": "PV_PROCESSOR"
+      },
+      "raw_source": "Literature case report: Authors Johnson MK, Patel S. Journal of Clinical Pharmacology, 2026. A 74 year old male patient with atrial fibrillation received Warfarin 5 mg daily by oral route for anticoagulation. The patient presented to the emergency room with intracranial haemorrhage 30 days after initiating Warfarin therapy. The event was life-threatening and the patient died on 2026-02-03 despite intensive care. This was an unexpected fatal serious adverse event with a 7-day expedited reporting clock. Causality was assessed as related to Warfarin by the treating physician. Dechallenge: not applicable (fatal outcome).",
+      "context": {
+        "reporter_name": "Johnson MK, Patel S",
+        "reporter_country": "unspecified",
+        "expected_seriousness": true,
+        "expected_criteria": ["death", "life_threatening"],
+        "expected_clock_days": 7,
+        "expected_outcome": "fatal"
+      }
+    }
+  ]
+}

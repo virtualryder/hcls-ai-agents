@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  HCLS Agent Suite - MCP layer as Amazon Bedrock AgentCore Gateway + AgentCore
+  Identity. The gateway is the governed front door to every system of record:
+  deny-by-default authorization, least-privilege scopes, short-lived tokens, and
+  audit. Each tool in platform_core/mcp_gateway/policy.py:TOOL_REGISTRY maps to a
+  Gateway target here. The deterministic decision/least-privilege/token/audit
+  semantics are identical to the Python reference in platform_core.
+
+  NOTE on resource types: AWS::BedrockAgentCore::* are used where available in the
+  deployment region. Where a property/type is not yet supported, the equivalent
+  API Gateway + Lambda-authorizer + Cognito + STS pattern (documented in
+  platform_core/mcp_gateway/README.md) can be substituted without changing agent
+  code. Keep this stack in an AgentCore-enabled region.
+
+Parameters:
+  Environment: { Type: String, Default: dev }
+  UserPoolId: { Type: String, Description: Cognito user pool (from security stack) }
+  AgentExecutionRoleArn: { Type: String }
+
+Resources:
+  # AgentCore Identity workload identity for the agent fleet.
+  AgentCoreIdentity:
+    Type: AWS::BedrockAgentCore::WorkloadIdentity
+    Properties:
+      Name: !Sub "hcls-${Environment}-agent-identity"
+      AllowedResourceOauth2ReturnUrls: []
+
+  # The governed gateway. JWT authorizer = the customer IdP via Cognito.
+  AgentCoreGateway:
+    Type: AWS::BedrockAgentCore::Gateway
+    Properties:
+      Name: !Sub "hcls-${Environment}-gateway"
+      ProtocolType: MCP
+      AuthorizerType: CUSTOM_JWT
+      AuthorizerConfiguration:
+        CustomJWTAuthorizer:
+          DiscoveryUrl: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}/.well-known/openid-configuration"
+      RoleArn: !Ref AgentExecutionRoleArn
+      Description: HCLS systems-of-record gateway (RIM/DMS/Safety/EDC/CTMS/eTMF/RWD/QMS/CRM)
+
+  # One target per system of record. Targets back the tools in TOOL_REGISTRY.
+  # Read tools require an entitled scope; write/irreversible tools additionally
+  # require the human-approval gate (enforced in the agent workflow + here via scope).
+  RimTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: rim
+      TargetConfiguration:
+        Mcp:
+          Lambda:
+            LambdaArn: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:hcls-${Environment}-connector-rim"
+      CredentialProviderConfigurations:
+        - CredentialProviderType: GATEWAY_IAM_ROLE
+
+  SafetyTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: safety
+      TargetConfiguration:
+        Mcp:
+          Lambda:
+            LambdaArn: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:hcls-${Environment}-connector-safety"
+      CredentialProviderConfigurations:
+        - CredentialProviderType: GATEWAY_IAM_ROLE
+
+  QmsTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: qms
+      TargetConfiguration:
+        Mcp:
+          Lambda:
+            LambdaArn: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:hcls-${Environment}-connector-qms"
+      CredentialProviderConfigurations:
+        - CredentialProviderType: GATEWAY_IAM_ROLE
+
+Outputs:
+  GatewayId:
+    Value: !Ref AgentCoreGateway
+    Export: { Name: !Sub "hcls-${Environment}-agentcore-gateway" }
+  WorkloadIdentityArn:
+    Value: !Ref AgentCoreIdentity
+    Export: { Name: !Sub "hcls-${Environment}-agentcore-identity" }

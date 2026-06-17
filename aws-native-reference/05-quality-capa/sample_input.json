@@ -1,0 +1,18 @@
+{
+  "request_id": "CAPA-2026-0001",
+  "complaint_id": "COMP-2026-001",
+  "event_type": "COMPLAINT",
+  "product": "Demo-Parenteral",
+  "lot_number": "LOT-2026-001",
+  "site": "SITE-MFG-01",
+  "severity": "MAJOR",
+  "description": "Customer reported visible particulate matter in vial. Lot LOT-2026-001 quarantined pending investigation. Two additional complaints from same lot. Filter fiber tentatively identified.",
+  "similar_events": [
+    {"complaint_id": "COMP-2025-088", "root_cause": "Inadequate filter integrity testing."},
+    {"complaint_id": "COMP-2025-102", "root_cause": "Filter integrity test not performed."}
+  ],
+  "root_cause_hypotheses": [
+    "Filter integrity test not performed or not scheduled.",
+    "Personnel gowning breach in filling area."
+  ]
+}

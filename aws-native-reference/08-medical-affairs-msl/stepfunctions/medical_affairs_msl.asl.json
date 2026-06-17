@@ -1,0 +1,52 @@
+{
+  "Comment": "AWS-native Medical Affairs MSL Agent. Step Functions orchestrates deterministic Lambdas; the LLM (Strands/Bedrock) only drafts the brief; the Medical Affairs Approver gate uses waitForTaskToken (framework-enforced HITL). Off-label or promotional language forces escalation; clean briefs route to review; finalize submits to MLR only after approval (HIGH-RISK).",
+  "StartAt": "Assemble",
+  "States": {
+    "Assemble": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${AssembleFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "Draft"
+    },
+    "Draft": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${DraftFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "Check"
+    },
+    "Check": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${CheckFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "Next": "RouteChoice"
+    },
+    "RouteChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {"Variable": "$.routing.next", "StringEquals": "Draft", "Next": "Draft"}
+      ],
+      "Default": "HumanReviewGate"
+    },
+    "HumanReviewGate": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${HitlNotifyFunctionArn}",
+        "Payload": {"input.$": "$", "task_token.$": "$$.Task.Token"}
+      },
+      "ResultPath": "$.review",
+      "TimeoutSeconds": 1209600,
+      "Next": "Finalize"
+    },
+    "Finalize": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {"FunctionName": "${FinalizeFunctionArn}", "Payload.$": "$"},
+      "OutputPath": "$.Payload",
+      "End": true
+    }
+  }
+}

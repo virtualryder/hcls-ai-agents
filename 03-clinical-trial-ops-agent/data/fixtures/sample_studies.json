@@ -1,0 +1,223 @@
+{
+  "studies": [
+    {
+      "request_id": "CLINOPS-2026-0001",
+      "study_id": "DEMO-STUDY-001",
+      "protocol_id": "PROTO-XR-301",
+      "sponsor": "Demo Pharma Inc.",
+      "indication": "type 2 diabetes",
+      "review_period": "2026-Q1",
+      "instructions": "Generate Q1 study health briefing and flag all data queries.",
+      "acting_user_claims": {
+        "sub": "clinops.lead@demopharma.com",
+        "custom:hcls_role": "CLINOPS_LEAD"
+      },
+      "context": {
+        "expected_risk_tier": "HIGH",
+        "expected_outcome": "enrollment behind, TMF gaps"
+      },
+      "study_status": {
+        "study_id": "DEMO-STUDY-001",
+        "sponsor": "Demo Pharma Inc.",
+        "phase": "Phase 3",
+        "status": "ACTIVE",
+        "enrolled_subjects": 124,
+        "target_enrollment": 200,
+        "active_sites": 8,
+        "planned_sites": 12,
+        "screen_failures": 18,
+        "start_date": "2025-03-01"
+      },
+      "tmf_data": {
+        "study_id": "DEMO-STUDY-001",
+        "completeness_pct": 87,
+        "missing_documents": [
+          "Site Activation Log - Site 04",
+          "IRB Correspondence - Site 07"
+        ],
+        "last_reviewed": "2026-01-15"
+      },
+      "subject_data": [
+        {
+          "subject_id": "001-001",
+          "site_id": "SITE-01",
+          "status": "ACTIVE",
+          "visit": "Week 12",
+          "missing_fields": ["Weight", "BP_Diastolic"],
+          "visits_completed": 4,
+          "visits_expected": 6,
+          "open_queries": 2
+        },
+        {
+          "subject_id": "001-002",
+          "site_id": "SITE-01",
+          "status": "ACTIVE",
+          "visit": "Week 8",
+          "missing_fields": [],
+          "visits_completed": 3,
+          "visits_expected": 6,
+          "open_queries": 0
+        },
+        {
+          "subject_id": "002-001",
+          "site_id": "SITE-02",
+          "status": "COMPLETED",
+          "visit": "EOS",
+          "missing_fields": [],
+          "visits_completed": 6,
+          "visits_expected": 6,
+          "open_queries": 0
+        },
+        {
+          "subject_id": "003-001",
+          "site_id": "SITE-03",
+          "status": "ACTIVE",
+          "visit": "Week 8",
+          "missing_fields": ["HbA1c_Result"],
+          "visits_completed": 3,
+          "visits_expected": 6,
+          "open_queries": 1
+        }
+      ]
+    },
+    {
+      "request_id": "CLINOPS-2026-0002",
+      "study_id": "DEMO-STUDY-002",
+      "protocol_id": "PROTO-CV-201",
+      "sponsor": "Demo Pharma Inc.",
+      "indication": "heart failure",
+      "review_period": "2026-Q1",
+      "instructions": "Monthly data integrity review — flag deviations and missing primary endpoint data.",
+      "acting_user_claims": {
+        "sub": "clinops.lead@demopharma.com",
+        "custom:hcls_role": "CLINOPS_LEAD"
+      },
+      "context": {
+        "expected_risk_tier": "MEDIUM",
+        "expected_outcome": "minor missing data, good TMF"
+      },
+      "study_status": {
+        "study_id": "DEMO-STUDY-002",
+        "sponsor": "Demo Pharma Inc.",
+        "phase": "Phase 2b",
+        "status": "ACTIVE",
+        "enrolled_subjects": 67,
+        "target_enrollment": 150,
+        "active_sites": 5,
+        "planned_sites": 8,
+        "screen_failures": 12,
+        "start_date": "2025-06-01"
+      },
+      "tmf_data": {
+        "study_id": "DEMO-STUDY-002",
+        "completeness_pct": 92,
+        "missing_documents": [],
+        "last_reviewed": "2026-01-10"
+      },
+      "subject_data": [
+        {
+          "subject_id": "101-001",
+          "site_id": "SITE-11",
+          "status": "ACTIVE",
+          "visit": "Month 3",
+          "missing_fields": ["LVEF_Echo"],
+          "visits_completed": 3,
+          "visits_expected": 6,
+          "open_queries": 1
+        },
+        {
+          "subject_id": "101-002",
+          "site_id": "SITE-11",
+          "status": "ACTIVE",
+          "visit": "Month 3",
+          "missing_fields": [],
+          "visits_completed": 3,
+          "visits_expected": 6,
+          "open_queries": 0
+        },
+        {
+          "subject_id": "102-001",
+          "site_id": "SITE-12",
+          "status": "ACTIVE",
+          "visit": "Month 2",
+          "missing_fields": [],
+          "visits_completed": 2,
+          "visits_expected": 6,
+          "open_queries": 0
+        }
+      ]
+    },
+    {
+      "request_id": "CLINOPS-2026-0003",
+      "study_id": "DEMO-STUDY-003",
+      "protocol_id": "PROTO-ONC-101",
+      "sponsor": "Demo Oncology Ltd.",
+      "indication": "non-small cell lung cancer",
+      "review_period": "2026-Q1",
+      "instructions": "Pre-inspection readiness review — identify all TMF and data gaps before FDA inspection.",
+      "acting_user_claims": {
+        "sub": "clinops.director@demopharma.com",
+        "custom:hcls_role": "CLINOPS_LEAD"
+      },
+      "context": {
+        "expected_risk_tier": "CRITICAL",
+        "expected_outcome": "critical TMF gaps, escalation required"
+      },
+      "study_status": {
+        "study_id": "DEMO-STUDY-003",
+        "sponsor": "Demo Oncology Ltd.",
+        "phase": "Phase 2",
+        "status": "ACTIVE",
+        "enrolled_subjects": 43,
+        "target_enrollment": 120,
+        "active_sites": 4,
+        "planned_sites": 10,
+        "screen_failures": 31,
+        "start_date": "2025-09-01"
+      },
+      "tmf_data": {
+        "study_id": "DEMO-STUDY-003",
+        "completeness_pct": 71,
+        "missing_documents": [
+          "Informed Consent Version 2 - Site 02",
+          "Protocol Amendment v2 Approval - Site 03",
+          "IRB Approval Letter - Site 04",
+          "Investigator Brochure Receipt - Site 01"
+        ],
+        "last_reviewed": "2025-12-15"
+      },
+      "subject_data": [
+        {
+          "subject_id": "201-001",
+          "site_id": "SITE-21",
+          "status": "ACTIVE",
+          "visit": "Cycle 2",
+          "missing_fields": ["Tumor_Assessment", "ECOG_Score"],
+          "visits_completed": 2,
+          "visits_expected": 6,
+          "open_queries": 3
+        },
+        {
+          "subject_id": "201-002",
+          "site_id": "SITE-21",
+          "status": "ACTIVE",
+          "visit": "Cycle 1",
+          "missing_fields": ["AE_Grading"],
+          "visits_completed": 1,
+          "visits_expected": 6,
+          "open_queries": 2
+        },
+        {
+          "subject_id": "202-001",
+          "site_id": "SITE-22",
+          "status": "ACTIVE",
+          "visit": "Cycle 2",
+          "missing_fields": [],
+          "visits_completed": 2,
+          "visits_expected": 6,
+          "open_queries": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "Comment": "Pharmacovigilance ICSR pipeline — AWS-native rebuild. Step Functions orchestrates deterministic Lambdas; Strands/Bedrock only drafts the narrative; the PV Medical Reviewer gate uses waitForTaskToken (framework-enforced HITL). PHI leak or invalid ICSR forces ESCALATE; clean drafts route to review; Finalize submits only after approval.",
+  "StartAt": "Assemble",
+  "States": {
+    "Assemble": {
+      "Type": "Task",
+      "Resource": "${AssembleFunctionArn}",
+      "ResultPath": "$",
+      "Next": "Draft",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "PipelineFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    "Draft": {
+      "Type": "Task",
+      "Resource": "${DraftFunctionArn}",
+      "ResultPath": "$",
+      "Next": "Check",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "PipelineFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    "Check": {
+      "Type": "Task",
+      "Resource": "${CheckFunctionArn}",
+      "ResultPath": "$",
+      "Next": "RouteChoice",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "PipelineFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    "RouteChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.body.routing.next",
+          "StringEquals": "Draft",
+          "Next": "Draft"
+        },
+        {
+          "Variable": "$.body.routing.next",
+          "StringEquals": "HumanReviewGate",
+          "Next": "HumanReviewGate"
+        }
+      ],
+      "Default": "HumanReviewGate"
+    },
+    "HumanReviewGate": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${HitlNotifyFunctionArn}",
+        "Payload": {
+          "input.$": "$.body",
+          "task_token.$": "$$.Task.Token"
+        }
+      },
+      "ResultPath": "$.review",
+      "TimeoutSeconds": 1209600,
+      "HeartbeatSeconds": 3600,
+      "Next": "Finalize",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.HeartbeatTimeout", "States.Timeout"],
+          "Next": "ReviewTimeout",
+          "ResultPath": "$.error"
+        },
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "PipelineFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    "Finalize": {
+      "Type": "Task",
+      "Resource": "${FinalizeFunctionArn}",
+      "Parameters": {
+        "body.$": "$.body",
+        "review.$": "$.review"
+      },
+      "ResultPath": "$",
+      "End": true,
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "PipelineFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    "ReviewTimeout": {
+      "Type": "Fail",
+      "Error": "ReviewTimeout",
+      "Cause": "PV Medical Reviewer gate exceeded the 14-day timeout without a decision. Case remains open."
+    },
+    "PipelineFailed": {
+      "Type": "Fail",
+      "Error": "PipelineFailed",
+      "Cause": "An unrecoverable error occurred in the pharmacovigilance ICSR pipeline."
+    }
+  }
+}

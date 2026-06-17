@@ -1,0 +1,288 @@
+{
+  "requests": [
+    {
+      "request_id": "MATCH-2026-0001",
+      "study_id": "DEMO-STUDY-001",
+      "protocol_id": "PROTO-XR-301",
+      "indication": "type 2 diabetes",
+      "target_enrollment": 200,
+      "instructions": "Identify top US sites with highest eligible T2D patient pools. Flag demographic under-representation.",
+      "acting_user_claims": {
+        "sub": "epi.analyst@demopharma.com",
+        "custom:hcls_role": "EPIDEMIOLOGIST"
+      },
+      "eligibility_criteria": {
+        "age_min": 18,
+        "age_max": 75,
+        "diagnosis_codes": [
+          "E11",
+          "E11.9",
+          "E11.65"
+        ],
+        "lab_thresholds": {
+          "HbA1c": 7.5
+        },
+        "exclusions": [
+          "eGFR < 30",
+          "active malignancy",
+          "pregnancy"
+        ]
+      },
+      "cohort_results": {
+        "query_id": "DEMO-Q-001",
+        "total_eligible": 1847,
+        "sites_with_data": 6,
+        "site_counts": [
+          {
+            "site_id": "SITE-NE-01",
+            "region": "Northeast",
+            "eligible_count": 423,
+            "demographics": {
+              "pct_female": 52,
+              "pct_hispanic": 18,
+              "pct_black": 14
+            }
+          },
+          {
+            "site_id": "SITE-SE-01",
+            "region": "Southeast",
+            "eligible_count": 387,
+            "demographics": {
+              "pct_female": 49,
+              "pct_hispanic": 22,
+              "pct_black": 28
+            }
+          },
+          {
+            "site_id": "SITE-MW-01",
+            "region": "Midwest",
+            "eligible_count": 312,
+            "demographics": {
+              "pct_female": 48,
+              "pct_hispanic": 9,
+              "pct_black": 11
+            }
+          },
+          {
+            "site_id": "SITE-W-01",
+            "region": "West",
+            "eligible_count": 298,
+            "demographics": {
+              "pct_female": 51,
+              "pct_hispanic": 31,
+              "pct_black": 8
+            }
+          },
+          {
+            "site_id": "SITE-SW-01",
+            "region": "Southwest",
+            "eligible_count": 251,
+            "demographics": {
+              "pct_female": 47,
+              "pct_hispanic": 38,
+              "pct_black": 7
+            }
+          },
+          {
+            "site_id": "SITE-NW-01",
+            "region": "Northwest",
+            "eligible_count": 176,
+            "demographics": {
+              "pct_female": 53,
+              "pct_hispanic": 12,
+              "pct_black": 5
+            }
+          }
+        ],
+        "phi_note": "All counts are aggregate and de-identified per 45 CFR 164.514."
+      }
+    },
+    {
+      "request_id": "MATCH-2026-0002",
+      "study_id": "DEMO-STUDY-002",
+      "protocol_id": "PROTO-CV-201",
+      "indication": "heart failure with reduced ejection fraction",
+      "target_enrollment": 150,
+      "instructions": "Identify sites with HFrEF patients LVEF < 40%. Ensure Black patient representation >= 20%.",
+      "acting_user_claims": {
+        "sub": "epi.analyst@demopharma.com",
+        "custom:hcls_role": "EPIDEMIOLOGIST"
+      },
+      "eligibility_criteria": {
+        "age_min": 21,
+        "age_max": 80,
+        "diagnosis_codes": [
+          "I50.20",
+          "I50.22"
+        ],
+        "lab_thresholds": {
+          "LVEF": 40
+        },
+        "exclusions": [
+          "LVEF >= 40",
+          "acute decompensation within 30 days",
+          "eGFR < 25"
+        ]
+      },
+      "cohort_results": {
+        "query_id": "DEMO-Q-002",
+        "total_eligible": 942,
+        "sites_with_data": 5,
+        "site_counts": [
+          {
+            "site_id": "SITE-SE-02",
+            "region": "Southeast",
+            "eligible_count": 318,
+            "demographics": {
+              "pct_female": 41,
+              "pct_hispanic": 15,
+              "pct_black": 34
+            }
+          },
+          {
+            "site_id": "SITE-NE-02",
+            "region": "Northeast",
+            "eligible_count": 241,
+            "demographics": {
+              "pct_female": 38,
+              "pct_hispanic": 12,
+              "pct_black": 22
+            }
+          },
+          {
+            "site_id": "SITE-MW-02",
+            "region": "Midwest",
+            "eligible_count": 187,
+            "demographics": {
+              "pct_female": 42,
+              "pct_hispanic": 8,
+              "pct_black": 18
+            }
+          },
+          {
+            "site_id": "SITE-W-02",
+            "region": "West",
+            "eligible_count": 124,
+            "demographics": {
+              "pct_female": 44,
+              "pct_hispanic": 21,
+              "pct_black": 9
+            }
+          },
+          {
+            "site_id": "SITE-SW-02",
+            "region": "Southwest",
+            "eligible_count": 72,
+            "demographics": {
+              "pct_female": 39,
+              "pct_hispanic": 29,
+              "pct_black": 11
+            }
+          }
+        ],
+        "phi_note": "All counts are aggregate and de-identified per 45 CFR 164.514."
+      }
+    },
+    {
+      "request_id": "MATCH-2026-0003",
+      "study_id": "DEMO-STUDY-003",
+      "protocol_id": "PROTO-ONCO-401",
+      "indication": "non-small cell lung cancer, stage III-IV",
+      "target_enrollment": 120,
+      "instructions": "Identify sites with NSCLC patients PD-L1 >= 50%. Prioritize diversity and geographic coverage.",
+      "acting_user_claims": {
+        "sub": "epi.analyst@demopharma.com",
+        "custom:hcls_role": "EPIDEMIOLOGIST"
+      },
+      "eligibility_criteria": {
+        "age_min": 18,
+        "diagnosis_codes": [
+          "C34.10",
+          "C34.11",
+          "C34.12",
+          "C34.90"
+        ],
+        "lab_thresholds": {
+          "PDL1_expression_pct": 50
+        },
+        "exclusions": [
+          "prior PD-1/PD-L1 inhibitor therapy",
+          "active autoimmune disease requiring systemic treatment",
+          "ECOG PS >= 3"
+        ],
+        "comorbidity_exclusions": [
+          "J84.10",
+          "M06.9"
+        ]
+      },
+      "cohort_results": {
+        "query_id": "DEMO-Q-003",
+        "total_eligible": 534,
+        "sites_with_data": 6,
+        "site_counts": [
+          {
+            "site_id": "SITE-NE-03",
+            "region": "Northeast",
+            "eligible_count": 148,
+            "demographics": {
+              "pct_female": 46,
+              "pct_hispanic": 11,
+              "pct_black": 9
+            }
+          },
+          {
+            "site_id": "SITE-SE-03",
+            "region": "Southeast",
+            "eligible_count": 127,
+            "demographics": {
+              "pct_female": 43,
+              "pct_hispanic": 14,
+              "pct_black": 19
+            }
+          },
+          {
+            "site_id": "SITE-MW-03",
+            "region": "Midwest",
+            "eligible_count": 98,
+            "demographics": {
+              "pct_female": 48,
+              "pct_hispanic": 7,
+              "pct_black": 8
+            }
+          },
+          {
+            "site_id": "SITE-W-03",
+            "region": "West",
+            "eligible_count": 89,
+            "demographics": {
+              "pct_female": 51,
+              "pct_hispanic": 26,
+              "pct_black": 6
+            }
+          },
+          {
+            "site_id": "SITE-SW-03",
+            "region": "Southwest",
+            "eligible_count": 47,
+            "demographics": {
+              "pct_female": 44,
+              "pct_hispanic": 33,
+              "pct_black": 5
+            }
+          },
+          {
+            "site_id": "SITE-NW-03",
+            "region": "Northwest",
+            "eligible_count": 25,
+            "demographics": {
+              "pct_female": 52,
+              "pct_hispanic": 10,
+              "pct_black": 4
+            }
+          }
+        ],
+        "phi_note": "All counts are aggregate and de-identified per 45 CFR 164.514."
+      }
+    }
+  ]
+}

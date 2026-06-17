@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Environment / secrets
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Distribution / build artifacts
+*.zip
+*.tar.gz
+
+# Jupyter
+.ipynb_checkpoints/
+
+# AWS CDK / Terraform state
+cdk.out/
+*.tfstate
+*.tfstate.backup
+.terraform/

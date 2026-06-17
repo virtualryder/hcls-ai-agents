@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  HCLS Agent Suite - Per-agent service stack. Deploys the native rebuild
+  (Step Functions orchestrating Lambdas, with a waitForTaskToken human gate) OR
+  the container lift (AgentCore Runtime / ECS). Parameterized by AgentId so the
+  same template serves every agent in the suite.
+
+Parameters:
+  Environment: { Type: String, Default: dev }
+  AgentId:
+    Type: String
+    Default: 01-regulatory-writing
+    Description: Agent folder id (e.g. 01-regulatory-writing, 02-pharmacovigilance).
+  DeployMode:
+    Type: String
+    Default: native
+    AllowedValues: [native, container]
+  LambdaCodeBucket: { Type: String, Description: S3 bucket holding lambdas.zip }
+  LambdaCodeKey: { Type: String, Default: lambdas.zip }
+  AgentExecutionRoleArn: { Type: String }
+  BedrockGuardrailId: { Type: String, Default: "" }
+  ReviewTableName: { Type: String }
+
+Conditions:
+  IsNative: !Equals [!Ref DeployMode, native]
+
+Resources:
+  StateMachineRole:
+    Type: AWS::IAM::Role
+    Condition: IsNative
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - { Effect: Allow, Principal: { Service: states.amazonaws.com }, Action: sts:AssumeRole }
+      Policies:
+        - PolicyName: invoke-lambdas
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Action: lambda:InvokeFunction, Resource: "*" }
+
+  AssembleFunction:
+    Type: AWS::Lambda::Function
+    Condition: IsNative
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-${AgentId}-assemble"
+      Runtime: python3.11
+      Handler: lambdas.assemble.handler
+      Timeout: 60
+      Role: !Ref AgentExecutionRoleArn
+      Code: { S3Bucket: !Ref LambdaCodeBucket, S3Key: !Ref LambdaCodeKey }
+
+  DraftFunction:
+    Type: AWS::Lambda::Function
+    Condition: IsNative
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-${AgentId}-draft"
+      Runtime: python3.11
+      Handler: lambdas.draft.handler
+      Timeout: 120
+      Role: !Ref AgentExecutionRoleArn
+      Environment:
+        Variables:
+          BEDROCK_GUARDRAIL_ID: !Ref BedrockGuardrailId
+          LLM_PROVIDER: bedrock
+      Code: { S3Bucket: !Ref LambdaCodeBucket, S3Key: !Ref LambdaCodeKey }
+
+  CheckFunction:
+    Type: AWS::Lambda::Function
+    Condition: IsNative
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-${AgentId}-check"
+      Runtime: python3.11
+      Handler: lambdas.check.handler
+      Timeout: 60
+      Role: !Ref AgentExecutionRoleArn
+      Code: { S3Bucket: !Ref LambdaCodeBucket, S3Key: !Ref LambdaCodeKey }
+
+  HitlNotifyFunction:
+    Type: AWS::Lambda::Function
+    Condition: IsNative
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-${AgentId}-hitl-notify"
+      Runtime: python3.11
+      Handler: lambdas.hitl_notify.handler
+      Timeout: 60
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { REVIEW_TABLE: !Ref ReviewTableName } }
+      Code: { S3Bucket: !Ref LambdaCodeBucket, S3Key: !Ref LambdaCodeKey }
+
+  FinalizeFunction:
+    Type: AWS::Lambda::Function
+    Condition: IsNative
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-${AgentId}-finalize"
+      Runtime: python3.11
+      Handler: lambdas.finalize.handler
+      Timeout: 60
+      Role: !Ref AgentExecutionRoleArn
+      Code: { S3Bucket: !Ref LambdaCodeBucket, S3Key: !Ref LambdaCodeKey }
+
+  WorkflowStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Condition: IsNative
+    Properties:
+      StateMachineName: !Sub "hcls-${Environment}-${AgentId}"
+      RoleArn: !GetAtt StateMachineRole.Arn
+      DefinitionSubstitutions:
+        AssembleFunctionArn: !GetAtt AssembleFunction.Arn
+        DraftFunctionArn: !GetAtt DraftFunction.Arn
+        CheckFunctionArn: !GetAtt CheckFunction.Arn
+        HitlNotifyFunctionArn: !GetAtt HitlNotifyFunction.Arn
+        FinalizeFunctionArn: !GetAtt FinalizeFunction.Arn
+      DefinitionString: |
+        {
+          "Comment": "HCLS agent workflow (native). HITL via waitForTaskToken.",
+          "StartAt": "Assemble",
+          "States": {
+            "Assemble": {"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Parameters":{"FunctionName":"${AssembleFunctionArn}","Payload.$":"$"},"OutputPath":"$.Payload","Next":"Draft"},
+            "Draft": {"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Parameters":{"FunctionName":"${DraftFunctionArn}","Payload.$":"$"},"OutputPath":"$.Payload","Next":"Check"},
+            "Check": {"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Parameters":{"FunctionName":"${CheckFunctionArn}","Payload.$":"$"},"OutputPath":"$.Payload","Next":"RouteChoice"},
+            "RouteChoice": {"Type":"Choice","Choices":[{"Variable":"$.routing.next","StringEquals":"Draft","Next":"Draft"}],"Default":"HumanReviewGate"},
+            "HumanReviewGate": {"Type":"Task","Resource":"arn:aws:states:::lambda:invoke.waitForTaskToken","Parameters":{"FunctionName":"${HitlNotifyFunctionArn}","Payload":{"input.$":"$","task_token.$":"$$.Task.Token"}},"ResultPath":"$.review","TimeoutSeconds":1209600,"Next":"Finalize"},
+            "Finalize": {"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","Parameters":{"FunctionName":"${FinalizeFunctionArn}","Payload.$":"$"},"OutputPath":"$.Payload","End":true}
+          }
+        }
+
+  # Container path placeholder: in container mode the agent runs on AgentCore
+  # Runtime (ARM64, /invocations + /ping) from the shared runtime image. The
+  # runtime resource is created by the AgentCore deployment workflow referencing
+  # the ECR image; see aws-native-reference/_shared/runtime.
+
+Outputs:
+  StateMachineArn:
+    Condition: IsNative
+    Value: !Ref WorkflowStateMachine
+    Export: { Name: !Sub "hcls-${Environment}-${AgentId}-sfn" }

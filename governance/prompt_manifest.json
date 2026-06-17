@@ -1,0 +1,15 @@
+{
+  "_comment": "Hash-pinned prompt versions. Bump via: python -m governance.prompt_registry --update. CI fails if a registered prompt's text changes without a manifest bump (deliberate, reviewed change control).",
+  "01-regulatory-writing:benefit_risk_section": {
+    "agent": "01-regulatory-writing",
+    "name": "benefit_risk_section",
+    "version": 1,
+    "sha256": "managed-by-prompt_registry --update"
+  },
+  "02-pharmacovigilance:icsr_narrative": {
+    "agent": "02-pharmacovigilance",
+    "name": "icsr_narrative",
+    "version": 1,
+    "sha256": "managed-by-prompt_registry --update"
+  }
+}

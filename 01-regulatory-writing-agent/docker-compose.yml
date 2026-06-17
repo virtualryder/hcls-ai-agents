@@ -1,0 +1,15 @@
+services:
+  regulatory-writing-agent:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - EXTRACT_MODE=${EXTRACT_MODE:-demo}
+      - CONNECTOR_MODE=${CONNECTOR_MODE:-fixture}
+      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      - ../platform_core:/platform_core:ro
+      - ../governance:/governance:ro
+    # For durable HITL state in a fuller demo, add a postgres service and set
+    # DATABASE_URL; the agent falls back to in-memory checkpointing without it.

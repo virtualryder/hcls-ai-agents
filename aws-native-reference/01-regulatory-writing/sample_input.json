@@ -1,0 +1,16 @@
+{
+  "request_id": "REQ-2026-0001",
+  "document_type": "BENEFIT_RISK_SUMMARY",
+  "product": "Demo-Drug",
+  "indication": "type 2 diabetes",
+  "target_authority": "FDA",
+  "section_ref": "CSR STUDY-301 Section 11",
+  "instructions": "Draft the integrated benefit-risk summary from the pivotal study.",
+  "study_data": {
+    "n_subjects": 450,
+    "primary_endpoint": "HbA1c reduction",
+    "hba1c_reduction_pct": 1.2,
+    "comparator": "placebo",
+    "source_ref": "CSR STUDY-301 Section 11"
+  }
+}

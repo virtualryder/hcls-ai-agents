@@ -1,0 +1,11 @@
+{
+  "request_id": "RWE-NATIVE-2026-0001",
+  "research_question": "Does SGLT2 inhibitor reduce all-cause hospitalization vs DPP4 inhibitor in adults with type 2 diabetes over 12 months?",
+  "study_design_type": "Retrospective Cohort",
+  "indication": "type 2 diabetes",
+  "intervention": "SGLT2 inhibitor",
+  "comparator": "DPP4 inhibitor",
+  "outcome": "all-cause hospitalization",
+  "time_horizon": "12 months",
+  "data_source": "US Commercial Claims (Optum CDM)"
+}

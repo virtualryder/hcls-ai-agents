@@ -1,0 +1,7 @@
+# Runtime (Lambda layer)
+boto3>=1.34
+strands-agents>=0.1.0; python_version>="3.11"
+
+# Test
+pytest>=7.4
+pytest-cov>=4.1

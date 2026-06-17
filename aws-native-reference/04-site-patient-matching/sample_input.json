@@ -1,0 +1,26 @@
+{
+  "study_id": "DEMO-STUDY-001",
+  "protocol_id": "PROTO-XR-301",
+  "indication": "type 2 diabetes",
+  "target_enrollment": 200,
+  "eligibility_criteria": {
+    "age_min": 18,
+    "age_max": 75,
+    "diagnosis_codes": ["E11", "E11.9", "E11.65"],
+    "lab_thresholds": {"HbA1c": 7.5},
+    "exclusions": ["eGFR < 30", "active malignancy"]
+  },
+  "cohort_results": {
+    "total_eligible": 1847,
+    "sites_with_data": 6,
+    "site_counts": [
+      {"site_id": "SITE-NE-01", "region": "Northeast", "eligible_count": 423,
+       "demographics": {"pct_female": 52, "pct_hispanic": 18, "pct_black": 14}},
+      {"site_id": "SITE-SE-01", "region": "Southeast", "eligible_count": 387,
+       "demographics": {"pct_female": 49, "pct_hispanic": 22, "pct_black": 28}},
+      {"site_id": "SITE-MW-01", "region": "Midwest", "eligible_count": 312,
+       "demographics": {"pct_female": 48, "pct_hispanic": 9, "pct_black": 11}}
+    ],
+    "phi_note": "All counts are aggregate and de-identified per 45 CFR 164.514."
+  }
+}

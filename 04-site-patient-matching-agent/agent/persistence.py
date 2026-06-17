@@ -1,0 +1,22 @@
+# agent/persistence.py
+from __future__ import annotations
+
+import logging
+import os
+
+logger = logging.getLogger(__name__)
+
+
+def get_checkpointer():
+    database_url = os.getenv("DATABASE_URL")
+    if database_url:
+        try:  # pragma: no cover
+            from langgraph.checkpoint.postgres import PostgresSaver
+            cp = PostgresSaver.from_conn_string(database_url)
+            logger.info("Using PostgresSaver for durable checkpointing.")
+            return cp
+        except Exception as exc:  # pragma: no cover
+            logger.warning("PostgresSaver unavailable (%s); falling back to MemorySaver.", exc)
+
+    from langgraph.checkpoint.memory import MemorySaver
+    return MemorySaver()

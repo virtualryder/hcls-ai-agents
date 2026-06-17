@@ -1,0 +1,15 @@
+{
+  "study_id": "DEMO-STUDY-001",
+  "protocol_id": "PROT-T2D-2024-001",
+  "enrolled": 124,
+  "target": 200,
+  "query_rate": 1.2,
+  "tmf_data": {
+    "completeness_pct": 87,
+    "missing_documents": [
+      "Site Activation Log — Site 003",
+      "Laboratory Certification — Site 002"
+    ],
+    "last_reviewed": "2025-05-15"
+  }
+}

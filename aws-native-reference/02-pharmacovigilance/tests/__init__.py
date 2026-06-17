@@ -1,0 +1,1 @@
+# Pharmacovigilance AWS-native tests
