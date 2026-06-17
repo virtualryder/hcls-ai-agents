@@ -73,6 +73,8 @@ The governed front door between every agent and every system of record. **No age
 
 Reference logic: `platform_core/hcls_agent_platform/mcp_gateway/` — this is the testable Python model of **Amazon Bedrock AgentCore Gateway + AgentCore Identity**. Tool names (`connector_kind.operation`) map 1:1 to AgentCore Gateway targets. See `infra/cloudformation/agentcore-gateway.yaml` for the deployable registration.
 
+**New to positioning this layer with a customer?** `docs/WHY-THE-MCP-LAYER.md` is a plain-English explainer (with a talk track and objection handling) for why agents that *automate* systems need a governed access layer and why to fund it in Phase 1.
+
 ### Connector Framework
 Adapter layer for each system category (RIM, DMS, Safety DB, EDC, CTMS, eTMF, RWD, QMS, CRM). Demo mode uses deterministic JSON fixtures; production connectors point at live Veeva, Medidata, and other vendor APIs. The connector interface is the same in both modes — the gateway does not know which backend is live.
 
@@ -184,7 +186,7 @@ Ready-to-use GTM material lives at the repository root:
 | `HCLS-Customer-Teaser-5slide.pptx` | 5-slide customer-facing teaser |
 | `HCLS-One-Pager.pdf` | One-page leave-behind (print-ready; editable `.pptx` source included) |
 
-Deeper written collateral: `offerings/` (POC, pilot, assessment, managed service, ROI, objection-handling, competitive, TPRM), `runbooks/` (incident, DR, HITL queue, model degradation), and `docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`.
+Per-agent **tailored deployment handbook PDFs** are in `deliverables/agent-handbooks/`, and all collateral regenerates from source with `make handbooks` (see `tooling/handbooks/`). Deeper written collateral: `offerings/` (POC, pilot, assessment, managed service, ROI, objection-handling, competitive, TPRM), `runbooks/` (incident, DR, HITL queue, model degradation), and `docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`.
 
 `EXTRACT_MODE=demo` routes every gateway call through the fixture connectors and bypasses the LLM. The full workflow — intake, regulatory intelligence retrieval, evidence assembly, draft section, grounding/compliance check, human review gate, finalize — executes against deterministic data. Suitable for customer demonstrations before any AWS account is configured.
 
@@ -229,6 +231,7 @@ hcls-ai-agents/
 │
 ├── docs/
 │   ├── DEPLOYMENT-HANDBOOK.md          # Console + CLI step-by-step deploy (empty account -> running agent)
+│   ├── WHY-THE-MCP-LAYER.md            # Account-team explainer: why agents need a governed access layer
 │   ├── SUITE-ARCHITECTURE.md           # 6-layer reference architecture + AWS service mapping
 │   └── STAKEHOLDER-SECURITY-BRIEFINGS.md  # Per-stakeholder security pitch (CIO/CISO/CMO/RegAffairs/PV/QA/ClinOps/CPO/MedAffairs/Procurement/IRB)
 │

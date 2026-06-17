@@ -99,6 +99,8 @@ Agents 01, 02, 03, 05 should default to **in-account AWS**. Agents 04, 06 can be
 
 The FDA/EMA Joint Statement on Good Machine Learning Practices (January 2026) introduces a "context of use + credibility controls proportional to risk" framework. Use this with Regulatory Affairs and Quality stakeholders to frame why the platform design is the right approach.
 
+> **Positioning the MCP layer:** for the plain-English "why do agents need a governed access layer, and why fund it first" conversation — with a 60-second talk track and objection handling — use `docs/WHY-THE-MCP-LAYER.md`. It's written for a new account person to deliver to a customer.
+
 | Context of use dimension | How to frame it | How the platform addresses it |
 |---|---|---|
 | **What decision does the AI inform?** | Is it a search/summarize (low risk) or a submission/report (high risk)? | The six-step adoption path calibrates autonomy to the risk level; write tools require human approval regardless of step |

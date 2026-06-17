@@ -102,6 +102,7 @@ live Bedrock + real-connector path — use it as the reference for going live.
 - **Change a prompt:** edit the text, bump its version in `prompts.py`, run `python -m governance.prompt_registry --update`, and commit the manifest diff with the prompt diff. CI fails on un-bumped drift.
 - **Add an eval case:** append a reviewed golden artifact + its input state to `governance/evals/golden/*.json`.
 - **Add a new agent:** copy the shape of `01-regulatory-writing-agent/`, give it an id + grants in `policy.py`, and add an `aws-native-reference/<agent>/` rebuild.
+- **Regenerate the handbooks/figures:** edit the `PROFILES` in `tooling/handbooks/agent_handbooks.py` (or the template/CSS/figures) and run `make handbooks` — `make` rebuilds only what changed (`make help` lists targets).
 
 ## 7. Testing & CI
 

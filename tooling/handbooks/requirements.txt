@@ -1,0 +1,5 @@
+# Handbook & console-mockup generation toolchain
+markdown>=3.5
+weasyprint>=60
+cairosvg>=2.7
+# System packages also required: libpango/cairo (WeasyPrint), and (for `make deck`) LibreOffice `soffice`.
