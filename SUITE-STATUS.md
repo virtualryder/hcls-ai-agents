@@ -31,6 +31,8 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 ## Changelog (most recent first)
 
+- **AWS GTM mechanics pack** — five new `docs/` files covering the questions AWS sellers and SAs ask before a deal can progress: `AWS-FUNDING-AND-GTM.md` (MAP/PoA/ISV Accelerate), `WELL-ARCHITECTED-REVIEW.md` (WAF + GenAI Lens pillar mapping), `SHARED-RESPONSIBILITY-MATRIX.md` (AWS vs. SI vs. institution), `AWS-ACCOUNT-PREREQUISITES.md` (pre-flight checklist), `AWS-MARKETPLACE-PATH.md` (private offer mechanics).
+- **Sales artifacts** — `offerings/BATTLECARD.md` (qualifying questions, discovery cheat-sheet, objection + competitor one-liners), `offerings/SOW-TEMPLATE.md` (fill-in-the-blank POC/Pilot SOW shell), `offerings/TCO-MODEL.md` (Bedrock inference + infrastructure cost estimates + per-agent ROI worksheet with SA number-entry guide).
 - **A2A orchestration stance + reference** — `ENTERPRISE-PLATFORM.md` §5 expanded to **ADR-001** (in-process LangGraph today; A2A-through-AgentCore when multi-agent is needed), plus a runnable governed reference hop `platform_core/hcls_agent_platform/a2a/` (identity-propagating, least-privilege, audited; 5 tests).
 - **`make handbooks` build tooling** — versioned generators in `tooling/handbooks/` + a repo-root `Makefile`; figures, the master PDF, and the 8 per-agent PDFs regenerate from source with dependency tracking (edit a profile -> only the affected PDFs rebuild).
 - **MCP-layer account explainer** — `docs/WHY-THE-MCP-LAYER.md`: plain-English why-and-why-now for the governed access layer, with a talk track and objection handling.

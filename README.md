@@ -188,7 +188,20 @@ Ready-to-use GTM material lives at the repository root:
 | `HCLS-Customer-Teaser-5slide.pptx` | 5-slide customer-facing teaser |
 | `HCLS-One-Pager.pdf` | One-page leave-behind (print-ready; editable `.pptx` source included) |
 
-Per-agent **tailored deployment handbook PDFs** are in `deliverables/agent-handbooks/`, and all collateral regenerates from source with `make handbooks` (see `tooling/handbooks/`). Deeper written collateral: `offerings/` (POC, pilot, assessment, managed service, ROI, objection-handling, competitive, TPRM), `runbooks/` (incident, DR, HITL queue, model degradation), and `docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`.
+Per-agent **tailored deployment handbook PDFs** are in `deliverables/agent-handbooks/`, and all collateral regenerates from source with `make handbooks` (see `tooling/handbooks/`). Deeper written collateral: `offerings/` (POC, pilot, assessment, managed service, TCO/ROI calculator, battlecard, SOW template, objection-handling, competitive, TPRM), `runbooks/` (incident, DR, HITL queue, model degradation), and `docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`.
+
+**AWS go-to-market mechanics** — the following docs answer the questions AWS sellers and SAs ask before a deal can progress:
+
+| Document | Answers |
+|---|---|
+| `docs/AWS-FUNDING-AND-GTM.md` | Who pays for the pilot? MAP, PoA, ISV Accelerate |
+| `docs/WELL-ARCHITECTED-REVIEW.md` | WAF + GenAI Lens pillar-by-pillar mapping for WAFR sessions |
+| `docs/SHARED-RESPONSIBILITY-MATRIX.md` | AWS vs. SI vs. institution — what each party owns |
+| `docs/AWS-ACCOUNT-PREREQUISITES.md` | Pre-flight checklist: Bedrock access, quotas, AgentCore, Cognito |
+| `docs/AWS-MARKETPLACE-PATH.md` | Marketplace listing and private offer mechanics |
+| `offerings/BATTLECARD.md` | Qualifying questions, discovery cheat-sheet, objection one-liners |
+| `offerings/SOW-TEMPLATE.md` | Fill-in-the-blank POC/Pilot SOW shell |
+| `offerings/TCO-MODEL.md` | Bedrock inference + infrastructure cost estimates + ROI worksheet |
 
 `EXTRACT_MODE=demo` routes every gateway call through the fixture connectors and bypasses the LLM. The full workflow — intake, regulatory intelligence retrieval, evidence assembly, draft section, grounding/compliance check, human review gate, finalize — executes against deterministic data. Suitable for customer demonstrations before any AWS account is configured.
 
@@ -235,14 +248,22 @@ hcls-ai-agents/
 │   ├── DEPLOYMENT-HANDBOOK.md          # Console + CLI step-by-step deploy (empty account -> running agent)
 │   ├── WHY-THE-MCP-LAYER.md            # Account-team explainer: why agents need a governed access layer
 │   ├── SUITE-ARCHITECTURE.md           # 6-layer reference architecture + AWS service mapping
-│   └── STAKEHOLDER-SECURITY-BRIEFINGS.md  # Per-stakeholder security pitch (CIO/CISO/CMO/RegAffairs/PV/QA/ClinOps/CPO/MedAffairs/Procurement/IRB)
+│   ├── STAKEHOLDER-SECURITY-BRIEFINGS.md  # Per-stakeholder security pitch (CIO/CISO/CMO/RegAffairs/PV/QA/ClinOps/CPO/MedAffairs/Procurement/IRB)
+│   ├── AWS-FUNDING-AND-GTM.md          # MAP, PoA, ISV Accelerate — who pays for the pilot
+│   ├── WELL-ARCHITECTED-REVIEW.md      # WAF + GenAI Lens pillar-by-pillar mapping
+│   ├── SHARED-RESPONSIBILITY-MATRIX.md # AWS vs. SI vs. institution responsibility breakdown
+│   ├── AWS-ACCOUNT-PREREQUISITES.md   # Pre-flight checklist: Bedrock, AgentCore, quotas, Cognito
+│   └── AWS-MARKETPLACE-PATH.md        # Marketplace listing and private offer mechanics
 │
 └── offerings/                          # Consulting packaging
     ├── POC-OFFERING.md
     ├── PILOT-OFFERING.md
     ├── ASSESSMENT-OFFERING.md
     ├── MANAGED-SERVICE-OFFERING.md
-    ├── COST-ROI-MODEL.md
+    ├── COST-ROI-MODEL.md               # Narrative ROI framework
+    ├── TCO-MODEL.md                    # AWS run costs + ROI worksheet (SA-ready numbers)
+    ├── BATTLECARD.md                   # Qualifying questions, discovery, objection one-liners
+    ├── SOW-TEMPLATE.md                 # Fill-in-the-blank POC/Pilot SOW shell
     ├── OBJECTION-HANDLING.md
     ├── COMPETITIVE-POSITIONING.md
     └── TPRM-DUE-DILIGENCE-PACKET.md
