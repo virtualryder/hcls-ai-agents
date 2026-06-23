@@ -1,5 +1,12 @@
 # Deploy Guide — Protocol Design Agent (AWS-native)
 
+> **Canonical path:** for the full, current end-to-end deploy (build script,
+> `GatewayMode` choice, human-gate smoke test) follow
+> [`../../docs/DEPLOY-QUICKSTART.md`](../../docs/DEPLOY-QUICKSTART.md). Package with
+> `scripts/build_lambdas.sh 06-protocol-design` — it vendors Strands + `platform_core`
+> into the zip (a bare `zip` of the source `ImportError`s on cold start). The notes below
+> are an agent-specific supplement.
+
 ## Architecture
 
 ```

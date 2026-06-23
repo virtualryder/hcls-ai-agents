@@ -5,10 +5,15 @@ HB     := tooling/handbooks
 CONSOLE:= docs/assets/console
 AGENTS := deliverables/agent-handbooks
 
-.PHONY: help handbooks figures master agent-handbooks deck install clean-handbooks
+.PHONY: help handbooks figures master agent-handbooks deck install clean-handbooks \
+        build-lambdas deploy
 
 help:
-	@echo "HCLS handbook targets:"
+	@echo "HCLS targets:"
+	@echo "  -- AWS deployment --"
+	@echo "  make build-lambdas   package all agent + connector zips WITH deps (scripts/build_lambdas.sh)"
+	@echo "  make deploy AGENT=02-pharmacovigilance CFN_BUCKET=.. CODE_BUCKET=..   stage + deploy quickstart"
+	@echo "  -- collateral --"
 	@echo "  make install         pip install the generation toolchain"
 	@echo "  make handbooks       regenerate figures + master PDF + all 8 agent PDFs"
 	@echo "  make figures         regenerate the generic console mockups"
@@ -16,6 +21,18 @@ help:
 	@echo "  make agent-handbooks regenerate the 8 per-agent handbook PDFs"
 	@echo "  make deck            export the executive deck PPTX -> PDF (needs LibreOffice)"
 	@echo "  make clean-handbooks remove generated PDFs and build stamps"
+
+# --- AWS deployment ----------------------------------------------------------
+AGENT       ?= 01-regulatory-writing
+ENVIRONMENT ?= dev
+GATEWAY_MODE ?= portable
+DEPLOY_MODE ?= native
+
+build-lambdas:
+	bash scripts/build_lambdas.sh
+
+deploy:
+	bash scripts/deploy.sh $(AGENT) $(ENVIRONMENT) $(GATEWAY_MODE) $(DEPLOY_MODE)
 
 install:
 	$(PYTHON) -m pip install -r $(HB)/requirements.txt

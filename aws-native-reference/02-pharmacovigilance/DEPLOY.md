@@ -1,5 +1,12 @@
 # DEPLOY — Pharmacovigilance AWS-Native Agent
 
+> **Canonical path:** for the full, current end-to-end deploy (build script,
+> `GatewayMode` choice, human-gate smoke test) follow
+> [`../../docs/DEPLOY-QUICKSTART.md`](../../docs/DEPLOY-QUICKSTART.md). Package with
+> `scripts/build_lambdas.sh 02-pharmacovigilance` — it vendors Strands + `platform_core`
+> into the zip (a bare `zip` of the source `ImportError`s on cold start). The notes below
+> are an agent-specific supplement.
+
 ## Prerequisites
 
 - AWS CLI v2 configured with a profile that has IAM, Lambda, Step Functions, SNS, DynamoDB permissions

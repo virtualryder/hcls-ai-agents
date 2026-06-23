@@ -1,13 +1,16 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >
   HCLS Agent Suite - QUICK DEPLOY (master). One stack that provisions the whole
-  customer-isolated environment: network, security (KMS + Bedrock Guardrail +
-  Cognito + IAM), data (append-only audit, WORM store, review table), the MCP
-  layer as Bedrock AgentCore Gateway + Identity, and one agent service
-  (native Step Functions + Lambdas, or container on AgentCore Runtime).
+  customer-isolated environment in a NEW AWS account: network, security (KMS +
+  Bedrock Guardrail + Cognito + IAM), data (append-only audit, WORM store, review
+  table), the connector Lambdas (governed system-of-record backends), the MCP
+  layer (Path A portable API Gateway OR Path B managed AgentCore Gateway, chosen
+  with GatewayMode), and one agent service (native Step Functions + Lambdas, or a
+  container on ECS Fargate / AgentCore Runtime).
 
-  Upload the component templates to an S3 bucket and pass its base URL as
-  TemplateBaseUrl, then deploy this template. See infra/cloudformation/README.md.
+  Stage the component templates + code to S3 (scripts/build_lambdas.sh +
+  scripts/deploy.sh do this for you), then deploy this template. See
+  docs/DEPLOY-QUICKSTART.md for the full walkthrough.
 
 Parameters:
   Environment:
@@ -22,18 +25,45 @@ Parameters:
     Type: String
     Default: native
     AllowedValues: [native, container]
+  GatewayMode:
+    Type: String
+    Default: portable
+    AllowedValues: [portable, agentcore]
+    Description: >
+      portable = API Gateway + Cognito JWT authorizer (any region, no preview
+      dependency — recommended for a new account). agentcore = Amazon Bedrock
+      AgentCore Gateway + Identity (managed; AgentCore-enabled regions only).
+  ConnectorMode:
+    Type: String
+    Default: fixture
+    AllowedValues: [fixture, live]
   TemplateBaseUrl:
     Type: String
     Description: HTTPS base URL of the S3 location holding the component templates.
   LambdaCodeBucket:
     Type: String
-    Description: S3 bucket holding the agent lambdas.zip.
+    Description: S3 bucket holding the agent lambdas.zip and connector.zip.
   LambdaCodeKey:
     Type: String
     Default: lambdas.zip
+  ConnectorCodeKey:
+    Type: String
+    Default: connector.zip
+  ContainerImageUri:
+    Type: String
+    Default: ""
+    Description: (container mode) ECR image URI (ARM64) from _shared/runtime.
+  AgentModule:
+    Type: String
+    Default: agent.graph:build_graph
+    Description: (container mode) module:factory of the agent's compiled LangGraph.
   IdpMetadataUrl:
     Type: String
     Default: ""
+
+Conditions:
+  UsePortable: !Equals [!Ref GatewayMode, portable]
+  UseAgentCore: !Equals [!Ref GatewayMode, agentcore]
 
 Resources:
   NetworkStack:
@@ -58,14 +88,64 @@ Resources:
         Environment: !Ref Environment
         KmsKeyArn: !GetAtt SecurityStack.Outputs.KmsKeyArn
 
-  GatewayStack:
+  # Connector Lambdas FIRST — both gateway modes reference these target ARNs.
+  ConnectorsStack:
     Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseUrl}/connectors.yaml"
+      Parameters:
+        Environment: !Ref Environment
+        ConnectorCodeBucket: !Ref LambdaCodeBucket
+        ConnectorCodeKey: !Ref ConnectorCodeKey
+        ConnectorMode: !Ref ConnectorMode
+        AgentExecutionRoleArn: !GetAtt SecurityStack.Outputs.AgentExecutionRoleArn
+        AuditTableName: !GetAtt DataStack.Outputs.AuditTableName
+
+  # Path A — PORTABLE MCP gateway (any region). Default.
+  PortableGatewayStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: UsePortable
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseUrl}/gateway-portable.yaml"
+      Parameters:
+        Environment: !Ref Environment
+        UserPoolId: !GetAtt SecurityStack.Outputs.UserPoolId
+        UserPoolClientId: !GetAtt SecurityStack.Outputs.UserPoolClientId
+        RimConnectorArn: !GetAtt ConnectorsStack.Outputs.RimConnectorArn
+        DmsConnectorArn: !GetAtt ConnectorsStack.Outputs.DmsConnectorArn
+        SafetyConnectorArn: !GetAtt ConnectorsStack.Outputs.SafetyConnectorArn
+        MeddraConnectorArn: !GetAtt ConnectorsStack.Outputs.MeddraConnectorArn
+        WhodrugConnectorArn: !GetAtt ConnectorsStack.Outputs.WhodrugConnectorArn
+        EdcConnectorArn: !GetAtt ConnectorsStack.Outputs.EdcConnectorArn
+        CtmsConnectorArn: !GetAtt ConnectorsStack.Outputs.CtmsConnectorArn
+        EtmfConnectorArn: !GetAtt ConnectorsStack.Outputs.EtmfConnectorArn
+        RwdConnectorArn: !GetAtt ConnectorsStack.Outputs.RwdConnectorArn
+        QmsConnectorArn: !GetAtt ConnectorsStack.Outputs.QmsConnectorArn
+        CrmConnectorArn: !GetAtt ConnectorsStack.Outputs.CrmConnectorArn
+        MlrConnectorArn: !GetAtt ConnectorsStack.Outputs.MlrConnectorArn
+
+  # Path B — MANAGED AgentCore gateway (AgentCore-enabled regions only).
+  AgentCoreGatewayStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: UseAgentCore
     Properties:
       TemplateURL: !Sub "${TemplateBaseUrl}/agentcore-gateway.yaml"
       Parameters:
         Environment: !Ref Environment
         UserPoolId: !GetAtt SecurityStack.Outputs.UserPoolId
         AgentExecutionRoleArn: !GetAtt SecurityStack.Outputs.AgentExecutionRoleArn
+        RimConnectorArn: !GetAtt ConnectorsStack.Outputs.RimConnectorArn
+        DmsConnectorArn: !GetAtt ConnectorsStack.Outputs.DmsConnectorArn
+        SafetyConnectorArn: !GetAtt ConnectorsStack.Outputs.SafetyConnectorArn
+        MeddraConnectorArn: !GetAtt ConnectorsStack.Outputs.MeddraConnectorArn
+        WhodrugConnectorArn: !GetAtt ConnectorsStack.Outputs.WhodrugConnectorArn
+        EdcConnectorArn: !GetAtt ConnectorsStack.Outputs.EdcConnectorArn
+        CtmsConnectorArn: !GetAtt ConnectorsStack.Outputs.CtmsConnectorArn
+        EtmfConnectorArn: !GetAtt ConnectorsStack.Outputs.EtmfConnectorArn
+        RwdConnectorArn: !GetAtt ConnectorsStack.Outputs.RwdConnectorArn
+        QmsConnectorArn: !GetAtt ConnectorsStack.Outputs.QmsConnectorArn
+        CrmConnectorArn: !GetAtt ConnectorsStack.Outputs.CrmConnectorArn
+        MlrConnectorArn: !GetAtt ConnectorsStack.Outputs.MlrConnectorArn
 
   AgentServiceStack:
     Type: AWS::CloudFormation::Stack
@@ -80,11 +160,23 @@ Resources:
         AgentExecutionRoleArn: !GetAtt SecurityStack.Outputs.AgentExecutionRoleArn
         BedrockGuardrailId: !GetAtt SecurityStack.Outputs.GuardrailId
         ReviewTableName: !GetAtt DataStack.Outputs.ReviewTableName
+        VpcId: !GetAtt NetworkStack.Outputs.VpcId
+        PrivateSubnets: !GetAtt NetworkStack.Outputs.PrivateSubnets
+        AppSecurityGroupId: !GetAtt NetworkStack.Outputs.AppSecurityGroupId
+        ContainerImageUri: !Ref ContainerImageUri
+        AgentModule: !Ref AgentModule
 
 Outputs:
   GatewayId:
-    Description: Bedrock AgentCore Gateway id (the MCP layer)
-    Value: !GetAtt GatewayStack.Outputs.GatewayId
+    Description: The MCP layer id (portable API Gateway or AgentCore Gateway).
+    Value: !If
+      - UsePortable
+      - !GetAtt PortableGatewayStack.Outputs.GatewayId
+      - !GetAtt AgentCoreGatewayStack.Outputs.GatewayId
+  GatewayEndpoint:
+    Condition: UsePortable
+    Description: Portable gateway base URL (POST {endpoint}/mcp/<kind> with a JWT).
+    Value: !GetAtt PortableGatewayStack.Outputs.GatewayEndpoint
   AuditTable:
     Value: !GetAtt DataStack.Outputs.AuditTableName
   GuardrailId:

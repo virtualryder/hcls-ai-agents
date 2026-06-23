@@ -1,5 +1,12 @@
 # DEPLOY — Medical Affairs MSL Agent (AWS-native)
 
+> **Canonical path:** for the full, current end-to-end deploy (build script,
+> `GatewayMode` choice, human-gate smoke test) follow
+> [`../../docs/DEPLOY-QUICKSTART.md`](../../docs/DEPLOY-QUICKSTART.md). Package with
+> `scripts/build_lambdas.sh 08-medical-affairs-msl` — it vendors Strands + `platform_core`
+> into the zip (a bare `zip` of the source `ImportError`s on cold start). The notes below
+> are an agent-specific supplement.
+
 ## Prerequisites
 - AWS account with Bedrock access (Claude Sonnet in us-east-1)
 - SAM CLI or CDK

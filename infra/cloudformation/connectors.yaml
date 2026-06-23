@@ -1,0 +1,184 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  HCLS Agent Suite - Connector Lambdas. One Lambda per system of record, each the
+  governed backend behind an MCP gateway *target*. Every call is run through
+  platform_core's MCPGateway (deny-by-default, least-privilege intersection,
+  human-approval gate, scoped token, append-only audit) so enforcement is the
+  tested Python reference, not a re-implementation. Both gateway modes
+  (agentcore-gateway.yaml and gateway-portable.yaml) reference these by ARN, so
+  this stack deploys FIRST. Shared connector code is at
+  aws-native-reference/_shared/connector/ (packaged by scripts/build_lambdas.sh).
+
+Parameters:
+  Environment: { Type: String, Default: dev }
+  ConnectorCodeBucket: { Type: String, Description: S3 bucket holding connector.zip }
+  ConnectorCodeKey: { Type: String, Default: connector.zip }
+  AgentExecutionRoleArn: { Type: String }
+  AuditTableName: { Type: String, Default: "" }
+  ConnectorMode:
+    Type: String
+    Default: fixture
+    AllowedValues: [fixture, live]
+    Description: fixture = deterministic demo data; live = real vendor APIs.
+
+# Every distinct connector kind in TOOL_REGISTRY (platform_core/mcp_gateway/policy.py).
+# Each becomes one Lambda + one gateway target. Mappings (Fn::FindInMap-free, kept
+# explicit for readability) live inline per resource below.
+Resources:
+  RimConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-rim"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: rim, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  DmsConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-dms"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: dms, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  SafetyConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-safety"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: safety, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  MeddraConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-meddra"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: meddra, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  WhodrugConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-whodrug"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: whodrug, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  EdcConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-edc"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: edc, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  CtmsConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-ctms"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: ctms, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  EtmfConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-etmf"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: etmf, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  RwdConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-rwd"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: rwd, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  QmsConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-qms"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: qms, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  CrmConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-crm"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: crm, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  MlrConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-mlr"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: mlr, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+Outputs:
+  RimConnectorArn:     { Value: !GetAtt RimConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-rim" } }
+  DmsConnectorArn:     { Value: !GetAtt DmsConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-dms" } }
+  SafetyConnectorArn:  { Value: !GetAtt SafetyConnector.Arn,  Export: { Name: !Sub "hcls-${Environment}-connector-safety" } }
+  MeddraConnectorArn:  { Value: !GetAtt MeddraConnector.Arn,  Export: { Name: !Sub "hcls-${Environment}-connector-meddra" } }
+  WhodrugConnectorArn: { Value: !GetAtt WhodrugConnector.Arn, Export: { Name: !Sub "hcls-${Environment}-connector-whodrug" } }
+  EdcConnectorArn:     { Value: !GetAtt EdcConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-edc" } }
+  CtmsConnectorArn:    { Value: !GetAtt CtmsConnector.Arn,    Export: { Name: !Sub "hcls-${Environment}-connector-ctms" } }
+  EtmfConnectorArn:    { Value: !GetAtt EtmfConnector.Arn,    Export: { Name: !Sub "hcls-${Environment}-connector-etmf" } }
+  RwdConnectorArn:     { Value: !GetAtt RwdConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-rwd" } }
+  QmsConnectorArn:     { Value: !GetAtt QmsConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-qms" } }
+  CrmConnectorArn:     { Value: !GetAtt CrmConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-crm" } }
+  MlrConnectorArn:     { Value: !GetAtt MlrConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-mlr" } }

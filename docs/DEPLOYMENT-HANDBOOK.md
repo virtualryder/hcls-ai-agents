@@ -25,7 +25,21 @@ There are two deployment shapes; the handbook walks the **native** shape end to 
 
 Both deploy through the **same CloudFormation quickstart** (`infra/cloudformation/quickstart.yaml`)
 — `DeployMode=native` vs `DeployMode=container`. Both put every system-of-record call
-behind the **MCP authorization gateway = Bedrock AgentCore Gateway + Identity**.
+behind the **MCP authorization gateway**, which itself has two interchangeable
+implementations selected by the **`GatewayMode`** parameter:
+
+| `GatewayMode` | MCP front door | Region support |
+|---|---|---|
+| `portable` (default) | API Gateway (HTTP API) + Cognito JWT authorizer | **any commercial Region** — use this in a new account |
+| `agentcore` | Amazon Bedrock **AgentCore Gateway + Identity** | AgentCore-enabled Regions only |
+
+Both route to the **same connector Lambdas** (`connectors.yaml`, one per system of record)
+which run every call through `platform_core`'s deny-by-default policy. This handbook shows
+the AgentCore path; the portable path is identical except for the gateway stack.
+
+> **In a hurry / new account?** [`DEPLOY-QUICKSTART.md`](DEPLOY-QUICKSTART.md) is the
+> opinionated copy-paste path (two scripts, ~30–60 min). This handbook is the deep
+> console walkthrough with screenshots and per-control explanations.
 
 **Time budget:** ~2–4 hours for a first dev deployment once prerequisites are granted.
 
@@ -155,15 +169,22 @@ aws s3 mb s3://my-cfn-bucket
 aws s3 cp infra/cloudformation/ s3://my-cfn-bucket/hcls/ --recursive --exclude "*" --include "*.yaml"
 ```
 
-### 4.2 Package the agent Lambda code (native path)
+### 4.2 Package the agent + connector Lambda code (native path)
+
+Use the build script — it vendors third-party dependencies (Strands SDK) **and**
+`platform_core` into each zip, which a bare `zip` of the source does not (that omission
+is the classic `ImportError` on cold start). It also builds the shared `connector.zip`
+that backs every gateway target.
 
 ```bash
-cd aws-native-reference/02-pharmacovigilance
-mkdir -p build
-zip -r build/lambdas.zip core.py strands_agent.py lambdas/ requirements.txt
+scripts/build_lambdas.sh 02-pharmacovigilance      # -> build/lambdas.zip + connector.zip
 aws s3 mb s3://my-code-bucket
-aws s3 cp build/lambdas.zip s3://my-code-bucket/02-pharmacovigilance/lambdas.zip
+aws s3 cp aws-native-reference/02-pharmacovigilance/build/lambdas.zip s3://my-code-bucket/02-pharmacovigilance/lambdas.zip
+aws s3 cp aws-native-reference/_shared/connector/build/connector.zip   s3://my-code-bucket/connector.zip
 ```
+
+> `scripts/deploy.sh` does this staging for you; the manual commands are shown so you can
+> see exactly what lands in S3.
 
 ### 4.3 (Container path only) Build & push the ARM64 image to ECR
 
@@ -232,8 +253,15 @@ aws cloudformation describe-stacks --stack-name hcls-dev-02-pharmacovigilance \
 
 ## 6. Phase 4 — The MCP layer (AgentCore Gateway + Identity)
 
-The `agentcore-gateway.yaml` nested stack created the **Gateway** (JWT-authorized by your
-Cognito pool) and one **target per system of record**. To see/extend it in the Console:
+The gateway nested stack created the MCP layer (JWT-authorized by your Cognito pool) and one
+**target per system of record**, each backed by a **connector Lambda** from `connectors.yaml`
+(`hcls-<env>-connector-<kind>`). The connector Lambda runs every call through
+`platform_core`'s `MCPGateway` — so the deny-by-default decision is the tested Python
+reference, identical in both gateway modes. With `GatewayMode=portable` the front door is an
+API Gateway HTTP API (`POST {endpoint}/mcp/<kind>` with a Cognito JWT) instead of the
+AgentCore Gateway below; the targets and enforcement are the same.
+
+To see/extend the AgentCore gateway in the Console:
 
 1. **Bedrock** → **AgentCore** → **Gateways** → open `hcls-dev-gateway`.
 2. Confirm the **authorizer** points at your Cognito user pool discovery URL.
@@ -396,7 +424,8 @@ Remove them deliberately (and only in dev) after exporting any records you need.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `AccessDeniedException` calling Bedrock | Model access not granted in this Region | Phase 3.1 |
-| Stack fails on `AWS::BedrockAgentCore::*` | Region doesn't support AgentCore, or property unsupported | Deploy in an AgentCore-enabled Region, or use the API Gateway + Lambda-authorizer + Cognito fallback (see `platform_core/.../mcp_gateway/README.md`) |
+| Stack fails on `AWS::BedrockAgentCore::*` | Region doesn't support AgentCore | Redeploy with **`GatewayMode=portable`** (API Gateway + Cognito JWT authorizer — same connectors, same enforcement, any Region) |
+| Lambda `ImportError` on cold start | zip missing vendored deps (Strands / platform_core) | Re-package with `scripts/build_lambdas.sh` |
 | LLM factory refuses to start | `ENVIRONMENT=prod` but no `BEDROCK_GUARDRAIL_ID` | Set the Guardrail ID (this guard is intentional) |
 | Execution stuck at `HumanReviewGate` | Working as designed — awaiting human approval | Send `send-task-success` with a verified reviewer (Phase 8.2) |
 | `Safety API call failed` | `SAFETY_BASE_URL` unreachable or token missing | Verify the URL and the `hcls/safety_api_token` secret; test against the reference service first |

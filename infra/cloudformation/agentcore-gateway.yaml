@@ -1,22 +1,37 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >
-  HCLS Agent Suite - MCP layer as Amazon Bedrock AgentCore Gateway + AgentCore
-  Identity. The gateway is the governed front door to every system of record:
-  deny-by-default authorization, least-privilege scopes, short-lived tokens, and
-  audit. Each tool in platform_core/mcp_gateway/policy.py:TOOL_REGISTRY maps to a
-  Gateway target here. The deterministic decision/least-privilege/token/audit
-  semantics are identical to the Python reference in platform_core.
+  HCLS Agent Suite - MCP layer (Path B, MANAGED) as Amazon Bedrock AgentCore
+  Gateway + AgentCore Identity. The gateway is the governed front door to every
+  system of record: deny-by-default authorization, least-privilege scopes,
+  short-lived tokens, and audit. Each connector kind in
+  platform_core/mcp_gateway/policy.py:TOOL_REGISTRY maps to one Gateway target
+  backed by a connector Lambda from connectors.yaml. The deterministic
+  decision/least-privilege/token/audit semantics are identical to the Python
+  reference in platform_core.
 
-  NOTE on resource types: AWS::BedrockAgentCore::* are used where available in the
-  deployment region. Where a property/type is not yet supported, the equivalent
-  API Gateway + Lambda-authorizer + Cognito + STS pattern (documented in
-  platform_core/mcp_gateway/README.md) can be substituted without changing agent
-  code. Keep this stack in an AgentCore-enabled region.
+  REGION NOTE: AWS::BedrockAgentCore::* requires an AgentCore-enabled region. For
+  a new customer account in any region, use Path A (gateway-portable.yaml) — the
+  API Gateway + Cognito JWT authorizer equivalent with identical semantics and
+  the same connector Lambdas. Select the path with the GatewayMode parameter in
+  quickstart.yaml.
 
 Parameters:
   Environment: { Type: String, Default: dev }
   UserPoolId: { Type: String, Description: Cognito user pool (from security stack) }
   AgentExecutionRoleArn: { Type: String }
+  # Connector target ARNs (from connectors.yaml outputs, passed by quickstart).
+  RimConnectorArn: { Type: String }
+  DmsConnectorArn: { Type: String }
+  SafetyConnectorArn: { Type: String }
+  MeddraConnectorArn: { Type: String }
+  WhodrugConnectorArn: { Type: String }
+  EdcConnectorArn: { Type: String }
+  CtmsConnectorArn: { Type: String }
+  EtmfConnectorArn: { Type: String }
+  RwdConnectorArn: { Type: String }
+  QmsConnectorArn: { Type: String }
+  CrmConnectorArn: { Type: String }
+  MlrConnectorArn: { Type: String }
 
 Resources:
   # AgentCore Identity workload identity for the agent fleet.
@@ -37,46 +52,106 @@ Resources:
         CustomJWTAuthorizer:
           DiscoveryUrl: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}/.well-known/openid-configuration"
       RoleArn: !Ref AgentExecutionRoleArn
-      Description: HCLS systems-of-record gateway (RIM/DMS/Safety/EDC/CTMS/eTMF/RWD/QMS/CRM)
+      Description: HCLS systems-of-record gateway (RIM/DMS/Safety/EDC/CTMS/eTMF/RWD/QMS/CRM/MedDRA/WHODrug/MLR)
 
-  # One target per system of record. Targets back the tools in TOOL_REGISTRY.
+  # One target per system of record. Each backs the tools in TOOL_REGISTRY.
   # Read tools require an entitled scope; write/irreversible tools additionally
-  # require the human-approval gate (enforced in the agent workflow + here via scope).
+  # require the human-approval gate (enforced in the connector Lambda + workflow).
   RimTarget:
     Type: AWS::BedrockAgentCore::GatewayTarget
     Properties:
       GatewayIdentifier: !Ref AgentCoreGateway
       Name: rim
-      TargetConfiguration:
-        Mcp:
-          Lambda:
-            LambdaArn: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:hcls-${Environment}-connector-rim"
-      CredentialProviderConfigurations:
-        - CredentialProviderType: GATEWAY_IAM_ROLE
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref RimConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
+
+  DmsTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: dms
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref DmsConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
 
   SafetyTarget:
     Type: AWS::BedrockAgentCore::GatewayTarget
     Properties:
       GatewayIdentifier: !Ref AgentCoreGateway
       Name: safety
-      TargetConfiguration:
-        Mcp:
-          Lambda:
-            LambdaArn: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:hcls-${Environment}-connector-safety"
-      CredentialProviderConfigurations:
-        - CredentialProviderType: GATEWAY_IAM_ROLE
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref SafetyConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
+
+  MeddraTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: meddra
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref MeddraConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
+
+  WhodrugTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: whodrug
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref WhodrugConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
+
+  EdcTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: edc
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref EdcConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
+
+  CtmsTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: ctms
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref CtmsConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
+
+  EtmfTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: etmf
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref EtmfConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
+
+  RwdTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: rwd
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref RwdConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
 
   QmsTarget:
     Type: AWS::BedrockAgentCore::GatewayTarget
     Properties:
       GatewayIdentifier: !Ref AgentCoreGateway
       Name: qms
-      TargetConfiguration:
-        Mcp:
-          Lambda:
-            LambdaArn: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:hcls-${Environment}-connector-qms"
-      CredentialProviderConfigurations:
-        - CredentialProviderType: GATEWAY_IAM_ROLE
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref QmsConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
+
+  CrmTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: crm
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref CrmConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
+
+  MlrTarget:
+    Type: AWS::BedrockAgentCore::GatewayTarget
+    Properties:
+      GatewayIdentifier: !Ref AgentCoreGateway
+      Name: mlr
+      TargetConfiguration: { Mcp: { Lambda: { LambdaArn: !Ref MlrConnectorArn } } }
+      CredentialProviderConfigurations: [{ CredentialProviderType: GATEWAY_IAM_ROLE }]
 
 Outputs:
   GatewayId:

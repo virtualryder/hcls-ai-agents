@@ -1,5 +1,12 @@
 # Deploy — Regulatory Writing (native)
 
+> **Canonical path:** for the full, current end-to-end deploy (build script,
+> `GatewayMode` choice, human-gate smoke test) follow
+> [`../../docs/DEPLOY-QUICKSTART.md`](../../docs/DEPLOY-QUICKSTART.md). Package with
+> `scripts/build_lambdas.sh 01-regulatory-writing` — it vendors Strands + `platform_core`
+> into the zip (a bare `zip` of the source `ImportError`s on cold start). The notes below
+> are an agent-specific supplement.
+
 ## Prerequisites
 - AWS account with Amazon Bedrock model access (Claude) + a Guardrail.
 - Step Functions, Lambda, DynamoDB, ECR permissions.

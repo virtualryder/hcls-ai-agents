@@ -11,8 +11,8 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 | AWS-native rebuilds | **8** (Strands + Step Functions, `waitForTaskToken` HITL) |
 | Automated tests passing | **452** (platform 21 · governance 13 · agents 263 · native 155) |
 | LLM | Anthropic Claude / in-account Amazon Bedrock + Guardrails / deterministic demo |
-| MCP layer | Bedrock AgentCore Gateway + Identity (reference logic in `platform_core`) |
-| IaC | CloudFormation quick-deploy (primary) + Terraform parity |
+| MCP layer | Two interchangeable gateway modes — portable (API Gateway + Cognito JWT) and managed (Bedrock AgentCore Gateway + Identity) — both fronting shared connector Lambdas (reference logic in `platform_core`) |
+| IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in any Region (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform parity |
 | Live reference path | Agent 02 — real Bedrock + real HTTP connector, end-to-end |
 | GTM collateral | Executive deck, 5-slide teaser, one-page leave-behind |
 | Maturity | Demonstrated + Deployable-by-design (production-readiness = engagement) |
@@ -31,6 +31,13 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 ## Changelog (most recent first)
 
+- **Deployable-in-a-new-account hardening** — closed the gaps that blocked a clean first deploy and made both deployment paths real:
+  - **Connector Lambdas** (`infra/cloudformation/connectors.yaml` + `aws-native-reference/_shared/connector/handler.py`) — one governed backend per system of record; every gateway target now resolves to a real function that runs each call through `platform_core`'s `MCPGateway` (deny-by-default, approval gate, audit). Validated with a 5-case enforcement smoke test (ALLOW / PENDING_APPROVAL / wrong-kind DENY / API-Gateway-proxy / AgentCore-input shapes).
+  - **Two MCP gateway modes, one policy** — new `gateway-portable.yaml` (API Gateway HTTP API + Cognito JWT authorizer, **any Region**) alongside the fixed `agentcore-gateway.yaml` (now references real connector ARNs, all 12 targets). Pick with `GatewayMode`.
+  - **IAM fix** — the shared agent role now grants DynamoDB (audit/review), S3 (WORM), Step Functions task callbacks, CloudWatch Logs, and connector invoke (previously missing → HITL-notify/finalize would fail at runtime).
+  - **Real container mode** — `agent-service.yaml` now provisions an ECS Fargate service (ARM64) instead of a placeholder comment; the running service *is* the agent.
+  - **Build + deploy automation** — `scripts/build_lambdas.sh` vendors Strands + `platform_core` into each zip (fixes cold-start `ImportError`); `scripts/deploy.sh` stages to S3 and deploys the master stack for a new account in one command (`make build-lambdas` / `make deploy`).
+  - **New guide** — `docs/DEPLOY-QUICKSTART.md` (empty account → live agent, including "creating the agent itself"); README, `DEPLOYMENT-HANDBOOK.md`, infra READMEs, `DEPLOY-ALL.md`, and all 8 per-agent `DEPLOY.md` updated to match.
 - **AWS GTM mechanics pack** — five new `docs/` files covering the questions AWS sellers and SAs ask before a deal can progress: `AWS-FUNDING-AND-GTM.md` (MAP/PoA/ISV Accelerate), `WELL-ARCHITECTED-REVIEW.md` (WAF + GenAI Lens pillar mapping), `SHARED-RESPONSIBILITY-MATRIX.md` (AWS vs. SI vs. institution), `AWS-ACCOUNT-PREREQUISITES.md` (pre-flight checklist), `AWS-MARKETPLACE-PATH.md` (private offer mechanics).
 - **Sales artifacts** — `offerings/BATTLECARD.md` (qualifying questions, discovery cheat-sheet, objection + competitor one-liners), `offerings/SOW-TEMPLATE.md` (fill-in-the-blank POC/Pilot SOW shell), `offerings/TCO-MODEL.md` (Bedrock inference + infrastructure cost estimates + per-agent ROI worksheet with SA number-entry guide).
 - **A2A orchestration stance + reference** — `ENTERPRISE-PLATFORM.md` §5 expanded to **ADR-001** (in-process LangGraph today; A2A-through-AgentCore when multi-agent is needed), plus a runnable governed reference hop `platform_core/hcls_agent_platform/a2a/` (identity-propagating, least-privilege, audited; 5 tests).

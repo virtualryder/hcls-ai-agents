@@ -73,6 +73,20 @@ Resources:
         - { Name: hcls_role, AttributeDataType: String, Mutable: true }
       AdminCreateUserConfig: { AllowAdminCreateUserOnly: true }
 
+  # App client — the JWT audience for the portable gateway authorizer and the
+  # token client for the reviewer UI. Federated sign-in flows through the IdP.
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "hcls-${Environment}-app"
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows: [ALLOW_USER_SRP_AUTH, ALLOW_REFRESH_TOKEN_AUTH]
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows: [code]
+      AllowedOAuthScopes: [openid, email, profile]
+      SupportedIdentityProviders: [COGNITO]
+
   AgentExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -88,20 +102,64 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              # --- Inference: in-account Bedrock + Guardrail on every call ---
               - Effect: Allow
-                Action: [bedrock:InvokeModel, bedrock:ApplyGuardrail]
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                  - bedrock:ApplyGuardrail
                 Resource: "*"
+              # --- Credentials for live systems of record (hcls/ prefix only) ---
               - Effect: Allow
                 Action: [secretsmanager:GetSecretValue]
                 Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:hcls/*"
+              # --- Envelope encryption for audit/review/WORM data ---
               - Effect: Allow
                 Action: [kms:Decrypt, kms:GenerateDataKey]
                 Resource: !GetAtt AgentKmsKey.Arn
+              # --- Audit + review tables: the HITL-notify and finalize Lambdas
+              #     write the task token, draft, and append-only audit entries.
+              #     Without this the native workflow fails at the human gate. ---
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                  - dynamodb:UpdateItem
+                  - dynamodb:BatchWriteItem
+                Resource:
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/hcls-${Environment}-audit"
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/hcls-${Environment}-review"
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/hcls-${Environment}-*/index/*"
+              # --- Finalized regulated artifacts to the WORM (Object Lock) store ---
+              - Effect: Allow
+                Action: [s3:PutObject, s3:GetObject]
+                Resource: !Sub "arn:aws:s3:::hcls-${Environment}-regulated-${AWS::AccountId}/*"
+              # --- Invoke the connector target Lambdas (the gateway assumes this
+              #     role to reach each system-of-record target) ---
+              - Effect: Allow
+                Action: [lambda:InvokeFunction]
+                Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:hcls-${Environment}-connector-*"
+              # --- Human gate callbacks: approve/reject resumes the workflow ---
+              - Effect: Allow
+                Action:
+                  - states:SendTaskSuccess
+                  - states:SendTaskFailure
+                  - states:SendTaskHeartbeat
+                Resource: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:hcls-${Environment}-*"
+              # --- CloudWatch Logs for every Lambda / task in the suite ---
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/hcls-${Environment}-*:*"
 
 Outputs:
   KmsKeyArn: { Value: !GetAtt AgentKmsKey.Arn, Export: { Name: !Sub "hcls-${Environment}-kms" } }
   GuardrailId: { Value: !Ref BedrockGuardrail, Export: { Name: !Sub "hcls-${Environment}-guardrail" } }
   UserPoolId: { Value: !Ref CognitoUserPool, Export: { Name: !Sub "hcls-${Environment}-userpool" } }
+  UserPoolClientId: { Value: !Ref CognitoUserPoolClient, Export: { Name: !Sub "hcls-${Environment}-userpool-client" } }
   AgentExecutionRoleArn:
     Value: !GetAtt AgentExecutionRole.Arn
     Export: { Name: !Sub "hcls-${Environment}-agent-role" }

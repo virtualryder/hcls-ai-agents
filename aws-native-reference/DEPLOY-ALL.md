@@ -1,36 +1,39 @@
 # Deploy All Agents
 
-Shared stacks once, then one service stack per agent.
+Shared stacks once, then one service stack per agent. Full walkthrough:
+[`../docs/DEPLOY-QUICKSTART.md`](../docs/DEPLOY-QUICKSTART.md).
 
-## 1. Shared environment (once per customer/env)
-Deploy `quickstart.yaml` with `AgentId=01-regulatory-writing`. This creates the
-network, security (KMS + Guardrail + Cognito), data (audit/WORM/review), and the
-AgentCore Gateway — plus the first agent.
+## 0. Build the code bundles (deps vendored in)
+```bash
+scripts/build_lambdas.sh           # all agents' lambdas.zip + the shared connector.zip
+```
+
+## 1. Shared environment + first agent (once per customer/env)
+```bash
+CFN_BUCKET=my-cfn-bucket CODE_BUCKET=my-code-bucket \
+  scripts/deploy.sh 01-regulatory-writing dev portable native
+```
+This creates the network, security (KMS + Guardrail + Cognito + app client + role),
+data (audit/WORM/review), the **connector Lambdas**, the **MCP gateway**
+(`portable` API Gateway or `agentcore`), and the first agent.
 
 ## 2. Each additional agent
-Package that agent's `lambdas.zip` (native) or build/push its AgentCore Runtime
-image (container), then deploy `agent-service.yaml`:
-
+The shared stacks are reused; only the agent service is per-agent:
 ```bash
 for AGENT in 02-pharmacovigilance 03-clinical-trial-ops 04-site-patient-matching \
              05-quality-capa 06-protocol-design 07-rwe-heor 08-medical-affairs-msl; do
-  aws cloudformation deploy \
-    --template-file ../infra/cloudformation/agent-service.yaml \
-    --stack-name hcls-dev-$AGENT \
-    --capabilities CAPABILITY_NAMED_IAM \
-    --parameter-overrides Environment=dev AgentId=$AGENT DeployMode=native \
-      LambdaCodeBucket=my-code-bucket LambdaCodeKey=$AGENT/lambdas.zip \
-      AgentExecutionRoleArn=<from-security-stack> \
-      BedrockGuardrailId=<from-security-stack> \
-      ReviewTableName=<from-data-stack>
+  scripts/build_lambdas.sh $AGENT
+  CFN_BUCKET=my-cfn-bucket CODE_BUCKET=my-code-bucket \
+    scripts/deploy.sh $AGENT dev portable native
 done
 ```
 
-## 3. Register gateway targets
-Add each system of record this agent uses as an AgentCore Gateway target
-(`agentcore-gateway.yaml`), matching the agent's grants in
-`platform_core/mcp_gateway/policy.py`.
+## 3. Gateway targets
+Every system of record already has a connector Lambda + gateway target (created by
+`connectors.yaml` + the gateway stack). Each agent's allowed tools are governed by
+`platform_core/mcp_gateway/policy.py:AGENT_TOOL_GRANTS` — no per-agent gateway edit needed.
 
 ## 4. Validate
 Run each agent's `tests/` and the suite `governance/` evals as CSV evidence before
-promoting an environment to `prod`.
+promoting an environment to `prod`. Smoke-test the human gate per
+`docs/DEPLOY-QUICKSTART.md` §6.

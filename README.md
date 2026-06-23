@@ -7,7 +7,7 @@ A large systems integrator deploying AI in a pharmaceutical, biotech, medtech, o
 
 The result is a deployable accelerator — not a certified product — that gives an SI engagement team a credible, compliant starting point across eight high-value life-sciences workflows.
 
-**Repository status (current):** all 8 agents built to flagship depth · 8 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **452 automated tests passing** with no API key · CloudFormation quick-deploy + Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included.
+**Repository status (current):** all 8 agents built to flagship depth · 8 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **452 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + two interchangeable MCP gateway modes + native/container agent) deployable in a new customer account in any Region · Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included.
 
 ---
 
@@ -98,45 +98,58 @@ See `governance/README.md` for the full governance layer documentation.
 
 ## AWS Deployment
 
+**New customer account → running agent in two commands.** Build the code bundles (deps
+vendored in) and deploy the master CloudFormation stack:
+
+```bash
+scripts/build_lambdas.sh 02-pharmacovigilance
+CFN_BUCKET=my-cfn-bucket CODE_BUCKET=my-code-bucket \
+  scripts/deploy.sh 02-pharmacovigilance dev portable native
+#                   ^AgentId            ^env ^GatewayMode ^DeployMode
+```
+
+> **Read this first:** [`docs/DEPLOY-QUICKSTART.md`](docs/DEPLOY-QUICKSTART.md) is the
+> copy-paste, empty-account-to-live-agent guide (prerequisites → build → deploy →
+> create the agent → human-gate smoke test → go-live checklist). The deeper console
+> click-through with screenshots is [`docs/DEPLOYMENT-HANDBOOK.md`](docs/DEPLOYMENT-HANDBOOK.md).
+
 ### CloudFormation Quick Deploy (primary path)
 One master template provisions a customer-isolated environment:
 
 ```
 infra/cloudformation/
-├── quickstart.yaml          # Master — nests all stacks
+├── quickstart.yaml          # Master — nests all stacks; GatewayMode + DeployMode switch the variants
 ├── network.yaml             # VPC, subnets, NAT, security groups
-├── security.yaml            # KMS, Bedrock Guardrail, Cognito (IdP federation), agent IAM role
+├── security.yaml            # KMS, Bedrock Guardrail, Cognito (pool + app client), least-privilege agent role
 ├── data.yaml                # Append-only DynamoDB audit, S3 Object Lock WORM, HITL table
-├── agentcore-gateway.yaml   # Bedrock AgentCore Gateway + Identity — one target per SoR
-└── agent-service.yaml       # Per-agent Step Functions + Lambdas (native) or AgentCore Runtime (container)
+├── connectors.yaml          # One connector Lambda per system of record (governed backend per gateway target)
+├── gateway-portable.yaml    # MCP layer — Path A: API Gateway + Cognito JWT authorizer (ANY region)
+├── agentcore-gateway.yaml   # MCP layer — Path B: Bedrock AgentCore Gateway + Identity (AgentCore regions)
+└── agent-service.yaml       # The agent — native (Step Functions + Lambdas + human gate) or container (ECS Fargate)
 ```
 
-```bash
-aws cloudformation deploy \
-  --template-file infra/cloudformation/quickstart.yaml \
-  --stack-name hcls-dev \
-  --capabilities CAPABILITY_NAMED_IAM \
-  --parameter-overrides \
-      Environment=dev \
-      AgentId=01-regulatory-writing \
-      DeployMode=native \
-      TemplateBaseUrl=https://my-cfn-bucket.s3.amazonaws.com/hcls \
-      LambdaCodeBucket=my-code-bucket \
-      IdpMetadataUrl=https://customer.okta.com/app/xxx/sso/saml/metadata
-```
+### Two MCP gateway paths, one policy (`GatewayMode`)
+Both front doors route to the **same connector Lambdas** and enforce the **same**
+deny-by-default decision (`platform_core`'s `MCPGateway`). Pick by region/posture:
+
+| `GatewayMode` | Front door | Region support | Use when |
+|---|---|---|---|
+| `portable` (default) | API Gateway HTTP API + Cognito JWT authorizer | **any commercial Region** | a new customer account — deploys day one |
+| `agentcore` | Bedrock AgentCore Gateway + Identity | AgentCore-enabled Regions | customer standardizing on AgentCore |
+
+Migrating Path A → Path B later changes only the gateway stack — agent and connector code are untouched.
+
+### Two ways to run the agent (`DeployMode`)
+- **`native`** — deterministic core in Lambda, Strands/Bedrock drafting, **Step Functions**
+  orchestration with a `waitForTaskToken` HITL gate. The state machine *is* the agent.
+- **`container`** — lift the LangGraph agent unchanged onto **ECS Fargate** (ARM64, the
+  AgentCore `/invocations` + `/ping` contract). The running service *is* the agent; the same
+  image registers with AgentCore Runtime in an AgentCore Region. No code changes.
 
 ### Terraform Parity
 `infra/terraform/` provides equivalent IaC for customers whose platform engineering teams standardize on Terraform. Identical resource topology; different surface syntax.
 
-### AgentCore Runtime (container lift)
-All eight agents implement the AgentCore container contract (`/invocations`, `/ping`, port 8080, ARM64). Build the image, push to ECR, and the CloudFormation stack registers it with AgentCore Runtime. No code changes required.
-
-### Strands + Step Functions (native rebuild)
-Deterministic core functions run as Lambda; Strands Agents SDK handles Bedrock inference; Step Functions orchestrates the multi-step workflow with a `waitForTaskToken` HITL gate. Highest fidelity to the managed-serverless target.
-
-**Step-by-step console + CLI walkthrough:** [`docs/DEPLOYMENT-HANDBOOK.md`](docs/DEPLOYMENT-HANDBOOK.md) takes a delivery team from an empty AWS account to a running, governed, human-gated agent (Bedrock model access, Guardrail, Cognito/IdP, CloudFormation, AgentCore Gateway, Secrets, Step Functions smoke test + HITL approval, validation checklist, per-agent appendix).
-
-See `aws-native-reference/README.md` for the full AWS deployment guide and per-agent paths.
+See `aws-native-reference/README.md` for the per-agent native rebuilds.
 
 ---
 
@@ -240,12 +253,17 @@ hcls-ai-agents/
 │
 ├── aws-native-reference/               # AWS-native deployment (container + native) for all 8 agents
 │
+├── scripts/
+│   ├── build_lambdas.sh                # Package every agent + connector zip WITH deps vendored in
+│   └── deploy.sh                       # Stage to S3 + deploy the quickstart stack (new account)
+│
 ├── infra/
-│   ├── cloudformation/                 # CloudFormation quick-deploy (primary path)
+│   ├── cloudformation/                 # CloudFormation quick-deploy (connectors + 2 gateway modes + agent)
 │   └── terraform/                      # Terraform parity
 │
 ├── docs/
-│   ├── DEPLOYMENT-HANDBOOK.md          # Console + CLI step-by-step deploy (empty account -> running agent)
+│   ├── DEPLOY-QUICKSTART.md            # Copy-paste: empty account -> running agent (start here)
+│   ├── DEPLOYMENT-HANDBOOK.md          # Console + CLI step-by-step deploy (deep walkthrough + screenshots)
 │   ├── WHY-THE-MCP-LAYER.md            # Account-team explainer: why agents need a governed access layer
 │   ├── SUITE-ARCHITECTURE.md           # 6-layer reference architecture + AWS service mapping
 │   ├── STAKEHOLDER-SECURITY-BRIEFINGS.md  # Per-stakeholder security pitch (CIO/CISO/CMO/RegAffairs/PV/QA/ClinOps/CPO/MedAffairs/Procurement/IRB)

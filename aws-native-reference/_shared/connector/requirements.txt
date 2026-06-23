@@ -1,0 +1,4 @@
+# Connector Lambda — the backend behind every MCP gateway target.
+# Enforcement, audit, and connectors come from platform_core (bundled into the
+# zip by scripts/build_lambdas.sh). boto3 is provided by the Lambda runtime.
+boto3>=1.34

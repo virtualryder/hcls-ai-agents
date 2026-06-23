@@ -1,0 +1,187 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  HCLS Agent Suite - MCP layer (Path A, PORTABLE) as Amazon API Gateway (HTTP API)
+  + a Cognito JWT authorizer in front of the connector Lambdas. This is the
+  any-region, no-preview-dependency equivalent of the AgentCore Gateway: identical
+  governed semantics (the connector Lambda runs every call through platform_core's
+  MCPGateway — deny-by-default, least-privilege intersection, human-approval gate,
+  scoped token, append-only audit), reachable over MCP/HTTPS, deployable in a brand
+  new customer account in any commercial region.
+
+  One route per system of record:  POST /mcp/{kind}  ->  hcls-<env>-connector-<kind>
+  The caller presents a Cognito-issued JWT (from the customer IdP federation); the
+  authorizer validates issuer + audience before the request reaches a connector.
+
+Parameters:
+  Environment: { Type: String, Default: dev }
+  UserPoolId: { Type: String }
+  UserPoolClientId: { Type: String, Description: JWT audience (Cognito app client) }
+  RimConnectorArn: { Type: String }
+  DmsConnectorArn: { Type: String }
+  SafetyConnectorArn: { Type: String }
+  MeddraConnectorArn: { Type: String }
+  WhodrugConnectorArn: { Type: String }
+  EdcConnectorArn: { Type: String }
+  CtmsConnectorArn: { Type: String }
+  EtmfConnectorArn: { Type: String }
+  RwdConnectorArn: { Type: String }
+  QmsConnectorArn: { Type: String }
+  CrmConnectorArn: { Type: String }
+  MlrConnectorArn: { Type: String }
+
+Resources:
+  McpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub "hcls-${Environment}-mcp-gateway"
+      ProtocolType: HTTP
+      Description: HCLS governed MCP gateway (portable). One route per system of record.
+
+  JwtAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref McpApi
+      AuthorizerType: JWT
+      Name: !Sub "hcls-${Environment}-cognito-jwt"
+      IdentitySource: ["$request.header.Authorization"]
+      JwtConfiguration:
+        Audience: [!Ref UserPoolClientId]
+        Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}"
+
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref McpApi
+      StageName: "$default"
+      AutoDeploy: true
+
+  # ---- Integrations + routes + invoke permissions, one set per connector ----
+  RimIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref RimConnectorArn, PayloadFormatVersion: "2.0" }
+  RimRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/rim", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${RimIntegration}" }
+  RimPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref RimConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/rim" }
+
+  DmsIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref DmsConnectorArn, PayloadFormatVersion: "2.0" }
+  DmsRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/dms", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${DmsIntegration}" }
+  DmsPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref DmsConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/dms" }
+
+  SafetyIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref SafetyConnectorArn, PayloadFormatVersion: "2.0" }
+  SafetyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/safety", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${SafetyIntegration}" }
+  SafetyPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref SafetyConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/safety" }
+
+  MeddraIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref MeddraConnectorArn, PayloadFormatVersion: "2.0" }
+  MeddraRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/meddra", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${MeddraIntegration}" }
+  MeddraPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref MeddraConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/meddra" }
+
+  WhodrugIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref WhodrugConnectorArn, PayloadFormatVersion: "2.0" }
+  WhodrugRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/whodrug", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${WhodrugIntegration}" }
+  WhodrugPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref WhodrugConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/whodrug" }
+
+  EdcIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref EdcConnectorArn, PayloadFormatVersion: "2.0" }
+  EdcRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/edc", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${EdcIntegration}" }
+  EdcPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref EdcConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/edc" }
+
+  CtmsIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref CtmsConnectorArn, PayloadFormatVersion: "2.0" }
+  CtmsRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/ctms", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${CtmsIntegration}" }
+  CtmsPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref CtmsConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/ctms" }
+
+  EtmfIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref EtmfConnectorArn, PayloadFormatVersion: "2.0" }
+  EtmfRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/etmf", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${EtmfIntegration}" }
+  EtmfPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref EtmfConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/etmf" }
+
+  RwdIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref RwdConnectorArn, PayloadFormatVersion: "2.0" }
+  RwdRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/rwd", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${RwdIntegration}" }
+  RwdPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref RwdConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/rwd" }
+
+  QmsIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref QmsConnectorArn, PayloadFormatVersion: "2.0" }
+  QmsRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/qms", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${QmsIntegration}" }
+  QmsPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref QmsConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/qms" }
+
+  CrmIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref CrmConnectorArn, PayloadFormatVersion: "2.0" }
+  CrmRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/crm", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${CrmIntegration}" }
+  CrmPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref CrmConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/crm" }
+
+  MlrIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: { ApiId: !Ref McpApi, IntegrationType: AWS_PROXY, IntegrationUri: !Ref MlrConnectorArn, PayloadFormatVersion: "2.0" }
+  MlrRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref McpApi, RouteKey: "POST /mcp/mlr", AuthorizationType: JWT, AuthorizerId: !Ref JwtAuthorizer, Target: !Sub "integrations/${MlrIntegration}" }
+  MlrPerm:
+    Type: AWS::Lambda::Permission
+    Properties: { FunctionName: !Ref MlrConnectorArn, Action: lambda:InvokeFunction, Principal: apigateway.amazonaws.com, SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${McpApi}/*/*/mcp/mlr" }
+
+Outputs:
+  GatewayId:
+    Description: Portable MCP gateway (API Gateway HTTP API) id
+    Value: !Ref McpApi
+    Export: { Name: !Sub "hcls-${Environment}-portable-gateway" }
+  GatewayEndpoint:
+    Description: Base URL — call POST {endpoint}/mcp/<kind> with a Cognito JWT
+    Value: !GetAtt McpApi.ApiEndpoint
+    Export: { Name: !Sub "hcls-${Environment}-portable-gateway-url" }

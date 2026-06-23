@@ -20,9 +20,25 @@ Parameters:
   AgentExecutionRoleArn: { Type: String }
   BedrockGuardrailId: { Type: String, Default: "" }
   ReviewTableName: { Type: String }
+  # --- Container (ECS Fargate) path parameters (ignored in native mode) ---
+  VpcId: { Type: String, Default: "" }
+  PrivateSubnets:
+    Type: CommaDelimitedList
+    Default: ""
+    Description: Private subnet IDs (from the network stack) for the Fargate service.
+  AppSecurityGroupId: { Type: String, Default: "" }
+  ContainerImageUri:
+    Type: String
+    Default: ""
+    Description: ECR image URI (ARM64) built from aws-native-reference/_shared/runtime.
+  AgentModule:
+    Type: String
+    Default: agent.graph:build_graph
+    Description: "module:factory of the agent's compiled LangGraph (AGENT_MODULE)."
 
 Conditions:
   IsNative: !Equals [!Ref DeployMode, native]
+  IsContainer: !Equals [!Ref DeployMode, container]
 
 Resources:
   StateMachineRole:
@@ -38,7 +54,9 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - { Effect: Allow, Action: lambda:InvokeFunction, Resource: "*" }
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:hcls-${Environment}-${AgentId}-*"
 
   AssembleFunction:
     Type: AWS::Lambda::Function
@@ -126,13 +144,90 @@ Resources:
           }
         }
 
-  # Container path placeholder: in container mode the agent runs on AgentCore
-  # Runtime (ARM64, /invocations + /ping) from the shared runtime image. The
-  # runtime resource is created by the AgentCore deployment workflow referencing
-  # the ECR image; see aws-native-reference/_shared/runtime.
+  # ─────────────────────────────────────────────────────────────────────────
+  # CONTAINER PATH — ECS Fargate (ARM64). Runs the LangGraph agent unchanged via
+  # the shared AgentCore-contract runtime image (serve.py: /invocations + /ping,
+  # port 8080). This is the "creating the agent itself" resource in container
+  # mode: the running service IS the agent. Works in any commercial region. In an
+  # AgentCore-enabled region you may instead register the same ECR image with
+  # AgentCore Runtime — same image, no code change.
+  # ─────────────────────────────────────────────────────────────────────────
+  AgentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: IsContainer
+    Properties:
+      LogGroupName: !Sub "/aws/ecs/hcls-${Environment}-${AgentId}"
+      RetentionInDays: 30
+
+  EcsCluster:
+    Type: AWS::ECS::Cluster
+    Condition: IsContainer
+    Properties:
+      ClusterName: !Sub "hcls-${Environment}-${AgentId}"
+
+  # Task EXECUTION role: pulls the image from ECR and writes logs (separate from
+  # the app/task role, which is the shared least-privilege AgentExecutionRole).
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Condition: IsContainer
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: sts:AssumeRole }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  AgentTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Condition: IsContainer
+    Properties:
+      Family: !Sub "hcls-${Environment}-${AgentId}"
+      Cpu: "512"
+      Memory: "1024"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      RuntimePlatform: { CpuArchitecture: ARM64, OperatingSystemFamily: LINUX }
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !Ref AgentExecutionRoleArn
+      ContainerDefinitions:
+        - Name: agent
+          Image: !Ref ContainerImageUri
+          PortMappings: [{ ContainerPort: 8080, Protocol: tcp }]
+          Environment:
+            - { Name: AGENT_MODULE, Value: !Ref AgentModule }
+            - { Name: LLM_PROVIDER, Value: bedrock }
+            - { Name: CONNECTOR_MODE, Value: live }
+            - { Name: BEDROCK_GUARDRAIL_ID, Value: !Ref BedrockGuardrailId }
+            - { Name: ENVIRONMENT, Value: !Ref Environment }
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref AgentLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: agent
+
+  AgentService:
+    Type: AWS::ECS::Service
+    Condition: IsContainer
+    Properties:
+      ServiceName: !Sub "hcls-${Environment}-${AgentId}"
+      Cluster: !Ref EcsCluster
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: !Ref AgentTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets: !Ref PrivateSubnets
+          SecurityGroups: [!Ref AppSecurityGroupId]
 
 Outputs:
   StateMachineArn:
     Condition: IsNative
     Value: !Ref WorkflowStateMachine
     Export: { Name: !Sub "hcls-${Environment}-${AgentId}-sfn" }
+  EcsServiceName:
+    Condition: IsContainer
+    Value: !Ref AgentService
+    Export: { Name: !Sub "hcls-${Environment}-${AgentId}-ecs" }
