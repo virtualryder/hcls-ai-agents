@@ -123,7 +123,7 @@
 
 ---
 
-## 09 — Manufacturing Batch-Review  *(roadmap / expansion agent)*
+## 09 — Manufacturing Batch-Review  *(built agent — flagship depth)*
 
 - **HEADLINE:** **62% of US drug shortages trace to manufacturing / product-quality problems** — the single leading root cause. — *FDA, Drug Shortages: Root Causes and Potential Solutions (2019; 2013–2017 data)* `[gov/peer-reviewed]` — https://www.fda.gov/media/159480/download · confirmed still top driver: *HHS ASPE, Analysis of Drug Shortages 2018–2023 (2025)* — https://aspe.hhs.gov/sites/default/files/documents/efa332939da2064fa2c132bb8e842bb5/Drug%20Shortages_Data%20Brief_Final_2025.01.10.pdf
 - **COST OF DOING NOTHING:** routine internal quality failures ≈ **2.1% of annual sales**; remediation (investigations, CAPAs, complaints, field actions) ≈ **0.4–0.7% of annual sales**. — *McKinsey, Capturing the value of good quality (life sciences)* `[industry-research — device/LS quality-cost proxy]` — https://www.mckinsey.com/industries/life-sciences/our-insights/capturing-the-value-of-good-quality-in-medical-devices
