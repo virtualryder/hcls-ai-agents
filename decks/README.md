@@ -1,8 +1,8 @@
 # HCLS AI Agent Suite — Go-to-Market Decks
 
-Ten PowerPoint decks (each with a matching PDF leave-behind) for the **HCLS AI Agent Suite** — eight governed AI agents for
-life-sciences organizations, a suite executive overview, and a board-level CIO/CISO
-adoption review. The eight agent decks and the overview are generated from a single
+Twelve PowerPoint decks (each with a matching PDF leave-behind) for the **HCLS AI Agent Suite** — nine
+**built** governed AI agents (incl. 09 Manufacturing Batch-Review) plus **one roadmap agent** (10) for life-sciences
+organizations, a suite executive overview, and a board-level CIO/CISO adoption review. The agent decks and the overview are generated from a single
 `pptxgenjs` generator ([`build-agent-decks.js`](build-agent-decks.js)) so they share one
 AWS-standard layout, palette, and fonts; only the per-agent content object changes. The
 adoption review is built by [`build-cio-deck.js`](build-cio-deck.js).
@@ -33,6 +33,8 @@ Board-defensible metrics, an explicit cost of doing nothing, and source-class ta
 | `HCLS-06-Protocol-Design.pptx`           | 06 Clinical Protocol Design & Feasibility | ~57% amended / ~45% avoidable (Tufts) | ~$535K / amendment (Tufts) |
 | `HCLS-07-RWE-HEOR.pptx`                  | 07 Real-World Evidence / HEOR | ~45% of analyst time on data prep (Anaconda) | ~$1.3M / yr / team (modeled) |
 | `HCLS-08-Medical-Affairs-MSL.pptx`       | 08 Medical Affairs / MSL Copilot | MLR weeks→months; 50–70% reducible (McKinsey) | Billions in FCA risk (DOJ) |
+| `HCLS-09-Manufacturing-Batch-Review.pptx` | 09 Manufacturing Batch-Review **[built]** | 62% of drug shortages = mfg/quality (FDA) | ~$420K/yr (modeled) |
+| `HCLS-10-Scientific-Intelligence.pptx`   | 10 Scientific Intelligence & Target Discovery **[roadmap]** | ~86% of programs fail; wrong target leads (Wong 2019) | ~$2.6B/drug (Tufts) |
 | `HCLS-Agentic-AI-Suite-Executive-Overview.pptx` | Suite overview (executive) | The governed platform is the product | Suite-level cost-of-inaction summary |
 | `HCLS-CIO-Adoption-Review.pptx`          | CIO / CISO / Architecture board review | Verdict: governed accelerator, not turnkey | Go / no-go decision criteria |
 
@@ -113,5 +115,5 @@ node decks/build-cio-deck.js        # CIO / CISO adoption review
 `pptxgenjs` writes an uncompressed (STORED) ZIP; `make decks` follows the build with a deflate
 recompress (`decks/recompress.py`). `make decks-pdf` produces `decks/HCLS-*.pdf` leave-behinds
 (8 agent PDFs · 11-page overview · 12-page CIO review) for emailing without PowerPoint. The agent generator is self-contained: one `AGENTS` array of per-agent
-content objects drives the eight agent decks, and `buildOverview()` drives the suite deck, all
+content objects drives the core-8 agent decks (with 09/10 in an `EXPANSION` array), and `buildOverview()` drives the suite deck, all
 through shared slide-builder functions so the layout stays identical across all nine.

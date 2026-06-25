@@ -7,7 +7,7 @@ lives in [`_shared/`](./_shared/); the headline IaC is CloudFormation in
 
 ## Two paths to AWS (per agent)
 
-1. **Container lift** (all 8) — containerize the agent's compiled LangGraph and run
+1. **Container lift** (all 9) — containerize the agent's compiled LangGraph and run
    it on **Amazon Bedrock AgentCore Runtime** (or ECS Fargate), implementing the
    AgentCore container contract (`/invocations`, `/ping`, port 8080, ARM64).
    Inference runs in-account via **Bedrock + Guardrails**. Fastest; code unchanged.
@@ -37,10 +37,10 @@ the deterministic reference for its authorize → token → audit semantics.
 - Everything: [`DEPLOY-ALL.md`](./DEPLOY-ALL.md) + `../infra/cloudformation`.
 
 ## Maturity
-**All eight agents** ship both a container-lift path and a native rebuild (deterministic
+**All nine agents** ship both a container-lift path and a native rebuild (deterministic
 core in Lambdas + Strands drafting on Bedrock + Step Functions with a `waitForTaskToken`
 human gate). The native cores are **Demonstrated** — run and unit-tested without AWS (155
-native tests pass across the eight rebuilds) — and **Deployable-by-design** (ARM64 runtime
+native tests pass across the nine rebuilds) — and **Deployable-by-design** (ARM64 runtime
 + CloudFormation + Step Functions). They become *Deployed* once an account builds/pushes
 images and applies the IaC. Live Bedrock inference is wired and demonstrated for Agent 02
 (`02-pharmacovigilance-agent/demo/`); a penetration test and full CSV are engagement steps.

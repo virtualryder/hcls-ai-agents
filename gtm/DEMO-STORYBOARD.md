@@ -10,7 +10,7 @@
 
 | Persona | What they need to leave believing |
 |---|---|
-| **CIO** | One governed control plane carries all eight workloads; this compresses an SI build rather than adding shadow AI. |
+| **CIO** | One governed control plane carries all nine workloads; this compresses an SI build rather than adding shadow AI. |
 | **CISO / CSO** | Controls are enforced in the gateway, outside the model — a prompt cannot disable deny-by-default, the HITL gate, PHI masking, or the audit trail. |
 | **Director of Architecture** | The AWS reference is real and deployable (CloudFormation, dual MCP gateway, in-VPC Bedrock, Step Functions HITL), and the gaps are scoped honestly. |
 | **VP Quality / Head of Regulatory** | Every consequential decision stays human; everything is traceable and 21 CFR Part 11 / GxP-defensible. |
@@ -20,7 +20,7 @@
 1. `make build-lambdas` then `make deploy` into a sandbox account **(optional — only for the live segment)**, or run everything in `EXTRACT_MODE=demo` locally with no API key.
 2. Open the decks: `HCLS-Agentic-AI-Suite-Executive-Overview.pptx`, `HCLS-02-Pharmacovigilance.pptx`, and `HCLS-CIO-Adoption-Review.pptx`.
 3. Have `docs/SUITE-ARCHITECTURE.md` and `docs/DEPLOY-QUICKSTART.md` open in a second window.
-4. Run the test suite once on screen as a credibility opener: **452 tests, no API key.**
+4. Run the test suite once on screen as a credibility opener: **488 tests, no API key.**
 
 ## Run of show (~25 min)
 
@@ -28,7 +28,7 @@
 Open on "Everyone's moving, few are governed." Land the McKinsey value ($60–110B/yr), the ~5% who've realized it, and the FDA Jan-2025 AI guidance. **Message:** the gap between adoption and governance is the opportunity, and in a workflow where a hallucinated number is a data-integrity defect, governance is the product.
 
 ### 2 · The shared control plane — 4 min  *(Executive Overview, slide 3 — architecture)*
-Trace the eight numbered flow steps once. Emphasize: per-customer VPC + dedicated validated account; Cognito federation; the **MCP authorization gateway** as the single governed front door; in-VPC Bedrock + Guardrails (PHI masked first); S3 Object Lock + DynamoDB append-only audit. **Message:** every agent inherits this — improve a control once, all eight benefit.
+Trace the eight numbered flow steps once. Emphasize: per-customer VPC + dedicated validated account; Cognito federation; the **MCP authorization gateway** as the single governed front door; in-VPC Bedrock + Guardrails (PHI masked first); S3 Object Lock + DynamoDB append-only audit. **Message:** every agent inherits this — improve a control once, all nine benefit.
 
 ### 3 · Live governed run — 8 min  *(Agent 02 — Pharmacovigilance)*
 The flagship live segment. Walk an inbound adverse-event case through the pipeline:

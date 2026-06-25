@@ -5,7 +5,7 @@
 
 ## What It Is (30-second version)
 
-A governed, auditable AI agent accelerator for pharma, biotech, medtech, and CROs — eight agents covering the highest-value regulated workflows (PV/ICSR, regulatory writing, clinical trial ops, quality/CAPA, protocol design, RWE/HEOR, site/patient matching, medical affairs). Built on AWS with 21 CFR Part 11 controls and human-in-the-loop gates baked in, not bolted on. Designed for SI delivery — not a product you hand a customer unchanged.
+A governed, auditable AI agent accelerator for pharma, biotech, medtech, and CROs — nine agents covering the highest-value regulated workflows (PV/ICSR, regulatory writing, clinical trial ops, quality/CAPA, protocol design, RWE/HEOR, site/patient matching, medical affairs, manufacturing batch-review). Built on AWS with 21 CFR Part 11 controls and human-in-the-loop gates baked in, not bolted on. Designed for SI delivery — not a product you hand a customer unchanged.
 
 ---
 

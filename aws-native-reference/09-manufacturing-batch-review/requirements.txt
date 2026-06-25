@@ -1,0 +1,4 @@
+# Manufacturing Batch-Review — AWS-native rebuild (Strands + Step Functions)
+# strands-agents>=0.1.0      # Bedrock drafting (optional; demo falls back without it)
+# boto3>=1.34.0
+pytest>=8.0.0

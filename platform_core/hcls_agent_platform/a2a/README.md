@@ -1,6 +1,6 @@
 # Reference A2A Pattern (governed, identity-propagating, audited)
 
-**A2A is not used by the current suite** — the eight agents are independent,
+**A2A is not used by the current suite** — the nine agents are independent,
 in-process LangGraph workflows (see `ENTERPRISE-PLATFORM.md` ADR-001). This package
 is the worked example for **when multi-agent is needed**: a supervisor invoking a
 specialist over a hop that stays governed.

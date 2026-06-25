@@ -3,7 +3,7 @@
 Plain answers to the questions customers, AWS account teams, and SI architects ask most.
 
 ## What is this, exactly?
-A governed, AWS-native **accelerator** — not a certified product. It is eight reference AI
+A governed, AWS-native **accelerator** — not a certified product. It is nine reference AI
 agents for life-sciences workflows that share one governed control plane (MCP authorization
 gateway, in-VPC Bedrock + Guardrails, PHI masking, grounding verification, framework-enforced
 human-in-the-loop, and a 21 CFR Part 11 append-only audit trail). It gives an SI engagement a
@@ -17,7 +17,7 @@ or anything that takes GxP / 21 CFR Part 11 accountability off the sponsor. Prod
 ## Which agents are included?
 01 Regulatory Writing & Intelligence · 02 Pharmacovigilance (ICSR intake) · 03 Clinical Trial Ops
 & TMF · 04 Site Selection & Patient Matching · 05 Quality / CAPA & Complaints · 06 Clinical
-Protocol Design & Feasibility · 07 Real-World Evidence / HEOR · 08 Medical Affairs / MSL Copilot.
+Protocol Design & Feasibility · 07 Real-World Evidence / HEOR · 08 Medical Affairs / MSL Copilot · 09 Manufacturing Batch-Review (CMC/GxP). A tenth agent — 10 Scientific Intelligence & Target Discovery (R&D) — is at roadmap/Documented maturity (cited deck + design spec).
 
 ## Where do we start?
 Land-first with **01 / 02 / 03 / 08** — document- and case-centric, measurable, lower decision-risk.
@@ -42,7 +42,7 @@ reviewers; and a validated AWS account. See `docs/AWS-ACCOUNT-PREREQUISITES.md`.
 
 ## Can it run without an AWS account?
 Yes — `EXTRACT_MODE=demo` runs every workflow against deterministic fixtures with no API key, which
-is how the **452 automated tests** pass and how you demo before any account exists.
+is how the **488 automated tests** pass and how you demo before any account exists.
 
 ## How does it deploy into a brand-new account?
 `make build-lambdas` (vendors deps into each zip) then `make deploy` stages to S3 and deploys the
@@ -69,6 +69,6 @@ vendor/modeled/estimate figures are flagged on-slide and never used as the lead 
 Often AWS funding programs (MAP / PoA / ISV Accelerate) plus SI services. See
 `docs/AWS-FUNDING-AND-GTM.md` and `docs/AWS-MARKETPLACE-PATH.md`.
 
-## How do we add a ninth agent?
+## How do we add another agent?
 Follow `docs/CREATE-A-NEW-AGENT.md` — the platform, gateway, governance, and deck system are designed
 to be extended without re-architecting.

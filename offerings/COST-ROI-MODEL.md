@@ -28,7 +28,7 @@ Each agent's ROI model is independent but they share the platform cost — the m
 - **AWS infrastructure setup**: one-time CloudFormation stack deployment; estimated AWS professional services hours if the customer's platform team is not familiar with AgentCore / Bedrock
 
 ### Recurring costs (annual, per customer)
-- **AWS infrastructure**: Bedrock inference (pay-per-token), DynamoDB, S3, CloudWatch, KMS, Cognito, AgentCore Gateway — cost varies with invocation volume; at moderate use, infrastructure costs for a single agent are in the range of low-to-mid five figures (USD) annually. Scale to eight agents with shared platform adds marginal cost per additional agent.
+- **AWS infrastructure**: Bedrock inference (pay-per-token), DynamoDB, S3, CloudWatch, KMS, Cognito, AgentCore Gateway — cost varies with invocation volume; at moderate use, infrastructure costs for a single agent are in the range of low-to-mid five figures (USD) annually. Scale to nine agents with shared platform adds marginal cost per additional agent.
 - **Managed service** (if applicable): recurring monthly SI fee per scope agreed in `offerings/MANAGED-SERVICE-OFFERING.md`
 - **Connector maintenance**: ongoing SI support for vendor API changes; can be in-sourced once the customer's engineering team is familiar with the connector interface
 
@@ -116,6 +116,6 @@ For most engagements, the business case for Agent 01 or Agent 02 reaches payback
 ## Notes for the Finance Conversation
 
 - Do not present specific ROI numbers without populating the model with the customer's actual process metrics; illustrative ranges are useful for initial qualification but will not survive a CFO review without customer data
-- Frame the platform cost as infrastructure investment, not application cost — it serves all eight agents and has a multi-year useful life
+- Frame the platform cost as infrastructure investment, not application cost — it serves all nine agents and has a multi-year useful life
 - The risk-avoidance benefits (regulatory action, missed 15-day report) are real but asymmetric; a probability-weighted expected-value approach is appropriate, not zero probability
 - The model should be reviewed with the customer's finance business partner and the relevant functional head jointly — the functional head provides the process metrics; the finance business partner validates the financial assumptions

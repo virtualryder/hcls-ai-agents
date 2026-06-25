@@ -259,7 +259,7 @@ function slideProof(P, d) {
     { text: "Deploy:  ", options: { bold: true, color: ORANGE } },
     { text: d.deployOneLiner, options: { color: "DCE3EA", italic: true } },
   ], { x: x1 + 0.32, y: cy + 3.12, w: cw - 0.62, h: 0.6, fontFace: F_REG, fontSize: 9.5, align: "left", valign: "top", lineSpacingMultiple: 1.0, margin: 0 });
-  s.addText(`aws-native-reference/${d.runbook}  ·  docs/DEPLOY-QUICKSTART.md`, { x: x1 + 0.32, y: cy + ch - 0.4, w: cw - 0.6, h: 0.3, fontFace: F_REG, fontSize: 8.5, italic: true, color: MUTEDLT, align: "left", valign: "middle", margin: 0 });
+  s.addText(d.deployRef || `aws-native-reference/${d.runbook}  ·  docs/DEPLOY-QUICKSTART.md`, { x: x1 + 0.32, y: cy + ch - 0.4, w: cw - 0.6, h: 0.3, fontFace: F_REG, fontSize: 8.5, italic: true, color: MUTEDLT, align: "left", valign: "middle", margin: 0 });
   const by = cy + ch + 0.32, bh = 0.92;
   s.addShape(P.shapes.RECTANGLE, { x: x0, y: by, w: 11.78, h: bh, fill: { color: SQUID3 }, line: { color: "3A485A", width: 1 } });
   s.addText([
@@ -884,6 +884,167 @@ const AGENTS = [
 },
 ];
 
+// ============================================================ EXPANSION (roadmap) AGENTS
+// Agents that extend the lifecycle beyond the core-8 land/expand narrative.
+//   09 Manufacturing Batch-Review — BUILT to flagship depth (LangGraph app + 36 tests +
+//      AWS-native rebuild + 4-doc set); see 09-manufacturing-batch-review-agent/.
+//   10 Scientific Intelligence & Target Discovery — ROADMAP (Documented; cited deck + spec).
+// Per-agent decks only — the executive overview stays at the 8 core-lifecycle agents by design.
+const EXPANSION = [
+{
+  num: "09", name: "Manufacturing Batch-Review",
+  tagline: "review electronic batch records by exception — QA owns every release/reject",
+  runbook: "09-manufacturing-batch-review",
+  deployRef: "aws-native-reference/09-manufacturing-batch-review/DEPLOY.md  ·  docs/DEPLOY-QUICKSTART.md",
+  hero: "FROM 48-HOUR REVIEWS TO REVIEW BY EXCEPTION",
+  valueProp: "A governed batch-review copilot that reads the electronic batch record and process data, flags deviations and out-of-spec results by exception, and drafts the disposition — while a QA reviewer makes and signs every release/reject decision.",
+  hookStats: [
+    { big: "62%", label: "of US drug shortages trace to manufacturing/quality problems — the #1 root cause", tag: "[gov/peer-reviewed — FDA]" },
+    { big: "~48 hrs", label: "average review per batch report today (up to ~500 hrs for complex paper-based)", tag: "[sector-press/estimate]" },
+    { big: "~$14K", label: "average cost per deviation investigation (mostly senior labor)", tag: "[sector-press/estimate]" },
+  ],
+  issueBullets: [
+    "Batch-record review and OOS/deviation investigation are slow, manual, and senior-labor-heavy.",
+    "21 CFR 211.192 (production-record review / discrepancy investigation) is among the most-cited FDA warning-letter findings.",
+    "Right-first-time for complex biologics often sits ~80%; every non-RFT batch triggers rework and release delay.",
+    "A single biologics batch failure can cost tens of millions; raw materials alone often exceed $1–2M.",
+  ],
+  costBig: "~$420K / yr",
+  costMath: "Modeled: 200 batches/yr × ~15% deviating (85% RFT) ≈ 30 investigations × ~$14K labor ≈ ~$420K/yr — before any scrapped batch ($1–2M+ each) or delayed-release carrying cost.",
+  costRisks: [
+    "Release delays and drug-shortage risk from review backlogs.",
+    "Data-integrity / 211.192 findings from inconsistent record review.",
+  ],
+  costTag: "[modeled — deviation-investigation cost × batch volume]",
+  brightLine: "the agent reviews records and flags exceptions; a QA reviewer makes and signs the final release/reject decision — the agent never releases a batch.",
+  pipelineTagline: "Read the electronic batch record + MES/LIMS data through a scoped gateway, check by exception and draft the disposition — then stop at a QA gate before release.",
+  pipeline: [
+    { n: 1, title: "Read EBR + MES/LIMS", sub: "batch record + process/QC data via gateway", kind: "auto" },
+    { n: 2, title: "Check by exception", sub: "limits, OOS, missing steps, e-sig completeness", kind: "auto" },
+    { n: 3, title: "Draft disposition", sub: "exception report + recommended release/hold", kind: "auto" },
+    { n: 4, title: "HUMAN GATE (QA)", sub: "QA reviewer approves release / reject", kind: "gate" },
+    { n: 5, title: "Append-only audit", sub: "every check + decision logged", kind: "audit" },
+  ],
+  pipelineCards: stdCards("batch release"),
+  arch: {
+    users: "QA review & release",
+    sor: "MES / electronic batch records",
+    ext: "LIMS (QC results)",
+    runtime: [
+      { t: "Event worker + EventBridge", s: "on batch completion", color: C_COMPUTE },
+      { t: "Review/exception agent + limit checker", color: C_COMPUTE },
+      { t: "MCP auth gateway", s: "all outbound tool calls", color: C_INTEG },
+    ],
+    data: [
+      { t: "Aurora / DynamoDB", s: "batch + review state", color: C_MODEL },
+      { t: "DynamoDB audit", s: "append-only", color: C_INTEG },
+      { t: "S3 Object Lock", s: "WORM disposition", color: C_STORAGE },
+      { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
+    ],
+    legend: "1 QA sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to review console   4 MES/EBR + LIMS reads over private connectivity   5 EventBridge triggers review on batch completion   6 model calls stay in-VPC via Bedrock + Guardrails   7 every flag, exception, and release decision persisted to append-only audit (21 CFR Part 11)   8 connectors reachable only through the governed MCP gateway",
+  },
+  proofStats: [
+    { big: "~80%", label: "batch-release time cut with review by exception", tag: "[sector-press/estimate]" },
+    { big: ">50%", label: "deviation reduction at a benchmarked biopharma site", tag: "[industry-research — McKinsey]" },
+    { big: "#2 cited", label: "211.192 record-review is a top FDA warning-letter finding", tag: "[gov/peer-reviewed]" },
+    { big: "36 tests", label: "passing with no API key (built to flagship depth)", tag: "[built]" },
+  ],
+  deploySteps: [
+    "Provision KMS CMK + per-customer validated VPC / network.",
+    "Stand up Cognito SAML→JWT federation (operator / QA-reviewer roles).",
+    "Front with CloudFront + WAF, ALB TLS 1.3.",
+    "Deploy the agent + grant tools via the MCP gateway (deny-by-default).",
+    "Connect MES / electronic batch records + LIMS; wire EventBridge on batch completion.",
+    "Enable S3 Object Lock + append-only audit; run smoke + QA-gate test.",
+  ],
+  deployOneLiner: "CloudFormation quick-deploy provisions the isolated environment + dual MCP gateway + connector Lambdas (mes/lims); connect MES/EBR + LIMS. AWS-native Strands + Step Functions rebuild included.",
+  notes: {
+    s1: "[00:20] Title. Agent 09 is BUILT to flagship depth — a LangGraph app (review-by-exception scan + QA gate), 36 passing tests, an AWS-native Strands + Step Functions rebuild, and a four-document doc set. It extends the suite to CMC/manufacturing with the same governed review-and-approve pattern and a QA release gate.",
+    s2: "[00:45] Hook. Lead with FDA's 62% (gov). The 48-hr review and $14K deviation figures are sector estimates — flag them. The story: the most regulated, highest-cost manual review in the plant.",
+    s3: "[01:10] Issue + cost. Modeled ~$420K/yr investigation labor with arithmetic visible — before scrapped-batch cost. Bright line: QA owns and signs the release; the agent never releases a batch.",
+    s4: "[01:35] Pipeline. Review by exception — the agent surfaces only what deviates. Human gate (QA) in red. Every flag traces to a record value.",
+    s5: "[02:15] Architecture. EventBridge triggers review on batch completion. New connectors: MES/EBR + LIMS. Same governed spine + 21 CFR Part 11 audit. Customer provides MES/LIMS access and named QA approvers.",
+    s6: "[02:45] Proof + deploy. RBE ~80% is trade-press (illustrative); the >50% deviation reduction is McKinsey. This is a roadmap deck — deployment follows the build (docs/specs/09). Close on the takeaway.",
+  },
+},
+{
+  num: "10", name: "Scientific Intelligence & Target Discovery",
+  tagline: "synthesize literature, omics & patents into ranked, evidence-linked targets — a scientist owns the hypothesis  [roadmap]",
+  runbook: "10-scientific-intelligence",
+  deployRef: "docs/specs/10-scientific-intelligence.md (design spec — roadmap agent, Documented maturity)",
+  hero: "FROM A MILLION PAPERS A YEAR TO RANKED TARGETS",
+  valueProp: "A governed discovery copilot that synthesizes literature, omics, patents, and internal data into ranked, evidence-linked targets with full provenance — while a scientist owns the target hypothesis and every go/no-go decision.",
+  hookStats: [
+    { big: "~86%", label: "of drugs entering clinical testing fail; wrong target / lack of efficacy leads", tag: "[gov/peer-reviewed — Wong 2019]" },
+    { big: "11%", label: "of landmark preclinical cancer studies were reproducible (Amgen)", tag: "[gov/peer-reviewed — Begley 2012]" },
+    { big: ">1M / yr", label: "new papers added to PubMed (>35M total) — no team can read it all", tag: "[gov/peer-reviewed — NLM]" },
+  ],
+  issueBullets: [
+    "Target evidence is spread across >35M papers, omics, patents, and internal data — no team can synthesize it manually.",
+    "Poor target validation is a leading cause of the ~86% clinical failure rate.",
+    "The preclinical evidence base is shaky — only ~11% of landmark cancer studies reproduced.",
+    "Discovery-to-candidate runs ~3–6 years and hundreds of millions before a single patient.",
+  ],
+  costBig: "~$2.6B / drug",
+  costMath: "Industry: ~$2.6B capitalized cost per approved drug (incl. failures); a typical preclinical program is ~$430M out-of-pocket over 3–6 years. Failed targets are the dominant driver.",
+  costRisks: [
+    "Years and hundreds of millions sunk into targets that fail in the clinic.",
+    "Missed prior art / evidence that a competitor already acted on.",
+  ],
+  costTag: "[industry-research — DiMasi/Tufts; PhRMA]",
+  brightLine: "the agent synthesizes and ranks evidence with full provenance; a scientist owns the target hypothesis and the go/no-go decision.",
+  pipelineTagline: "Retrieve literature, omics, patents and internal data through a scoped gateway, synthesize and rank targets with provenance — then route the hypothesis to a scientist.",
+  pipeline: [
+    { n: 1, title: "Retrieve evidence", sub: "literature/omics/patents/internal via gateway + KB", kind: "auto" },
+    { n: 2, title: "Synthesize & link", sub: "extract claims, link to source, de-duplicate", kind: "auto" },
+    { n: 3, title: "Rank targets", sub: "score on evidence strength + tractability", kind: "auto" },
+    { n: 4, title: "HUMAN GATE", sub: "scientist owns the hypothesis & go/no-go", kind: "gate" },
+    { n: 5, title: "Append-only audit", sub: "full provenance + decisions logged", kind: "audit" },
+  ],
+  pipelineCards: stdCards("the target hypothesis"),
+  arch: {
+    users: "Discovery scientists & computational biology",
+    sor: "ELN + internal data lake",
+    ext: "Literature · omics · patents",
+    runtime: [
+      { t: "UI task (discovery console)", color: C_COMPUTE },
+      { t: "Synthesis/ranking agent + provenance linker", color: C_COMPUTE },
+      { t: "MCP auth gateway", s: "all outbound tool calls", color: C_INTEG },
+    ],
+    data: [
+      { t: "Bedrock Knowledge Base", s: "approved corpus (RAG)", color: C_MODEL },
+      { t: "DynamoDB audit", s: "append-only", color: C_INTEG },
+      { t: "S3 Object Lock", s: "WORM rationale", color: C_STORAGE },
+      { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
+    ],
+    legend: "1 scientist sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to discovery console   4 ELN + internal data reads over private connectivity (least-privilege)   5 demand scales the agent workers   6 model calls stay in-VPC via Bedrock + Guardrails; internal evidence never egresses after masking   7 full provenance + decisions persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
+  },
+  proofStats: [
+    { big: "~18 mo", label: "AI novel-target → preclinical candidate (Insilico, company-reported)", tag: "[vendor — company-reported]" },
+    { big: "~50%", label: "tissue-analysis time cut on AWS (AstraZeneca)", tag: "[vendor — AWS]" },
+    { big: "provenance", label: "every claim linked to source — reproducibility by design", tag: "[design property]" },
+    { big: "~$430M", label: "typical preclinical spend the workflow de-risks", tag: "[industry-research]" },
+  ],
+  deploySteps: [
+    "Provision KMS CMK + per-customer validated VPC / network.",
+    "Stand up Cognito SAML→JWT federation (scientist / comp-bio roles).",
+    "Front with CloudFront + WAF, ALB TLS 1.3.",
+    "Deploy the agent + grant tools via the MCP gateway (deny-by-default).",
+    "Connect ELN + internal data; index literature/omics/patents into a Knowledge Base.",
+    "Enable S3 Object Lock + append-only audit; run smoke + provenance/gate test.",
+  ],
+  deployOneLiner: "Roadmap agent (Documented): build per docs/CREATE-A-NEW-AGENT.md, then CloudFormation quick-deploy provisions the isolated environment + dual MCP gateway; connect ELN + index the corpus.",
+  notes: {
+    s1: "[00:20] Title. Agent 10 is a ROADMAP/expansion agent (Documented maturity) — cited design, not a built reference. It extends the suite to the FRONT of the lifecycle (R&D). Position to a different buyer: research informatics / computational biology, not the clinical/safety/quality buyer of the built eight.",
+    s2: "[00:45] Hook. Lead with the peer-reviewed ~86% failure (Wong 2019) and the 11% reproducibility (Begley). PubMed scale is the overload pain. All three are gov/peer-reviewed.",
+    s3: "[01:10] Issue + cost. The cost is the $2.6B/drug and ~$430M preclinical — failed targets are the dominant driver. Bright line: the scientist owns the hypothesis; provenance answers the reproducibility pain.",
+    s4: "[01:35] Pipeline. The differentiator is provenance — every claim links to its source. Human gate (scientist) in red. This is evidence synthesis, not an autonomous decision.",
+    s5: "[02:15] Architecture. New connectors: ELN + literature/omics/patents into a Knowledge Base. Internal evidence stays in-VPC and never egresses after masking. Customer provides ELN access and the corpus.",
+    s6: "[02:45] Proof + deploy. Insilico/AstraZeneca figures are company-/vendor-reported — never lead with them. Roadmap deck — deployment follows the build (docs/specs/10). Close on the takeaway.",
+  },
+},
+];
+
 // ============================================================ SUITE OVERVIEW
 function buildOverview(P) {
   // 1 TITLE
@@ -1109,10 +1270,12 @@ const fileNames = {
   "06": "HCLS-06-Protocol-Design.pptx",
   "07": "HCLS-07-RWE-HEOR.pptx",
   "08": "HCLS-08-Medical-Affairs-MSL.pptx",
+  "09": "HCLS-09-Manufacturing-Batch-Review.pptx",
+  "10": "HCLS-10-Scientific-Intelligence.pptx",
 };
 
 async function main() {
-  for (const d of AGENTS) {
+  for (const d of [...AGENTS, ...EXPANSION]) {
     const P = new pptxgen();
     P.layout = "LAYOUT_WIDE"; P.author = "HCLS AI Agent Suite"; P.title = `HCLS Agent ${d.num} — ${d.name}`;
     buildAgentDeck(P, d);

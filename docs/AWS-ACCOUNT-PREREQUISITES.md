@@ -135,7 +135,7 @@ Run this check the day before the first live demo or user acceptance test:
 # From the repo root, with AWS credentials set:
 EXTRACT_MODE=demo python -m pytest governance/ platform_core/ -q
 
-# Should output: 452 passed (or more), 0 failed
+# Should output: 488 passed (or more), 0 failed
 ```
 
 Then verify the live AWS path:

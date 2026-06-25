@@ -6,13 +6,13 @@ it points you at the right artifact for every moment of a deal.
 
 ## The one-sentence pitch
 
-> *"The agent isn't the product — the governed platform that makes it 21 CFR Part 11 / GxP-defensible and deployable on AWS is. We hand your SI a compliant, auditable starting point across eight high-value life-sciences workflows, so you compress an SI-led build instead of fielding ungoverned shadow AI."*
+> *"The agent isn't the product — the governed platform that makes it 21 CFR Part 11 / GxP-defensible and deployable on AWS is. We hand your SI a compliant, auditable starting point across nine high-value life-sciences workflows, so you compress an SI-led build instead of fielding ungoverned shadow AI."*
 
 ## Know your room (lead with the right sentence)
 
 | Persona | Their question | Your lead | Artifact |
 |---|---|---|---|
-| **CIO** | "Is this another point tool?" | One control plane, eight workloads; the platform is the asset. | `decks/HCLS-Agentic-AI-Suite-Executive-Overview.pptx` |
+| **CIO** | "Is this another point tool?" | One control plane, nine workloads; the platform is the asset. | `decks/HCLS-Agentic-AI-Suite-Executive-Overview.pptx` |
 | **CSO / CISO** | "Can a prompt turn the controls off?" | No — controls live in the gateway, outside the model. | `decks/HCLS-CIO-Adoption-Review.pptx` (slide 4) + red-team demo |
 | **Director of Architecture** | "Is it actually deployable?" | CloudFormation dual-gateway, in-VPC Bedrock, Step Functions HITL — and the gaps are scoped. | per-agent architecture slide + `docs/SUITE-ARCHITECTURE.md` |
 | **VP Quality / Reg Affairs** | "Who owns the regulated decision?" | A named human, every time — enforced in the framework. | the bright-line callout on every agent deck |
@@ -33,7 +33,7 @@ it points you at the right artifact for every moment of a deal.
 
 ## The five claims you can make (and how to keep them honest)
 
-1. **"452 automated tests pass with no API key."** Run them on screen — it's the single best credibility move. Governance is in code, not slideware.
+1. **"488 automated tests pass with no API key."** Run them on screen — it's the single best credibility move. Governance is in code, not slideware.
 2. **"Controls are enforced outside the model."** Show the red-team prompt-injection / authorization-bypass test denying.
 3. **"Every figure on the deck is cited."** Point at the source tag on-slide and `gtm/HCLS-DECK-SOURCES.md`.
 4. **"It deploys into a new account in any Region."** `make build-lambdas` + `make deploy` → CloudFormation quickstart (connectors + dual gateway + agent).

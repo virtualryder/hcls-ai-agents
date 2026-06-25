@@ -119,7 +119,7 @@
 
 ### "This is expensive for a proof of concept."
 
-**Respond:** The POC scope includes the full compliance platform stack — not just an agent prototype. A prototype that bypasses the authorization layer, the audit trail, and the grounding verification is not a useful starting point for a regulated engagement; it is a demo that will fail its first quality review. The platform cost is a one-time investment that serves all eight agents — the cost per agent decreases significantly after the first one is deployed.
+**Respond:** The POC scope includes the full compliance platform stack — not just an agent prototype. A prototype that bypasses the authorization layer, the audit trail, and the grounding verification is not a useful starting point for a regulated engagement; it is a demo that will fail its first quality review. The platform cost is a one-time investment that serves all nine agents — the cost per agent decreases significantly after the first one is deployed.
 
 **Redirect:** What is the cost of a 483 finding, a consent decree, or a missed expedited report? The platform's value is partly efficiency gain and partly risk reduction. The risk-reduction component is asymmetric: the probability may be low, but the cost of a regulatory action is very high.
 

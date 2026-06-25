@@ -1,0 +1,19 @@
+{
+  "batch_id": "B-24-0419",
+  "product": "Amoxicillin 250mg Capsules",
+  "acting_user_claims": {"sub": "mfg-operator-03", "custom:hcls_role": "MFG_OPERATOR"},
+  "raw_batch_record": {
+    "batch_id": "B-24-0419",
+    "product": "Amoxicillin 250mg Capsules",
+    "required_steps": ["S1", "S2", "S3", "S4"],
+    "steps": [
+      {"id": "S1", "name": "Dispensing", "value": 100.0, "lo": 99.0, "hi": 101.0, "unit": "%", "signed": true, "critical": true},
+      {"id": "S2", "name": "Blend uniformity", "value": 6.0, "lo": 0.0, "hi": 5.0, "unit": "%RSD", "signed": true, "critical": true},
+      {"id": "S4", "name": "Encapsulation weight", "value": 250.0, "lo": 245.0, "hi": 255.0, "unit": "mg", "signed": true, "critical": false}
+    ]
+  },
+  "lims_results": [
+    {"test": "Assay", "result": 92.0, "lo": 95.0, "hi": 105.0, "unit": "%", "status": "OOS"},
+    {"test": "Dissolution Q30", "result": 81.0, "lo": 80.0, "hi": 100.0, "unit": "%", "status": "PASS"}
+  ]
+}

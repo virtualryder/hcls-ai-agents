@@ -123,6 +123,33 @@
 
 ---
 
+## 09 — Manufacturing Batch-Review  *(roadmap / expansion agent)*
+
+- **HEADLINE:** **62% of US drug shortages trace to manufacturing / product-quality problems** — the single leading root cause. — *FDA, Drug Shortages: Root Causes and Potential Solutions (2019; 2013–2017 data)* `[gov/peer-reviewed]` — https://www.fda.gov/media/159480/download · confirmed still top driver: *HHS ASPE, Analysis of Drug Shortages 2018–2023 (2025)* — https://aspe.hhs.gov/sites/default/files/documents/efa332939da2064fa2c132bb8e842bb5/Drug%20Shortages_Data%20Brief_Final_2025.01.10.pdf
+- **COST OF DOING NOTHING:** routine internal quality failures ≈ **2.1% of annual sales**; remediation (investigations, CAPAs, complaints, field actions) ≈ **0.4–0.7% of annual sales**. — *McKinsey, Capturing the value of good quality (life sciences)* `[industry-research — device/LS quality-cost proxy]` — https://www.mckinsey.com/industries/life-sciences/our-insights/capturing-the-value-of-good-quality-in-medical-devices
+- **COST OF DOING NOTHING (modeled):** 200 batches/yr × ~15% deviating (85% RFT) ≈ 30 investigations × ~$14K labor ≈ **~$420K/yr** — before any scrapped batch ($1–2M+ each) or delayed-release carrying cost. `[modeled — deviation-investigation cost × batch volume]`
+- **PAIN:** **21 CFR 211.192** (production-record review / discrepancy investigation) was the **#2 most-cited regulation in FDA Warning Letters, 523 times across FY2017–FY2021** — the agent's exact workflow. — *The FDA Group; eCFR* `[gov/peer-reviewed]` — https://www.thefdagroup.com/blog/21-cfr-211-192 · https://www.ecfr.gov/current/title-21/chapter-I/subchapter-C/part-211/subpart-J/section-211.192
+- **PAIN:** average review **~48 hrs per batch report** (up to ~500 hrs for complex paper-based). — *Réalta / BioPharm International* `[sector-press/estimate]` — https://realtatechnologies.com/batch-reports-review-by-exception-pharma/
+- **PAIN:** a single biologics **batch failure = tens of millions** in losses; raw materials alone often exceed **$1–2M**. — *European Pharmaceutical Manufacturer; BioPharm International* `[sector-press/estimate]` — https://pharmaceuticalmanufacturer.media/pharmaceutical-industry-insights/pharmaceutical-manufacturing-insights/batch-failures-and-the-hidden-costs-of-contamination/
+- **OUTCOME/ROI:** **review by exception cuts batch-release time ~80%** (a ~150-page record → a ~3-page exception report). — *iFactory / Tulip* `[sector-press/estimate — vendor-adjacent]` — https://tulip.co/blog/review-by-exception/
+- **OUTCOME/ROI:** a benchmarked biopharma facility cut product deviations **>50%** and waste **~75%**; a generics maker raised RFT **83% → >92%**. — *McKinsey, Manufacturing quality today (2017)* `[industry-research]` — https://www.mckinsey.com/capabilities/operations/our-insights/manufacturing-quality-today-higher-quality-output-lower-cost-of-quality
+- **Gap:** no gov/peer-reviewed per-batch review-cost figure exists — use the modeled estimate; the ~80% RBE figure is vendor/trade-press (illustrative, not audited).
+
+---
+
+## 10 — Scientific Intelligence & Target Discovery  *(roadmap / expansion agent — note: R&D / research-informatics buyer)*
+
+- **HEADLINE:** only **~13.8% of programs entering clinical testing reach approval (~86% fail)**; lack of efficacy / wrong target leads. — *Wong, Siah & Lo, Biostatistics 20(2):273–286 (2019); 185,994 trials* `[gov/peer-reviewed]` — https://academic.oup.com/biostatistics/article/20/2/273/4817524 · https://pmc.ncbi.nlm.nih.gov/articles/PMC6409418/
+- **PAIN (target validation):** ~40–50% of clinical failures attributed to lack of efficacy. — *Sun et al., Acta Pharm Sin B (2022)* `[industry-research / peer-reviewed]` — https://www.sciencedirect.com/science/article/pii/S2211383522000521
+- **COST OF DOING NOTHING:** **~$2.6B capitalized cost per approved drug** (incl. failures), ~10+ years; a typical preclinical program is **~$430M out-of-pocket over 3–6 years**. — *DiMasi/Tufts CSDD (2014/2016); PhRMA/KnowledgePortalia* `[industry-research] [older]` — https://www.appliedclinicaltrialsonline.com/view/tufts-csdd-cost-develop-new-drug-26b · https://www.knowledgeportalia.org/cost-of-r-d
+- **PAIN (reproducibility):** Amgen reproduced only **11% of 53 landmark preclinical cancer studies**. — *Begley & Ellis, Nature 483:531–533 (2012)* `[gov/peer-reviewed] [older — the canonical citation]` — https://www.nature.com/articles/483531a · corroborated: *eLife Reproducibility Project: Cancer Biology (2021)* — https://elifesciences.org/articles/71601
+- **PAIN (overload):** PubMed holds **>35M citations and grows >1M/year (~3,000/day)** — no team can read it all. — *Jin et al., PubMed and beyond (2024); NLM* `[gov/peer-reviewed]` — https://pmc.ncbi.nlm.nih.gov/articles/PMC10850402/
+- **OUTCOME/ROI:** Insilico Medicine took a **novel target → preclinical candidate in ~18 months for ~$2.6M**, and target-discovery → Phase I in **<30 months**. — *Insilico Medicine (2022, company-reported); precedent: Nature Biotech 2019 (21-day DDR1 hit)* `[vendor — company-reported]` — https://insilico.com/phase1 · https://www.nature.com/articles/s41587-019-0224-x
+- **OUTCOME/ROI:** AstraZeneca cut tissue-sample analysis time **~50%** on AWS and ran **51B statistical tests in <24h** feeding 40+ discovery projects. — *AWS case study* `[vendor]` — https://aws.amazon.com/solutions/case-studies/innovators/astrazeneca/
+- **Gap:** no authoritative breakout of pure target-ID-to-validation dollar cost; AI-discovery timeline claims are company-reported (label clearly), never the lead stat.
+
+---
+
 ## Deck-author cheat sheet
 
 **Lead-safe headline stats:** Tufts **$800K/day delay + $40K/day** (agents 03/04/06); DiMasi **$2.6B/drug** (01); FDA **CAPA-is-top-cited** + official datasets (05); Tufts **$535K Phase III amendment + 45% avoidable** (06); **FAERS volume + Schmider 40–70%** (02).

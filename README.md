@@ -7,9 +7,9 @@
 
 A large systems integrator deploying AI in a pharmaceutical, biotech, medtech, or CRO environment cannot hand a customer a collection of LLM calls and call it done. Every regulated artifact an agent touches — an ICSR report, a submission section, a CAPA record — carries data-integrity, e-signature, and accountability obligations that exist before the first line of agent code is written. This suite embeds those controls from the first commit: deny-by-default authorization, PHI masking, grounding verification, prompt version pinning, a human gate that is framework-enforced (not merely documented), and a tamper-evident audit trail that satisfies 21 CFR Part 11.
 
-The result is a deployable accelerator — not a certified product — that gives an SI engagement team a credible, compliant starting point across eight high-value life-sciences workflows.
+The result is a deployable accelerator — not a certified product — that gives an SI engagement team a credible, compliant starting point across nine high-value life-sciences workflows.
 
-**Repository status (current):** all 8 agents built to flagship depth · 8 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **452 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + two interchangeable MCP gateway modes + native/container agent) deployable in a new customer account in any Region · Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included.
+**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **488 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + two interchangeable MCP gateway modes + native/container agent) deployable in a new customer account in any Region · Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included.
 
 ---
 
@@ -18,7 +18,7 @@ The result is a deployable accelerator — not a certified product — that give
 | What this is | What this is not |
 |---|---|
 | A governed, auditable accelerator — bring your own LLM call without the compliance scaffolding and you still have a prototype | A certified, validated, production-ready SaaS product you can hand to a customer unchanged |
-| Eight agents with shared platform controls that compound across the portfolio | Eight point tools built independently with no governance consistency |
+| Nine agents with shared platform controls that compound across the portfolio | Point tools built independently with no governance consistency |
 | A reference for Amazon Bedrock AgentCore Gateway + Identity + Runtime semantics — testable locally, deployable on AWS | A vendor lock-in — the gateway semantics are replicated in `platform_core/` so the logic is readable and testable without an AWS account |
 | Decision-support — drafts, assembles, monitors, flags — with humans owning every consequential decision | Autonomous execution in regulated workflows |
 
@@ -35,11 +35,11 @@ Every agent and platform component is positioned honestly against four levels:
 | **Deployable** | CloudFormation templates, container contracts (ARM64, `/invocations`, `/ping`), and CI pass; requires customer AWS account and Bedrock access | Suitable for a customer pilot with SI-managed infrastructure |
 | **Production-ready** | Customer computer-system validation (CSV) complete, IdP integrated, connectors tested against live systems, penetration test passed | Engagement milestone, not a day-one deliverable |
 
-**All eight agents are built to flagship depth** — a full LangGraph workflow, governed tool access, deterministic fixtures, flagship-level test suites, a Streamlit dashboard, a four-document doc set, and a matching **AWS-native rebuild** (Strands + Step Functions with a `waitForTaskToken` human gate). Agent 02 (Pharmacovigilance) additionally ships a **live path**: real Amazon Bedrock inference and a real HTTP system-of-record connector, exercised end-to-end (see `02-pharmacovigilance-agent/demo/`). The suite sits at **Demonstrated + Deployable-by-design**: 452 automated tests pass with no API key; production-readiness (CSV/CSA, live integration, penetration test) is the engagement.
+**All nine agents are built to flagship depth** — a full LangGraph workflow, governed tool access, deterministic fixtures, flagship-level test suites, a Streamlit dashboard, a four-document doc set, and a matching **AWS-native rebuild** (Strands + Step Functions with a `waitForTaskToken` human gate). Agent 02 (Pharmacovigilance) additionally ships a **live path**: real Amazon Bedrock inference and a real HTTP system-of-record connector, exercised end-to-end (see `02-pharmacovigilance-agent/demo/`). The suite sits at **Demonstrated + Deployable-by-design**: 488 automated tests pass with no API key; production-readiness (CSV/CSA, live integration, penetration test) is the engagement. (A tenth agent, 10 Scientific Intelligence & Target Discovery, is at roadmap/Documented maturity — cited deck + design spec.)
 
 ---
 
-## The Eight Agents
+## The Nine Agents
 
 | # | Agent | Problem it solves | Primary systems | Key regulations |
 |---|---|---|---|---|
@@ -51,12 +51,13 @@ Every agent and platform component is positioned honestly against four levels:
 | **06** | Clinical Protocol Design & Feasibility | First-draft protocols incorporate historical guidance and study data late; feasibility assumptions are not linked to RWD | RIM (guidance retrieval), RWD, CTMS historical data | ICH E8(R1) general principles, GCP, FDA/EMA protocol guidance |
 | **07** | Real-World Evidence / HEOR | RWE/HEOR analyses require cohort definition, confounding control, and structured code translation; analyst time is disproportionately spent on data wrangling | Claims databases, registry data, RWD platforms | FDA RWE framework, HEOR methodological standards, HIPAA de-identification |
 | **08** | Medical Affairs / MSL Copilot | Field medical teams need rapid, on-label, evidence-grounded responses for HCP interactions; off-label guardrails must be technical, not procedural | CRM (Veeva CRM), DMS/MSL portals, MLR workflow | FDA off-label promotion rules, OIG guidance, ABPI/EFPIA codes, MLR SOP |
+| **09** | Manufacturing Batch-Review | Batch-record review and OOS/deviation investigation are slow, manual, and senior-labor-heavy; review by exception with a QA release gate | MES / electronic batch records, LIMS | cGMP 21 CFR 211, 21 CFR 211.192, 21 CFR Part 11, EU GMP Annex 11 |
 
 ---
 
 ## Shared Platform
 
-Every agent shares the same platform stack. Controls compound: a governance improvement to the PHI masker, the grounding checker, or the audit trail benefits all eight agents simultaneously.
+Every agent shares the same platform stack. Controls compound: a governance improvement to the PHI masker, the grounding checker, or the audit trail benefits all nine agents simultaneously.
 
 ### LLM Factory
 A single abstraction layer routes inference to **Anthropic Claude** (API) or **Amazon Bedrock** (in-account, no data leaves the customer VPC) depending on deployment mode. `EXTRACT_MODE=demo` bypasses the LLM entirely for local testing.
@@ -199,7 +200,7 @@ Ready-to-use GTM material lives at the repository root:
 
 | Artifact | Use |
 |---|---|
-| `decks/HCLS-01..08-*.pptx` | **Eight per-agent AWS-style decks** (6-slide: issue → cost of doing nothing → governed pipeline → AWS architecture & traffic flow → proof/deploy). Every stat cited and source-class-tagged; speaker notes on every slide. |
+| `decks/HCLS-01..10-*.pptx` | **Per-agent AWS-style decks** (9 built agents + 1 roadmap; 6-slide: issue → cost of doing nothing → governed pipeline → AWS architecture & traffic flow → proof/deploy). Every stat cited and source-class-tagged; speaker notes on every slide. |
 | `decks/HCLS-Agentic-AI-Suite-Executive-Overview.pptx` | ~11-slide suite overview: thesis, shared architecture, 8-agent portfolio, governance spine, maturity ladder, land-and-expand, cost-of-inaction. |
 | `decks/HCLS-CIO-Adoption-Review.pptx` | **Board-ready CIO / CISO / Director of Architecture deck** — honest-broker verdict, six gateway controls, shortfalls, shared-responsibility matrix, phased path, go/no-go. |
 | `HCLS-Agentic-AI-Suite-Executive-Overview.pptx` | Original 16-slide executive deck (root) for sales, SAs, and delivery |
@@ -208,13 +209,15 @@ Ready-to-use GTM material lives at the repository root:
 
 The decks are generated from cited source-of-truth files and regenerate with `node decks/build-agent-decks.js` and `node decks/build-cio-deck.js` (see `decks/README.md`). Every figure traces to **`gtm/HCLS-DECK-SOURCES.md`** (each stat tagged `[gov/peer-reviewed]` · `[industry-research]` · `[sector-press/estimate]` · `[vendor]` · `[modeled]` with URLs). The GTM spine also includes `gtm/DECK-CONTENT-SPEC.md` (per-agent content contract), `gtm/DEMO-STORYBOARD.md` (a repeatable ~25-min customer demo), and `gtm/roi-calculator/` (an SA-fillable ROI workbook).
 
+Two **roadmap/expansion agents** also ship cited decks + design specs at Documented maturity — **09 Manufacturing Batch-Review** (CMC/GxP; `docs/specs/09-manufacturing-batch-review.md`) and **10 Scientific Intelligence & Target Discovery** (R&D; `docs/specs/10-scientific-intelligence.md`) — extending the lifecycle to manufacturing and discovery; the executive overview intentionally stays at the 8 built agents.
+
 Per-agent **tailored deployment handbook PDFs** are in `deliverables/agent-handbooks/`, and all collateral regenerates from source with `make handbooks` (see `tooling/handbooks/`). Deeper written collateral: `offerings/` (POC, pilot, assessment, managed service, TCO/ROI calculator, battlecard, SOW template, objection-handling, competitive, TPRM), `runbooks/` (incident, DR, HITL queue, model degradation), and `docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`.
 
 ### Positioning to a CIO, CSO/CISO, or Director of Architecture
 
 The deck system is built around the buyer in the room — lead with the one sentence that lands for each:
 
-- **CIO** — *"One governed control plane carries all eight workloads; this compresses an SI-led build instead of adding ungoverned shadow AI."* The platform is the asset; the agents are interchangeable, regulated workloads on top of it. Open with `Executive-Overview`, land on the maturity ladder and land-and-expand path.
+- **CIO** — *"One governed control plane carries all nine workloads; this compresses an SI-led build instead of adding ungoverned shadow AI."* The platform is the asset; the agents are interchangeable, regulated workloads on top of it. Open with `Executive-Overview`, land on the maturity ladder and land-and-expand path.
 - **CSO / CISO** — *"The controls are enforced in the gateway, outside the model — a prompt cannot disable deny-by-default, the HITL gate, PHI masking, or the audit trail."* Use the `CIO-Adoption-Review` "Why a CISO can say yes" slide and the red-team demo; the bright line (causality, reportability, what's submitted, what reaches an HCP) is never decided by the agent.
 - **Director of Architecture** — *"The AWS reference is real and deployable — CloudFormation dual-gateway, in-VPC Bedrock + Guardrails, Step Functions `waitForTaskToken` HITL — and the gaps are scoped honestly."* Drive the per-agent **architecture & traffic-flow** slide, `docs/SUITE-ARCHITECTURE.md`, `docs/WELL-ARCHITECTED-REVIEW.md`, and the shared-responsibility matrix, then a `docs/DEPLOY-QUICKSTART.md` walkthrough.
 
@@ -278,7 +281,7 @@ hcls-ai-agents/
 │
 ├── governance/                         # Governance & evaluation framework (grounding, evals, HITL tests, red team)
 │
-├── aws-native-reference/               # AWS-native deployment (container + native) for all 8 agents
+├── aws-native-reference/               # AWS-native deployment (container + native) for all 9 agents
 │
 ├── scripts/
 │   ├── build_lambdas.sh                # Package every agent + connector zip WITH deps vendored in

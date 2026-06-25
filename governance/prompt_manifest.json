@@ -1,15 +1,21 @@
 {
-  "_comment": "Hash-pinned prompt versions. Bump via: python -m governance.prompt_registry --update. CI fails if a registered prompt's text changes without a manifest bump (deliberate, reviewed change control).",
-  "01-regulatory-writing:benefit_risk_section": {
-    "agent": "01-regulatory-writing",
-    "name": "benefit_risk_section",
-    "version": 1,
-    "sha256": "managed-by-prompt_registry --update"
-  },
-  "02-pharmacovigilance:icsr_narrative": {
-    "agent": "02-pharmacovigilance",
-    "name": "icsr_narrative",
-    "version": 1,
-    "sha256": "managed-by-prompt_registry --update"
-  }
+ "_comment": "Hash-pinned prompt versions. Bump via: python -m governance.prompt_registry --update. CI fails if a registered prompt's text changes without a manifest bump (deliberate, reviewed change control).",
+ "01-regulatory-writing:benefit_risk_section": {
+  "agent": "01-regulatory-writing",
+  "name": "benefit_risk_section",
+  "version": 1,
+  "sha256": "managed-by-prompt_registry --update"
+ },
+ "02-pharmacovigilance:icsr_narrative": {
+  "agent": "02-pharmacovigilance",
+  "name": "icsr_narrative",
+  "version": 1,
+  "sha256": "managed-by-prompt_registry --update"
+ },
+ "09-manufacturing-batch-review:exception_report": {
+  "agent": "09-manufacturing-batch-review",
+  "name": "exception_report",
+  "version": 1,
+  "sha256": "a27d5eaa9e349997a04d456947113cbe59b00101f69919b122e9e0ac786048d5"
+ }
 }

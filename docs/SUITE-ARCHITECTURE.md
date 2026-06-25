@@ -46,7 +46,7 @@ The UX layer is intentionally thin. It captures the user's identity (forwarded a
 
 ## Layer 2 — Supervisor and Specialist Agents
 
-Each of the eight specialist agents is a **LangGraph StateGraph** — a directed, stateful workflow with deterministic routing and a framework-enforced interrupt for human approval.
+Each of the nine specialist agents is a **LangGraph StateGraph** — a directed, stateful workflow with deterministic routing and a framework-enforced interrupt for human approval.
 
 ### Specialist Agent Pattern
 

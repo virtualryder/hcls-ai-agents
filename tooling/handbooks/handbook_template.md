@@ -1,4 +1,4 @@
-> **Tailored edition for {{NAME}}** (AgentId `{{ID}}`). This is the companion to the suite master handbook (`docs/DEPLOYMENT-HANDBOOK.md`); it carries this agent's systems, approver role, workflow, and console figures. The phases and controls are identical across all eight agents.
+> **Tailored edition for {{NAME}}** (AgentId `{{ID}}`). This is the companion to the suite master handbook (`docs/DEPLOYMENT-HANDBOOK.md`); it carries this agent's systems, approver role, workflow, and console figures. The phases and controls are identical across all agents.
 
 ## 0. Two deployment shapes
 

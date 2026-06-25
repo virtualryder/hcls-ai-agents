@@ -18,7 +18,7 @@ This offering is the recommended entry point for customers who do not yet have a
 - Current-state assessment of relevant systems of record (Veeva Vault RIM/Safety/Quality, Argus, Medidata, TrackWise, EDC, CTMS, eTMF) — integration API availability, data quality, and access patterns
 - Compliance posture review: 21 CFR Part 11, HIPAA, GxP, GVP/E2B, FDA QMSR, EU AI Act (where applicable)
 - AWS platform maturity review: Bedrock availability and account configuration, IdP federation readiness, network posture
-- Fit-gap analysis against the eight agents in the suite
+- Fit-gap analysis against the nine agents in the suite
 - Business case development for prioritized agents: ROI model, effort estimate, risk factors
 
 ### Out of scope
@@ -46,7 +46,7 @@ This offering is the recommended entry point for customers who do not yet have a
 ## Deliverables
 
 1. **HCLS AI Readiness Scorecard** — a structured assessment across five dimensions with heat-map visualization; suitable for board or executive committee presentation
-2. **Agent Prioritization Matrix** — ranked view of all eight agents against the customer's specific business drivers, system readiness, and risk appetite
+2. **Agent Prioritization Matrix** — ranked view of all nine agents against the customer's specific business drivers, system readiness, and risk appetite
 3. **Architecture Blueprint** — a customer-specific adaptation of the six-layer suite architecture with AWS service selections, IdP integration approach, and network topology
 4. **Compliance Gap Analysis** — assessment of the customer's current control posture against the requirements for each prioritized agent's regulated context of use; identifies the validation scope for a subsequent pilot
 5. **Business Case Document** — quantified ROI model for the top two agents (illustrative ranges based on process metrics gathered in discovery; customer-specific data used where available)

@@ -35,7 +35,7 @@ When an agent holds the raw keys and calls systems directly:
 | **No human gate on irreversible actions** | "Submit to FDA," "close the CAPA," "release the batch" can happen without a qualified human signing — a direct conflict with FDA/EMA good-AI principles. |
 | **No usable audit trail** | When an inspector asks "who did this, on what basis, and who approved it?", logs scattered across vendor systems don't answer it. |
 | **PII/PHI sprawl** | Raw identifiers flow into prompts and logs with nothing masking them. |
-| **Every integration is bespoke** | Eight agents × many systems = dozens of one-off, ungoverned connections, each its own security review. |
+| **Every integration is bespoke** | Nine agents × many systems = dozens of one-off, ungoverned connections, each its own security review. |
 
 The result is predictable: the pilot works, then it hits the **CISO, Quality, and Privacy review** — and stops. The blocker to scaling agents in life sciences is almost never the model. It's trust and control over what the agent is allowed to do. That is exactly what the MCP layer provides.
 
@@ -63,10 +63,10 @@ A useful analogy: you don't give every new employee the master key to the buildi
 This is the part to push on. Three reasons to fund the gateway in Phase 1:
 
 1. **It's the unlock for production, not an add-on.** Every agent's path to go-live runs through the security/quality review. The gateway is what *passes* that review. Build agents first and bolt on governance later, and you rebuild every agent's integration when the controls finally land — slower and more expensive.
-2. **It's built once and reused by all eight agents.** The gateway, identity wiring, audit, and human-approval framework are shared platform. Pay for it once on agent #1 and agents #2–8 inherit it for free. Defer it and you pay the integration tax eight times.
+2. **It's built once and reused by all nine agents.** The gateway, identity wiring, audit, and human-approval framework are shared platform. Pay for it once on agent #1 and agents #2–9 inherit it for free. Defer it and you pay the integration tax nine times.
 3. **The cost of retrofitting governance is the highest cost in the program.** Adding identity, least-privilege, approval gates, and audit *after* agents are wired means touching every integration, re-validating, and re-reviewing. Doing it first makes every subsequent agent faster.
 
-> **The reframe for the customer:** the MCP layer isn't overhead on top of the agents — *it is the thing that makes the agents deployable in a regulated environment at all*. It's the difference between "we built eight pilots" and "we put eight agents into production."
+> **The reframe for the customer:** the MCP layer isn't overhead on top of the agents — *it is the thing that makes the agents deployable in a regulated environment at all*. It's the difference between "we built nine pilots" and "we put nine agents into production."
 
 ---
 
@@ -76,7 +76,7 @@ This is the part to push on. Three reasons to fund the gateway in Phase 1:
 >
 > So we put one governed layer between the agents and your systems — on AWS that's Bedrock AgentCore Gateway with your own identity provider. It checks who's acting, enforces least privilege so the agent never exceeds the human, requires a named human sign-off on anything irreversible, uses short-lived keys instead of standing service accounts, and records who-did-what-and-who-approved in a tamper-evident, Part-11-grade trail.
 >
-> We build it once on the first agent and every other agent reuses it. We'd strongly recommend funding it in the first phase — it's the control layer your security, quality, and privacy teams need to say yes, and it's far cheaper to build first than to retrofit across eight agents later. It's the difference between a demo and production."
+> We build it once on the first agent and every other agent reuses it. We'd strongly recommend funding it in the first phase — it's the control layer your security, quality, and privacy teams need to say yes, and it's far cheaper to build first than to retrofit across nine agents later. It's the difference between a demo and production."
 
 ---
 

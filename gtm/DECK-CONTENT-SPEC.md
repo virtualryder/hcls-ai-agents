@@ -49,6 +49,17 @@ five-step `pipeline` (incl. the red HUMAN GATE and the audit step), the `arch` b
 - **07** — code-system translation (ICD/SNOMED/RxNorm) + lineage tracker; gateway-enforced de-identification; Redshift/Aurora cohort store.
 - **08** — off-label content Guardrails (mandatory) + reference annotation; Veeva CRM/DMS; approved-label Knowledge Base.
 
+## Lifecycle-extension agents (09 built, 10 roadmap)
+
+Two agents extend the lifecycle beyond the core-8 land/expand narrative. **09 Manufacturing Batch-Review is built to flagship depth** (LangGraph app + 36 tests + AWS-native rebuild + 4-doc set; `09-manufacturing-batch-review-agent/`). **10 Scientific Intelligence & Target Discovery is roadmap** (Documented — cited deck + design spec). Both produce per-agent decks via the generator's `EXPANSION` array; the executive overview stays at the 8 core-lifecycle agents by design.
+
+| # | Agent | Headline (cited) | Cost of doing nothing | Bright line — AI never decides… | Spec |
+|---|---|---|---|---|---|
+| 09 | Manufacturing Batch-Review **(built)** | 62% of drug shortages = mfg/quality `[gov]` | ~$420K/yr `[modeled]` | batch release | `09-manufacturing-batch-review-agent/` + `docs/specs/09-…` |
+| 10 | Scientific Intelligence & Target Discovery | ~86% of programs fail `[gov/peer-reviewed]` | ~$2.6B/drug `[industry-research]` | the target hypothesis | `docs/specs/10-scientific-intelligence.md` |
+
+New systems: 09 → MES / electronic batch records + LIMS; 10 → ELN + literature/omics/patents. Buyer note: 10 targets research informatics / computational biology, a different buyer than the built eight.
+
 ## Discipline rules (applied across all decks)
 
 - The strongest **lead-safe** stats are Tufts day-of-delay (03/04/06), DiMasi $2.6B (01), FDA CAPA-is-top-cited (05), Tufts amendment economics (06), FAERS + Schmider (02).

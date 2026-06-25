@@ -55,7 +55,7 @@
 | How do you plan your network topology? | Multi-AZ Fargate; DynamoDB global tables optional for DR; VPC endpoints for Bedrock/S3 | `infra/cloudformation/` |
 | How do you design your workload service architecture? | Each agent is stateless compute + durable LangGraph state in DynamoDB; Step Functions for retry | `aws-native-reference/` |
 | How do you mitigate single points of failure? | HITL queue is DynamoDB-backed (multi-AZ); Step Functions handles retries with exponential backoff | `aws-native-reference/` |
-| How do you test reliability? | 452 tests covering agent graphs, gateway enforcement, connector modes; DR runbook with tested procedures | `runbooks/DR-RUNBOOK.md` |
+| How do you test reliability? | 488 tests covering agent graphs, gateway enforcement, connector modes; DR runbook with tested procedures | `runbooks/DR-RUNBOOK.md` |
 | How do you plan for disaster recovery? | DR runbook: RTO/RPO definitions, PITR on DynamoDB, cross-region backup strategy | `runbooks/DR-RUNBOOK.md` |
 
 **WAFR finding risk:** Medium. Multi-region active-active is not implemented by default (cost-prohibitive for most HCLS POCs); document the DR posture explicitly for CISO/QA audiences.
@@ -140,7 +140,7 @@ The AWS Generative AI Lens (published 2024) adds AI-specific best practices on t
 | Lens Question | How the Suite addresses it |
 |---|---|
 | How do you optimize inference costs? | Model tiering (Sonnet for drafting, Haiku for classification); demo mode for offline testing; Bedrock token budgets configurable |
-| How do you benchmark and test performance? | 452 automated tests; demo path runs full workflow without API spend; latency measured per graph node via OpenTelemetry |
+| How do you benchmark and test performance? | 488 automated tests; demo path runs full workflow without API spend; latency measured per graph node via OpenTelemetry |
 
 ---
 

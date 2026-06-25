@@ -1,0 +1,67 @@
+{
+  "batches": [
+    {
+      "review_id": "BR-2026-0001",
+      "batch_id": "B-24-0417",
+      "product": "Acetaminophen 500mg Tablets",
+      "acting_user_claims": {"sub": "mfg-operator-01", "custom:hcls_role": "MFG_OPERATOR"},
+      "raw_batch_record": {
+        "batch_id": "B-24-0417",
+        "product": "Acetaminophen 500mg Tablets",
+        "required_steps": ["S1", "S2", "S3", "S4"],
+        "steps": [
+          {"id": "S1", "name": "Dispensing", "value": 100.0, "lo": 99.0, "hi": 101.0, "unit": "%", "signed": true, "critical": true},
+          {"id": "S2", "name": "Granulation moisture", "value": 2.4, "lo": 1.5, "hi": 3.0, "unit": "%", "signed": true, "critical": true},
+          {"id": "S3", "name": "Compression force", "value": 12.0, "lo": 10.0, "hi": 15.0, "unit": "kN", "signed": true, "critical": false},
+          {"id": "S4", "name": "Coating weight gain", "value": 3.1, "lo": 2.5, "hi": 4.0, "unit": "%", "signed": true, "critical": false}
+        ]
+      },
+      "lims_results": [
+        {"test": "Assay", "result": 99.6, "lo": 95.0, "hi": 105.0, "unit": "%", "status": "PASS"},
+        {"test": "Dissolution Q30", "result": 88.0, "lo": 80.0, "hi": 100.0, "unit": "%", "status": "PASS"},
+        {"test": "Content uniformity AV", "result": 4.2, "lo": 0.0, "hi": 15.0, "unit": "", "status": "PASS"}
+      ]
+    },
+    {
+      "review_id": "BR-2026-0002",
+      "batch_id": "B-24-0418",
+      "product": "Metformin 850mg Tablets",
+      "acting_user_claims": {"sub": "mfg-operator-02", "custom:hcls_role": "MFG_OPERATOR"},
+      "raw_batch_record": {
+        "batch_id": "B-24-0418",
+        "product": "Metformin 850mg Tablets",
+        "required_steps": ["S1", "S2", "S3", "S4"],
+        "steps": [
+          {"id": "S1", "name": "Dispensing", "value": 100.0, "lo": 99.0, "hi": 101.0, "unit": "%", "signed": true, "critical": true},
+          {"id": "S2", "name": "Granulation moisture", "value": 3.4, "lo": 1.5, "hi": 3.0, "unit": "%", "signed": true, "critical": false},
+          {"id": "S3", "name": "Compression force", "value": 13.0, "lo": 10.0, "hi": 15.0, "unit": "kN", "signed": true, "critical": false},
+          {"id": "S4", "name": "Coating weight gain", "value": 3.0, "lo": 2.5, "hi": 4.0, "unit": "%", "signed": false, "critical": false}
+        ]
+      },
+      "lims_results": [
+        {"test": "Assay", "result": 98.9, "lo": 95.0, "hi": 105.0, "unit": "%", "status": "PASS"},
+        {"test": "Dissolution Q30", "result": 84.0, "lo": 80.0, "hi": 100.0, "unit": "%", "status": "PASS"}
+      ]
+    },
+    {
+      "review_id": "BR-2026-0003",
+      "batch_id": "B-24-0419",
+      "product": "Amoxicillin 250mg Capsules",
+      "acting_user_claims": {"sub": "mfg-operator-03", "custom:hcls_role": "MFG_OPERATOR"},
+      "raw_batch_record": {
+        "batch_id": "B-24-0419",
+        "product": "Amoxicillin 250mg Capsules",
+        "required_steps": ["S1", "S2", "S3", "S4"],
+        "steps": [
+          {"id": "S1", "name": "Dispensing", "value": 100.0, "lo": 99.0, "hi": 101.0, "unit": "%", "signed": true, "critical": true},
+          {"id": "S2", "name": "Blend uniformity", "value": 6.0, "lo": 0.0, "hi": 5.0, "unit": "%RSD", "signed": true, "critical": true},
+          {"id": "S4", "name": "Encapsulation weight", "value": 250.0, "lo": 245.0, "hi": 255.0, "unit": "mg", "signed": true, "critical": false}
+        ]
+      },
+      "lims_results": [
+        {"test": "Assay", "result": 92.0, "lo": 95.0, "hi": 105.0, "unit": "%", "status": "OOS"},
+        {"test": "Dissolution Q30", "result": 81.0, "lo": 80.0, "hi": 100.0, "unit": "%", "status": "PASS"}
+      ]
+    }
+  ]
+}

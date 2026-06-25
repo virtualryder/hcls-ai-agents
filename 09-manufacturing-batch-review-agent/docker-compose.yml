@@ -1,0 +1,9 @@
+services:
+  batch-review-agent:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - EXTRACT_MODE=demo
+      - CONNECTOR_MODE=fixture
+      - DISABLE_SECRETS_MANAGER=1

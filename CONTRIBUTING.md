@@ -1,6 +1,6 @@
 # Contributing & Onboarding
 
-Welcome. This repo is a **governed, AWS-native accelerator** of eight Life Sciences
+Welcome. This repo is a **governed, AWS-native accelerator** of nine Life Sciences
 AI agents plus the shared platform that makes them deployable in a regulated
 environment. This guide gets a new SI engineer or solution architect productive
 in about 30 minutes. Read `SUITE-STATUS.md` for the current state, `README.md`
@@ -35,7 +35,7 @@ finalize) executes against deterministic data.
 
 | Path | What it is |
 |---|---|
-| `0N-*-agent/` | The eight agents (LangGraph workflow + tools + app + tests + docs) |
+| `0N-*-agent/` | The nine agents (LangGraph workflow + tools + app + tests + docs) |
 | `platform_core/hcls_agent_platform/` | Shared platform: LLM factory, PHI masking, **MCP gateway**, connectors, secrets, auth, tracing |
 | `governance/` | Grounding, prompt registry, eval harness, HITL-gate tests, red team, fairness |
 | `aws-native-reference/` | Per-agent AWS-native rebuild (Strands + Step Functions) + shared AgentCore runtime |

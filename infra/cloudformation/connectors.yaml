@@ -169,6 +169,30 @@ Resources:
       Environment: { Variables: { CONNECTOR_KIND: mlr, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
       Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
 
+  MesConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-mes"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: mes, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
+  LimsConnector:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-connector-lims"
+      Runtime: python3.11
+      Handler: handler.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !Ref AgentExecutionRoleArn
+      Environment: { Variables: { CONNECTOR_KIND: lims, CONNECTOR_MODE: !Ref ConnectorMode, AUDIT_TABLE: !Ref AuditTableName, ENVIRONMENT: !Ref Environment } }
+      Code: { S3Bucket: !Ref ConnectorCodeBucket, S3Key: !Ref ConnectorCodeKey }
+
 Outputs:
   RimConnectorArn:     { Value: !GetAtt RimConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-rim" } }
   DmsConnectorArn:     { Value: !GetAtt DmsConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-dms" } }
@@ -182,3 +206,5 @@ Outputs:
   QmsConnectorArn:     { Value: !GetAtt QmsConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-qms" } }
   CrmConnectorArn:     { Value: !GetAtt CrmConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-crm" } }
   MlrConnectorArn:     { Value: !GetAtt MlrConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-mlr" } }
+  MesConnectorArn:     { Value: !GetAtt MesConnector.Arn,     Export: { Name: !Sub "hcls-${Environment}-connector-mes" } }
+  LimsConnectorArn:    { Value: !GetAtt LimsConnector.Arn,    Export: { Name: !Sub "hcls-${Environment}-connector-lims" } }

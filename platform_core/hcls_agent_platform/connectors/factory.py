@@ -25,6 +25,8 @@ from typing import Optional
 from .base import Connector
 from .fixtures import (
     FixtureDMS,
+    FixtureLIMS,
+    FixtureMES,
     FixtureGeneric,
     FixtureMedDRA,
     FixtureRIM,
@@ -39,6 +41,8 @@ _FIXTURE_BUILDERS = {
     "safety": FixtureSafety,
     "meddra": FixtureMedDRA,
     "whodrug": FixtureWHODrug,
+    "mes": FixtureMES,
+    "lims": FixtureLIMS,
 }
 _GENERIC_KINDS = {"edc", "ctms", "etmf", "rwd", "qms", "crm", "mlr"}
 

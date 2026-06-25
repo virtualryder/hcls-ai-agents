@@ -11,7 +11,7 @@
 Total cost of ownership, speed to value, platform consolidation, vendor lock-in risk, talent leverage, and the ability to scale a successful pilot to enterprise without rebuilding. They want AI that works within their existing AWS investment — not a separate SaaS contract with a new vendor to manage.
 
 ### How to approach them
-Lead with the platform story, not the agent story. The eight agents are applications; the governed platform is the durable investment. The same gateway, audit trail, identity layer, and governance controls that govern Agent 01 govern all eight — the cost of adding each additional agent falls sharply once the platform is operational.
+Lead with the platform story, not the agent story. The nine agents are applications; the governed platform is the durable investment. The same gateway, audit trail, identity layer, and governance controls that govern Agent 01 govern all nine — the cost of adding each additional agent falls sharply once the platform is operational.
 
 Frame it as **API modernization**: the MCP authorization gateway brings governed, auditable access to systems of record (Veeva, Argus, Medidata, TrackWise) that have historically been accessible only via thick-client or FTP. This is infrastructure value, independent of AI.
 

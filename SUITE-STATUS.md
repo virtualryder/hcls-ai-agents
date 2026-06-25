@@ -7,15 +7,16 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 | Dimension | Status |
 |---|---|
-| Agents | **8**, all built to flagship depth |
-| AWS-native rebuilds | **8** (Strands + Step Functions, `waitForTaskToken` HITL) |
-| Automated tests passing | **452** (platform 21 · governance 13 · agents 263 · native 155) |
+| Agents | **9**, all built to flagship depth (01–08 core lifecycle + 09 Manufacturing Batch-Review) |
+| AWS-native rebuilds | **9** (Strands + Step Functions, `waitForTaskToken` HITL) |
+| Automated tests passing | **488** (platform 21 · governance 13 · agents 277 · native 177) |
 | LLM | Anthropic Claude / in-account Amazon Bedrock + Guardrails / deterministic demo |
 | MCP layer | Two interchangeable gateway modes — portable (API Gateway + Cognito JWT) and managed (Bedrock AgentCore Gateway + Identity) — both fronting shared connector Lambdas (reference logic in `platform_core`) |
 | IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in any Region (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform parity |
 | Live reference path | Agent 02 — real Bedrock + real HTTP connector, end-to-end |
 | GTM collateral | **Cited, generated AWS-style deck system: 8 per-agent decks + executive overview + CIO/CISO board deck** (`decks/`, `make decks`), each with PDF leave-behind (`make decks-pdf`); GTM citation spine (`gtm/HCLS-DECK-SOURCES.md`, `DECK-CONTENT-SPEC.md`, `DEMO-STORYBOARD.md`) + SA-fillable ROI calculator (`gtm/roi-calculator/`, `make roi`); plus the original executive deck, 5-slide teaser, and one-page leave-behind |
 | Enablement | `docs/SA-SE-ENABLEMENT-GUIDE.md`, `docs/FAQ.md`, `docs/CREATE-A-NEW-AGENT.md`; CI in `.github/workflows/ci.yml` (tests · compile · deck build · cfn-lint) |
+| Roadmap agents | **1** cited deck + design spec at Documented maturity — 10 Scientific Intelligence & Target Discovery (R&D); see `docs/specs/`. (09 was promoted to a built agent.) |
 | Maturity | Demonstrated + Deployable-by-design (production-readiness = engagement) |
 
 ## What "flagship depth" means (every agent)
@@ -32,9 +33,12 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 ## Changelog (most recent first)
 
+- **Agent 09 (Manufacturing Batch-Review) built to flagship depth** — promoted from roadmap to a built agent: `09-manufacturing-batch-review-agent/` (LangGraph review-by-exception workflow with a QA release gate, gateway-backed `mes`/`lims` tools, deterministic exception scanner, demo-fallback drafter + grounding check, 3 batch fixtures, Streamlit dashboard, 4-doc set) + an AWS-native rebuild (`aws-native-reference/09-manufacturing-batch-review/`: Strands + Step Functions `waitForTaskToken` QA gate). New connector kinds `mes` + `lims` (policy + fixtures + `connectors.yaml` targets) and roles `MFG_OPERATOR` / `QA_RELEASE`. **36 new tests pass** (14 agent + 22 native); platform/governance/agent-02 unaffected. Suite is now **9 built agents**; 10 (Scientific Intelligence) remains roadmap.
+
 - **Cited AWS-style GTM deck system + GTM citation spine** — brought GTM collateral to (and past) the EDU/SLG standard:
-  - **`decks/` — 11 generated decks.** `build-agent-decks.js` (pptxgenjs) drives 8 per-agent AWS-style decks (issue → cost of doing nothing → governed pipeline → AWS architecture & traffic flow → proof/deploy) + the executive overview from one `AGENTS` content array; `build-cio-deck.js` drives the **CIO / CISO / Director-of-Architecture adoption-review** board deck (verdict, six gateway controls, shortfalls, 3-part shared-responsibility matrix, phased path, go/no-go). AWS palette + speaker notes on every slide. `make decks` builds + recompresses; `make decks-pdf` exports print-ready PDF leave-behinds.
+  - **`decks/` — 12 generated decks (10 per-agent incl. 2 roadmap + executive overview + CIO board deck).** `build-agent-decks.js` (pptxgenjs) drives 8 per-agent AWS-style decks (issue → cost of doing nothing → governed pipeline → AWS architecture & traffic flow → proof/deploy) + the executive overview from one `AGENTS` content array; `build-cio-deck.js` drives the **CIO / CISO / Director-of-Architecture adoption-review** board deck (verdict, six gateway controls, shortfalls, 3-part shared-responsibility matrix, phased path, go/no-go). AWS palette + speaker notes on every slide. `make decks` builds + recompresses; `make decks-pdf` exports print-ready PDF leave-behinds.
   - **`gtm/` — citation spine.** `HCLS-DECK-SOURCES.md` (every deck stat tagged by source class — `[gov/peer-reviewed]`/`[industry-research]`/`[sector-press/estimate]`/`[vendor]`/`[modeled]` — with URLs; vendor/modeled figures flagged, never lead), `DECK-CONTENT-SPEC.md` (per-agent content contract), `DEMO-STORYBOARD.md` (repeatable ~25-min customer demo), and `roi-calculator/` (SA-fillable XLSX + generator, `make roi`).
+  - **Roadmap/expansion agents 09 & 10.** Added cited per-agent decks (`decks/HCLS-09/10-*.pptx`) + DECK-SOURCES entries + design specs (`docs/specs/`) for Manufacturing Batch-Review (CMC/GxP) and Scientific Intelligence & Target Discovery (R&D), extending the lifecycle to manufacturing and discovery. Built via an `EXPANSION` array; the executive overview stays at the 8 built agents to keep maturity honest.
   - **Enablement + CI.** README upgraded with the new collateral, a CI badge, and explicit CIO/CSO/Architect positioning; new `docs/SA-SE-ENABLEMENT-GUIDE.md`, `docs/FAQ.md`, `docs/CREATE-A-NEW-AGENT.md`; new `.github/workflows/ci.yml` (platform/governance/agent tests · byte-compile · deck build · cfn-lint).
 - **Deployable-in-a-new-account hardening** — closed the gaps that blocked a clean first deploy and made both deployment paths real:
   - **Connector Lambdas** (`infra/cloudformation/connectors.yaml` + `aws-native-reference/_shared/connector/handler.py`) — one governed backend per system of record; every gateway target now resolves to a real function that runs each call through `platform_core`'s `MCPGateway` (deny-by-default, approval gate, audit). Validated with a 5-case enforcement smoke test (ALLOW / PENDING_APPROVAL / wrong-kind DENY / API-Gateway-proxy / AgentCore-input shapes).

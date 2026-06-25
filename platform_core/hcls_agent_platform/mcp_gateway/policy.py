@@ -53,6 +53,11 @@ TOOL_REGISTRY: Dict[str, Tuple[str, str, bool]] = {
     "qms.search_similar":         ("qms", "search_similar", False),
     "qms.create_capa_draft":      ("qms", "create_capa_draft", True),          # write
     "qms.close_capa":             ("qms", "close_capa", True),                 # write/irreversible
+    # Manufacturing execution system (electronic batch records) + LIMS
+    "mes.get_batch_record":       ("mes", "get_batch_record", False),
+    "mes.write_disposition_draft": ("mes", "write_disposition_draft", True),    # write
+    "mes.record_disposition":     ("mes", "record_disposition", True),          # write/irreversible
+    "lims.get_results":           ("lims", "get_results", False),
     # CRM / medical affairs
     "crm.get_hcp":                ("crm", "get_hcp", False),
     "mlr.submit_for_review":      ("mlr", "submit_for_review", True),          # write
@@ -89,6 +94,10 @@ AGENT_TOOL_GRANTS: Dict[str, FrozenSet[str]] = {
     "08-medical-affairs-msl": frozenset({
         "crm.get_hcp", "dms.get_document", "mlr.submit_for_review",
     }),
+    "09-manufacturing-batch-review": frozenset({
+        "mes.get_batch_record", "lims.get_results",
+        "mes.write_disposition_draft", "mes.record_disposition",
+    }),
 }
 
 # ── What each USER ROLE is entitled to (the human's real permissions) ─────────
@@ -121,6 +130,13 @@ ROLE_ENTITLEMENTS: Dict[str, FrozenSet[str]] = {
     "EPIDEMIOLOGIST": frozenset({"rwd.run_cohort_query", "ctms.get_study_status"}),
     "MSL": frozenset({"crm.get_hcp", "dms.get_document"}),
     "MEDICAL_AFFAIRS_APPROVER": frozenset({"crm.get_hcp", "dms.get_document", "mlr.submit_for_review"}),
+    "MFG_OPERATOR": frozenset({  # read batch + LIMS, draft a disposition; cannot record it
+        "mes.get_batch_record", "lims.get_results", "mes.write_disposition_draft",
+    }),
+    "QA_RELEASE": frozenset({  # operator rights + the irreversible disposition record (release/reject)
+        "mes.get_batch_record", "lims.get_results", "mes.write_disposition_draft",
+        "mes.record_disposition",
+    }),
 }
 
 

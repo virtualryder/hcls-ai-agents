@@ -89,6 +89,44 @@ class FixtureWHODrug(GenericConnector):
                 "atc": "N02BE01", "confidence": 0.88}
 
 
+class FixtureMES(GenericConnector):
+    """Manufacturing execution system / electronic batch records (review-by-exception)."""
+
+    def __init__(self) -> None:
+        super().__init__("mes")
+
+    def get_batch_record(self, batch_id: str = "B-DEMO", **_: Any) -> Dict[str, Any]:
+        return {
+            "batch_id": batch_id, "product": "DEMO-PRODUCT",
+            "required_steps": ["S1", "S2"],
+            "steps": [
+                {"id": "S1", "name": "Dispensing", "value": 100.0, "lo": 99.0, "hi": 101.0,
+                 "unit": "%", "signed": True, "critical": True},
+                {"id": "S2", "name": "Compression force", "value": 12.0, "lo": 10.0, "hi": 15.0,
+                 "unit": "kN", "signed": True, "critical": False},
+            ],
+        }
+
+    def write_disposition_draft(self, **kwargs: Any) -> Dict[str, Any]:
+        return {"disposition_id": "DISP-DRAFT-0001", "status": "DRAFT", "created": True, "echo": kwargs}
+
+    def record_disposition(self, **kwargs: Any) -> Dict[str, Any]:
+        return {"disposition_id": "DISP-0001", "recorded": True, "echo": kwargs}
+
+
+class FixtureLIMS(GenericConnector):
+    """Laboratory information management system — QC test results for a batch."""
+
+    def __init__(self) -> None:
+        super().__init__("lims")
+
+    def get_results(self, batch_id: str = "B-DEMO", **_: Any) -> List[Dict[str, Any]]:
+        return [
+            {"test": "Assay", "result": 99.5, "lo": 95.0, "hi": 105.0, "unit": "%", "status": "PASS"},
+            {"test": "Dissolution Q30", "result": 88.0, "lo": 80.0, "hi": 100.0, "unit": "%", "status": "PASS"},
+        ]
+
+
 class FixtureGeneric(GenericConnector):
     """Backs EDC, CTMS, eTMF, RWD, QMS, CRM, MLR with canned, safe responses."""
 

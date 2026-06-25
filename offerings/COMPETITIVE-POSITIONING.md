@@ -55,7 +55,7 @@ Major life-sciences software vendors are embedding AI features into their platfo
 
 **SI positioning against vendor AI:**
 
-The vendor AI story is "one product, one system, one vendor's AI." The HCLS suite story is "one governed platform, eight workflows, all systems, your AI governance model." 
+The vendor AI story is "one product, one system, one vendor's AI." The HCLS suite story is "one governed platform, nine workflows, all systems, your AI governance model." 
 
 Three specific differentiators:
 
@@ -101,7 +101,7 @@ Emerging SaaS vendors are building AI tools for specific pharma/biotech function
 
 | Dimension | This suite (SI-delivered) | Vendor-embedded AI | General-purpose AI platform | Build internally |
 |---|---|---|---|---|
-| Cross-system workflow coverage | Eight agents, all major LS SoRs | One system per vendor | Limited domain controls | Possible, but 6–12 months of compliance engineering first |
+| Cross-system workflow coverage | Nine agents, all major LS SoRs | One system per vendor | Limited domain controls | Possible, but 6–12 months of compliance engineering first |
 | GxP / Part 11 controls | Built in (audit trail, e-sig, HITL) | Varies by vendor; limited customer inspection | Not built for GxP | Customer builds from scratch |
 | PHI data residency | In-account (customer's AWS) | Vendor infrastructure | Cloud-provider infrastructure | Customer-controlled |
 | Governance model | Customer-controlled (prompt registry, eval harness) | Vendor-controlled | Not life-sciences-specific | Customer-built |

@@ -1,7 +1,7 @@
 # Enterprise Platform
 ### HCLS AI Agent Suite — Architecture, Compliance, and Governance Story
 
-> **An AI agent suite that a life-sciences enterprise can actually deploy is not primarily a model story. It is an API modernization, authorization, identity, and compliance-by-design story. The eight agents in this suite are the application layer above a platform that would need to exist regardless of what agents run on top of it.**
+> **An AI agent suite that a life-sciences enterprise can actually deploy is not primarily a model story. It is an API modernization, authorization, identity, and compliance-by-design story. The nine agents in this suite are the application layer above a platform that would need to exist regardless of what agents run on top of it.**
 
 ---
 
@@ -136,7 +136,7 @@ This pull-request-based catalog governance ensures that agent capability creep i
 **Decision.** **In-process LangGraph today; A2A-through-AgentCore when multi-agent is needed.**
 - **Layer 1 — intra-agent:** each agent is a single compiled **LangGraph `StateGraph`**. Steps coordinate as in-process function calls within one runtime. No network protocol, no A2A.
 - **Layer 2 — agent → tool / system of record:** **every** call routes through the MCP authorization gateway (**Amazon Bedrock AgentCore Gateway + Identity**) and is authorized, scoped, and **written to the append-only audit trail**. This is where "log every interaction" happens.
-- **Layer 3 — agent → agent (A2A):** **not used in the current suite.** The eight agents are independent; none calls another. A2A is introduced **only** when a use case genuinely requires cross-process / cross-org multi-agent orchestration (a supervisor calling a specialist as a separate service, or interop with a partner/CRO agent).
+- **Layer 3 — agent → agent (A2A):** **not used in the current suite.** The nine agents are independent; none calls another. A2A is introduced **only** when a use case genuinely requires cross-process / cross-org multi-agent orchestration (a supervisor calling a specialist as a separate service, or interop with a partner/CRO agent).
 
 | Layer | Mechanism today | Governed / audited by |
 |---|---|---|
