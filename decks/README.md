@@ -1,6 +1,6 @@
 # HCLS AI Agent Suite — Go-to-Market Decks
 
-Eleven PowerPoint decks for the **HCLS AI Agent Suite** — eight governed AI agents for
+Ten PowerPoint decks (each with a matching PDF leave-behind) for the **HCLS AI Agent Suite** — eight governed AI agents for
 life-sciences organizations, a suite executive overview, and a board-level CIO/CISO
 adoption review. The eight agent decks and the overview are generated from a single
 `pptxgenjs` generator ([`build-agent-decks.js`](build-agent-decks.js)) so they share one
