@@ -50,3 +50,15 @@ cdk.out/
 *.tfstate
 *.tfstate.backup
 .terraform/
+
+# Node / deck tooling
+node_modules/
+package-lock.json
+
+# QA render scratch
+_deckqa/
+_fv/
+
+# LibreOffice lock files & temp files
+.~lock.*#
+*.tmp

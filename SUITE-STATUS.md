@@ -14,7 +14,8 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 | MCP layer | Two interchangeable gateway modes — portable (API Gateway + Cognito JWT) and managed (Bedrock AgentCore Gateway + Identity) — both fronting shared connector Lambdas (reference logic in `platform_core`) |
 | IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in any Region (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform parity |
 | Live reference path | Agent 02 — real Bedrock + real HTTP connector, end-to-end |
-| GTM collateral | Executive deck, 5-slide teaser, one-page leave-behind |
+| GTM collateral | **Cited, generated AWS-style deck system: 8 per-agent decks + executive overview + CIO/CISO board deck** (`decks/`, `make decks`), each with PDF leave-behind (`make decks-pdf`); GTM citation spine (`gtm/HCLS-DECK-SOURCES.md`, `DECK-CONTENT-SPEC.md`, `DEMO-STORYBOARD.md`) + SA-fillable ROI calculator (`gtm/roi-calculator/`, `make roi`); plus the original executive deck, 5-slide teaser, and one-page leave-behind |
+| Enablement | `docs/SA-SE-ENABLEMENT-GUIDE.md`, `docs/FAQ.md`, `docs/CREATE-A-NEW-AGENT.md`; CI in `.github/workflows/ci.yml` (tests · compile · deck build · cfn-lint) |
 | Maturity | Demonstrated + Deployable-by-design (production-readiness = engagement) |
 
 ## What "flagship depth" means (every agent)
@@ -31,6 +32,10 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 ## Changelog (most recent first)
 
+- **Cited AWS-style GTM deck system + GTM citation spine** — brought GTM collateral to (and past) the EDU/SLG standard:
+  - **`decks/` — 11 generated decks.** `build-agent-decks.js` (pptxgenjs) drives 8 per-agent AWS-style decks (issue → cost of doing nothing → governed pipeline → AWS architecture & traffic flow → proof/deploy) + the executive overview from one `AGENTS` content array; `build-cio-deck.js` drives the **CIO / CISO / Director-of-Architecture adoption-review** board deck (verdict, six gateway controls, shortfalls, 3-part shared-responsibility matrix, phased path, go/no-go). AWS palette + speaker notes on every slide. `make decks` builds + recompresses; `make decks-pdf` exports print-ready PDF leave-behinds.
+  - **`gtm/` — citation spine.** `HCLS-DECK-SOURCES.md` (every deck stat tagged by source class — `[gov/peer-reviewed]`/`[industry-research]`/`[sector-press/estimate]`/`[vendor]`/`[modeled]` — with URLs; vendor/modeled figures flagged, never lead), `DECK-CONTENT-SPEC.md` (per-agent content contract), `DEMO-STORYBOARD.md` (repeatable ~25-min customer demo), and `roi-calculator/` (SA-fillable XLSX + generator, `make roi`).
+  - **Enablement + CI.** README upgraded with the new collateral, a CI badge, and explicit CIO/CSO/Architect positioning; new `docs/SA-SE-ENABLEMENT-GUIDE.md`, `docs/FAQ.md`, `docs/CREATE-A-NEW-AGENT.md`; new `.github/workflows/ci.yml` (platform/governance/agent tests · byte-compile · deck build · cfn-lint).
 - **Deployable-in-a-new-account hardening** — closed the gaps that blocked a clean first deploy and made both deployment paths real:
   - **Connector Lambdas** (`infra/cloudformation/connectors.yaml` + `aws-native-reference/_shared/connector/handler.py`) — one governed backend per system of record; every gateway target now resolves to a real function that runs each call through `platform_core`'s `MCPGateway` (deny-by-default, approval gate, audit). Validated with a 5-case enforcement smoke test (ALLOW / PENDING_APPROVAL / wrong-kind DENY / API-Gateway-proxy / AgentCore-input shapes).
   - **Two MCP gateway modes, one policy** — new `gateway-portable.yaml` (API Gateway HTTP API + Cognito JWT authorizer, **any Region**) alongside the fixed `agentcore-gateway.yaml` (now references real connector ARNs, all 12 targets). Pick with `GatewayMode`.

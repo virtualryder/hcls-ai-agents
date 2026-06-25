@@ -1,6 +1,8 @@
 # HCLS AI Agent Suite
 ### Governed AI Agents for Life Sciences — Built on AWS
 
+[![CI](https://github.com/virtualryder/hcls-ai-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/virtualryder/hcls-ai-agents/actions/workflows/ci.yml)
+
 > **The agents are not the product. The governed platform that makes them deployable, auditable, and compliant is.**
 
 A large systems integrator deploying AI in a pharmaceutical, biotech, medtech, or CRO environment cannot hand a customer a collection of LLM calls and call it done. Every regulated artifact an agent touches — an ICSR report, a submission section, a CAPA record — carries data-integrity, e-signature, and accountability obligations that exist before the first line of agent code is written. This suite embeds those controls from the first commit: deny-by-default authorization, PHI masking, grounding verification, prompt version pinning, a human gate that is framework-enforced (not merely documented), and a tamper-evident audit trail that satisfies 21 CFR Part 11.
@@ -197,11 +199,26 @@ Ready-to-use GTM material lives at the repository root:
 
 | Artifact | Use |
 |---|---|
-| `HCLS-Agentic-AI-Suite-Executive-Overview.pptx` | 16-slide executive deck for sales, solution architects, and delivery |
+| `decks/HCLS-01..08-*.pptx` | **Eight per-agent AWS-style decks** (6-slide: issue → cost of doing nothing → governed pipeline → AWS architecture & traffic flow → proof/deploy). Every stat cited and source-class-tagged; speaker notes on every slide. |
+| `decks/HCLS-Agentic-AI-Suite-Executive-Overview.pptx` | ~11-slide suite overview: thesis, shared architecture, 8-agent portfolio, governance spine, maturity ladder, land-and-expand, cost-of-inaction. |
+| `decks/HCLS-CIO-Adoption-Review.pptx` | **Board-ready CIO / CISO / Director of Architecture deck** — honest-broker verdict, six gateway controls, shortfalls, shared-responsibility matrix, phased path, go/no-go. |
+| `HCLS-Agentic-AI-Suite-Executive-Overview.pptx` | Original 16-slide executive deck (root) for sales, SAs, and delivery |
 | `HCLS-Customer-Teaser-5slide.pptx` | 5-slide customer-facing teaser |
 | `HCLS-One-Pager.pdf` | One-page leave-behind (print-ready; editable `.pptx` source included) |
 
+The decks are generated from cited source-of-truth files and regenerate with `node decks/build-agent-decks.js` and `node decks/build-cio-deck.js` (see `decks/README.md`). Every figure traces to **`gtm/HCLS-DECK-SOURCES.md`** (each stat tagged `[gov/peer-reviewed]` · `[industry-research]` · `[sector-press/estimate]` · `[vendor]` · `[modeled]` with URLs). The GTM spine also includes `gtm/DECK-CONTENT-SPEC.md` (per-agent content contract), `gtm/DEMO-STORYBOARD.md` (a repeatable ~25-min customer demo), and `gtm/roi-calculator/` (an SA-fillable ROI workbook).
+
 Per-agent **tailored deployment handbook PDFs** are in `deliverables/agent-handbooks/`, and all collateral regenerates from source with `make handbooks` (see `tooling/handbooks/`). Deeper written collateral: `offerings/` (POC, pilot, assessment, managed service, TCO/ROI calculator, battlecard, SOW template, objection-handling, competitive, TPRM), `runbooks/` (incident, DR, HITL queue, model degradation), and `docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`.
+
+### Positioning to a CIO, CSO/CISO, or Director of Architecture
+
+The deck system is built around the buyer in the room — lead with the one sentence that lands for each:
+
+- **CIO** — *"One governed control plane carries all eight workloads; this compresses an SI-led build instead of adding ungoverned shadow AI."* The platform is the asset; the agents are interchangeable, regulated workloads on top of it. Open with `Executive-Overview`, land on the maturity ladder and land-and-expand path.
+- **CSO / CISO** — *"The controls are enforced in the gateway, outside the model — a prompt cannot disable deny-by-default, the HITL gate, PHI masking, or the audit trail."* Use the `CIO-Adoption-Review` "Why a CISO can say yes" slide and the red-team demo; the bright line (causality, reportability, what's submitted, what reaches an HCP) is never decided by the agent.
+- **Director of Architecture** — *"The AWS reference is real and deployable — CloudFormation dual-gateway, in-VPC Bedrock + Guardrails, Step Functions `waitForTaskToken` HITL — and the gaps are scoped honestly."* Drive the per-agent **architecture & traffic-flow** slide, `docs/SUITE-ARCHITECTURE.md`, `docs/WELL-ARCHITECTED-REVIEW.md`, and the shared-responsibility matrix, then a `docs/DEPLOY-QUICKSTART.md` walkthrough.
+
+For the full run of show, see **`gtm/DEMO-STORYBOARD.md`**.
 
 **AWS go-to-market mechanics** — the following docs answer the questions AWS sellers and SAs ask before a deal can progress:
 
@@ -240,6 +257,16 @@ hcls-ai-agents/
 ├── 06-protocol-design-agent/           # Clinical Protocol Design & Feasibility
 ├── 07-rwe-heor-agent/                  # Real-World Evidence / HEOR
 ├── 08-medical-affairs-msl-agent/       # Medical Affairs / MSL Copilot
+│
+├── decks/                              # GTM decks + generators (8 agent + overview + CIO/CISO board deck)
+│   ├── build-agent-decks.js           # pptxgenjs: 8 AWS-style agent decks + executive overview
+│   └── build-cio-deck.js              # pptxgenjs: CIO / CISO / Architecture adoption-review deck
+│
+├── gtm/                                # Citation spine + demo + ROI
+│   ├── HCLS-DECK-SOURCES.md            # Every deck stat, source-class-tagged, with URLs
+│   ├── DECK-CONTENT-SPEC.md            # Per-agent deck content contract (auditable)
+│   ├── DEMO-STORYBOARD.md              # Repeatable ~25-min customer demo run of show
+│   └── roi-calculator/                # SA-fillable ROI workbook + generator
 │
 ├── platform_core/                      # Shared platform — LLM factory, PHI masker, MCP gateway, connectors
 │   └── hcls_agent_platform/

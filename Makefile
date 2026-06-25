@@ -5,7 +5,7 @@ HB     := tooling/handbooks
 CONSOLE:= docs/assets/console
 AGENTS := deliverables/agent-handbooks
 
-.PHONY: help handbooks figures master agent-handbooks deck install clean-handbooks \
+.PHONY: help handbooks figures master agent-handbooks deck decks decks-pdf roi install clean-handbooks \
         build-lambdas deploy
 
 help:
@@ -13,6 +13,10 @@ help:
 	@echo "  -- AWS deployment --"
 	@echo "  make build-lambdas   package all agent + connector zips WITH deps (scripts/build_lambdas.sh)"
 	@echo "  make deploy AGENT=02-pharmacovigilance CFN_BUCKET=.. CODE_BUCKET=..   stage + deploy quickstart"
+	@echo "  -- GTM decks & ROI --"
+	@echo "  make decks           build 8 agent + overview + CIO decks (needs npm install) and recompress"
+	@echo "  make decks-pdf       export all GTM decks to PDF leave-behinds (needs LibreOffice)"
+	@echo "  make roi             regenerate the SA-fillable ROI calculator workbook"
 	@echo "  -- collateral --"
 	@echo "  make install         pip install the generation toolchain"
 	@echo "  make handbooks       regenerate figures + master PDF + all 8 agent PDFs"
@@ -62,6 +66,22 @@ handbooks: figures master agent-handbooks
 deck: HCLS-Agentic-AI-Suite-Executive-Overview.pdf
 HCLS-Agentic-AI-Suite-Executive-Overview.pdf: HCLS-Agentic-AI-Suite-Executive-Overview.pptx
 	soffice --headless --convert-to pdf --outdir . $<
+
+# --- GTM decks (pptxgenjs; requires `npm install`) --------------------------
+# Builds 8 agent decks + executive overview + CIO/CISO board deck, then deflate-
+# recompresses (pptxgenjs writes uncompressed ZIPs).
+decks:
+	node decks/build-agent-decks.js
+	node decks/build-cio-deck.js
+	$(PYTHON) decks/recompress.py
+
+# --- GTM deck PDF leave-behinds (requires LibreOffice 'soffice') ------------
+decks-pdf:
+	soffice --headless --convert-to pdf --outdir decks decks/HCLS-*.pptx
+
+# --- ROI calculator workbook ------------------------------------------------
+roi:
+	$(PYTHON) gtm/roi-calculator/generate_roi_calculator.py
 
 clean-handbooks:
 	rm -f HCLS-Deployment-Handbook.pdf $(AGENTS)/*.pdf \
