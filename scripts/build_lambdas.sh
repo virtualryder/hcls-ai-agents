@@ -24,7 +24,7 @@ PY="${PYTHON:-python3}"
 AGENTS=(
   01-regulatory-writing 02-pharmacovigilance 03-clinical-trial-ops
   04-site-patient-matching 05-quality-capa 06-protocol-design
-  07-rwe-heor 08-medical-affairs-msl
+  07-rwe-heor 08-medical-affairs-msl 09-manufacturing-batch-review
 )
 if [[ $# -ge 1 ]]; then AGENTS=("$1"); fi
 
