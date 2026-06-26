@@ -53,6 +53,22 @@ Every agent and platform component is positioned honestly against four levels:
 | **08** | Medical Affairs / MSL Copilot | Field medical teams need rapid, on-label, evidence-grounded responses for HCP interactions; off-label guardrails must be technical, not procedural | CRM (Veeva CRM), DMS/MSL portals, MLR workflow | FDA off-label promotion rules, OIG guidance, ABPI/EFPIA codes, MLR SOP |
 | **09** | Manufacturing Batch-Review | Batch-record review and OOS/deviation investigation are slow, manual, and senior-labor-heavy; review by exception with a QA release gate | MES / electronic batch records, LIMS | cGMP 21 CFR 211, 21 CFR 211.192, 21 CFR Part 11, EU GMP Annex 11 |
 
+### Cited highlights
+
+One headline figure and the cost of doing nothing per agent — every stat is source-class-tagged and traces to **[`gtm/HCLS-DECK-SOURCES.md`](gtm/HCLS-DECK-SOURCES.md)** (with URLs). `[gov]` = gov/peer-reviewed · `[ind]` = industry-research · `[est]` = sector-press/estimate · `[mod]` = modeled · `[ven]` = vendor.
+
+- **01 Regulatory Writing** — $2.6B per approved drug `[gov]` (DiMasi/Tufts); cost of inaction **~$60M lost per month of submission delay** `[ind]` (McKinsey). Outcome proxy: CSR first draft 180→80 hrs `[ven]` (Merck).
+- **02 Pharmacovigilance** — ~28M cumulative FAERS reports `[gov]` (FDA); **~$2.0M/yr** modeled case-intake cost `[mod]`. Outcome: 40–70% data-entry-time cut `[gov]` (Schmider 2019).
+- **03 Clinical Trial Ops & TMF** — **~$800K/day** lost sales + ~$40K/day direct per day of delay `[gov]` (Tufts 2024); **~$25.7M** per 30-day database-lock slip `[mod]`.
+- **04 Site Selection & Patient Matching** — ~80% of trials miss their enrollment timeline `[est]`; **~$24M/launch** modeled from a 30-day pull-in `[mod]`. *(No independent AI ROI benchmark — labeled modeled.)*
+- **05 Quality / CAPA** — CAPA (21 CFR 820.100) is the **#1-cited FDA device 483 clause** `[gov]`; **$10M–$100M per recall** `[ind]`.
+- **06 Clinical Protocol Design** — ~57% of protocols amended, ~45% avoidable `[ind]` (Tufts); **~$535K per avoidable Phase III amendment** `[ind]`.
+- **07 Real-World Evidence / HEOR** — ~45% of analyst time on data prep `[est]` (Anaconda); **~$1.3M/yr per 20-person team** of non-analytic labor `[mod]`.
+- **08 Medical Affairs / MSL** — MLR review stretches weeks→months `[est]`; **billions in off-label FCA exposure** `[gov]` (GSK $3B, Pfizer $2.3B). Outcome: 50–70% MLR time reducible `[ind]` (McKinsey).
+- **09 Manufacturing Batch-Review** — **62% of US drug shortages trace to manufacturing/quality** `[gov]` (FDA); **~$420K/yr** modeled investigation labor `[mod]`. Outcome: >50% deviation reduction at a benchmarked site `[ind]` (McKinsey).
+- **10 Scientific Intelligence & Target Discovery** *(roadmap)* — **~86% of programs entering the clinic fail** `[gov]` (Wong/Siah/Lo 2019); **~$2.6B per drug** / ~$430M preclinical `[ind]`.
+
+
 ---
 
 ## Shared Platform
