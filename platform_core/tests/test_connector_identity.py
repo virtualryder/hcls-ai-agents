@@ -62,9 +62,10 @@ def test_body_identity_allowed_only_in_local_test(monkeypatch):
 
 
 def test_audit_mirror_is_conditional_and_fail_closed():
-    # The audit writer must use a conditional (immutable) put and must not swallow
-    # non-idempotent failures.
+    # The immutable audit writer must use a conditional (immutable) put and must not
+    # swallow non-idempotent failures (round-2 #4 renamed it to _put_immutable).
     src = _HANDLER.read_text()
     assert "attribute_not_exists(audit_id)" in src
     assert "ConditionalCheckFailedException" in src
-    assert "raise" in src.split("_audit_to_dynamo")[1][:1200]
+    block = src.split("def _put_immutable")[1][:900]
+    assert "raise" in block
