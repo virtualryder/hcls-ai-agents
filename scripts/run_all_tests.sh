@@ -10,7 +10,12 @@
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 export EXTRACT_MODE=demo CONNECTOR_MODE=fixture PYTHONPATH="platform_core:."
-PY="${PYTHON:-python3}"
+# Default to python on Windows (python3 is often the MS Store stub), python3 elsewhere.
+if [ -z "${PYTHON:-}" ]; then
+  case "$(uname -s)" in CYGWIN*|MINGW*|MSYS*) PY=python;; *) PY=python3;; esac
+else
+  PY="$PYTHON"
+fi
 
 SUITES=( "platform_core/tests" "governance/tests" )
 for a in [0-9][0-9]-*-agent; do SUITES+=( "$a/tests" ); done
