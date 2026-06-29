@@ -5,12 +5,12 @@
 ## Progress (live)
 - ✅ **Phase 1 — CISO/CIO security doc kit** (SECURITY.md + THREAT-MODEL + NIST 800-53 matrix + OWASP-LLM/ATLAS + IR & key-mgmt + production-readiness + README question index).
 - ✅ **Phase 2 — defense-in-depth in code** (consequential commits withheld from agents + enforcing test; bound approval tokens with SoD/single-use/args-binding).
-- ✅ **Phase 4 — one-command test harness** (`make test` → 492 tests across 20 suites; CI updated).
+- ✅ **Phase 4 — one-command test harness** (`make test` → 503 tests across 20 suites; CI updated).
 - ✅ **Phase 3 — deploy ergonomics:** `edge.yaml` + **9 per-agent SAM golden paths** (cfn-lint clean) + `infra/GOLDEN-PATHS.md`.
 - ✅ **Phase 5+6 — hygiene + combined leave-behind:** VERSION/SOURCES.md/CHANGELOG.md + a 77-page combined PDF leave-behind (`decks/leave-behinds/`).
 
 ## Verdict up front
-HCLS is **already ahead of SLG** on: **9 built agents** (vs. 8) including a **live Bedrock + connector path** (Agent 02), **cited AWS-style per-agent decks + CIO board deck + ROI calculator**, a beginner deploy cheat sheet, and **492 tests** (vs. ~224 SLG test functions). The gap is **not** agents or GTM — it's **security/CISO documentation, deploy ergonomics, defense-in-depth in code, and a one-command test harness**, where SLG is meaningfully deeper. Close those five areas and HCLS exceeds SLG on every axis.
+HCLS is **already ahead of SLG** on: **9 built agents** (vs. 8) including a **live Bedrock + connector path** (Agent 02), **cited AWS-style per-agent decks + CIO board deck + ROI calculator**, a beginner deploy cheat sheet, and **503 tests** (vs. ~224 SLG test functions). The gap is **not** agents or GTM — it's **security/CISO documentation, deploy ergonomics, defense-in-depth in code, and a one-command test harness**, where SLG is meaningfully deeper. Close those five areas and HCLS exceeds SLG on every axis.
 
 ---
 

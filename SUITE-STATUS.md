@@ -9,7 +9,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 |---|---|
 | Agents | **9**, all built to flagship depth (01–08 core lifecycle + 09 Manufacturing Batch-Review) |
 | AWS-native rebuilds | **9** (Strands + Step Functions, `waitForTaskToken` HITL) |
-| Automated tests passing | **492** (platform 31 · governance 7 · agents 277 · native 177), verified in one command via `make test` |
+| Automated tests passing | **503** (platform 35 · governance 7 · agents 277 · native 184), verified in one command via `make test` |
 | LLM | Anthropic Claude / in-account Amazon Bedrock + Guardrails / deterministic demo |
 | MCP layer | Two interchangeable gateway modes — portable (API Gateway + Cognito JWT) and managed (Bedrock AgentCore Gateway + Identity) — both fronting shared connector Lambdas (reference logic in `platform_core`) |
 | IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in any Region (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform parity |
@@ -33,10 +33,19 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 ## Changelog (most recent first)
 
+- **External-review remediation (P0)** — an independent review (58/100) found gaps between the control
+  narrative and the *deployed* path; all P0 items closed and verified one-command (`docs/CHATGPT-REVIEW-REMEDIATION-PLAN.md`):
+  deployed-path **bound-approval enforcement** in `finalize` (SoD/expiry/args/single-use, `STRICT_APPROVAL` fail-closed,
+  governed-connector submit); **authorizer-only identity** in the connector; review/approval unified on `approval_id`;
+  **immutable fail-closed audit** (conditional `PutItem`, no Update/BatchWrite IAM); **customer IdP federation** (Cognito
+  SAML/OIDC provider + `docs/IDP-FEDERATION-RUNBOOK.md`); **VPC PrivateLink isolation** (gateway + interface endpoints,
+  flow logs, 443-only egress, VPC-attached Lambdas) with the VPC claim corrected to accurate framing; **container path**
+  completed (internal ALB + `/ping`), SAM golden path canonical; **CI fail-closed**. Suite **492 → 503**.
+
 - **Security & deployability deepening (SLG-parity pass)** — closed the gaps where SLG-AI-Agents went deeper, so HCLS now exceeds it on every axis:
   - **CISO/CIO security answer kit:** `SECURITY.md` + `docs/THREAT-MODEL.md` (STRIDE→control→file) + `docs/NIST-800-53-CONTROL-MATRIX.md` + `docs/OWASP-LLM-ATLAS-MAPPING.md` + `docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md` + `docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md`, plus a README "CISO/CIO question index".
   - **Defense-in-depth in code:** the irreversible commit (`safety.submit_report`/`qms.close_capa`/`mes.record_disposition`) is **withheld from every agent grant** (`policy.CONSEQUENTIAL_COMMITS`), enforced by `test_consequential_actions_withheld_from_agents`; a bound human-approval primitive (`mcp_gateway/approvals.py`: single-use, separation-of-duties, args-bound; `STRICT_APPROVAL` for prod). 02/09 finalize now write reversible drafts.
-  - **One-command test harness:** `make test` / `scripts/run_all_tests.sh` runs all **492** tests across 20 suites and prints one total; root `conftest.py` + `pytest.ini`.
+  - **One-command test harness:** `make test` / `scripts/run_all_tests.sh` runs all **503** tests across 20 suites and prints one total; root `conftest.py` + `pytest.ini`.
   - **Deploy ergonomics:** `infra/cloudformation/edge.yaml` (CloudFront + WAF) closes the edge-in-IaC gap; **per-agent SAM golden paths** (`infra/golden-path-<agent>/` × 9: `template.yaml` + `deploy.sh` + `destroy.sh` + `smoke_test.sh` + `mint_approval.py` + layer) so an SA deploys one agent from a single folder — all cfn-lint clean. Index: `infra/GOLDEN-PATHS.md`.
   - **Hygiene:** `CHANGELOG.md`, `VERSION`, `SOURCES.md`; `decks/leave-behinds/HCLS-AI-Agent-Suite-COMBINED.pdf` (77-page all-in-one); `09-manufacturing-batch-review` added to the Lambda build list.
 

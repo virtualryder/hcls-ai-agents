@@ -9,7 +9,7 @@ A large systems integrator deploying AI in a pharmaceutical, biotech, medtech, o
 
 The result is a deployable accelerator — not a certified product — that gives an SI engagement team a credible, compliant starting point across nine high-value life-sciences workflows.
 
-**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **492 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + two interchangeable MCP gateway modes + native/container agent) deployable in a new customer account in any Region · Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included.
+**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **503 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + two interchangeable MCP gateway modes + native/container agent) deployable in a new customer account in any Region · Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included · **external-review hardening (P0):** deployed-path human-approval enforcement (bound, single-use, separation-of-duties, args-bound tokens; `STRICT_APPROVAL` fails closed), authenticated-authorizer-only identity, immutable fail-closed audit, customer IdP (SAML/OIDC) federation, VPC PrivateLink isolation, and fail-closed CI.
 
 ---
 
@@ -35,7 +35,7 @@ Every agent and platform component is positioned honestly against four levels:
 | **Deployable** | CloudFormation templates, container contracts (ARM64, `/invocations`, `/ping`), and CI pass; requires customer AWS account and Bedrock access | Suitable for a customer pilot with SI-managed infrastructure |
 | **Production-ready** | Customer computer-system validation (CSV) complete, IdP integrated, connectors tested against live systems, penetration test passed | Engagement milestone, not a day-one deliverable |
 
-**All nine agents are built to flagship depth** — a full LangGraph workflow, governed tool access, deterministic fixtures, flagship-level test suites, a Streamlit dashboard, a four-document doc set, and a matching **AWS-native rebuild** (Strands + Step Functions with a `waitForTaskToken` human gate). Agent 02 (Pharmacovigilance) additionally ships a **live path**: real Amazon Bedrock inference and a real HTTP system-of-record connector, exercised end-to-end (see `02-pharmacovigilance-agent/demo/`). The suite sits at **Demonstrated + Deployable-by-design**: 492 automated tests pass with no API key; production-readiness (CSV/CSA, live integration, penetration test) is the engagement. (A tenth agent, 10 Scientific Intelligence & Target Discovery, is at roadmap/Documented maturity — cited deck + design spec.)
+**All nine agents are built to flagship depth** — a full LangGraph workflow, governed tool access, deterministic fixtures, flagship-level test suites, a Streamlit dashboard, a four-document doc set, and a matching **AWS-native rebuild** (Strands + Step Functions with a `waitForTaskToken` human gate). Agent 02 (Pharmacovigilance) additionally ships a **live path**: real Amazon Bedrock inference and a real HTTP system-of-record connector, exercised end-to-end (see `02-pharmacovigilance-agent/demo/`). The suite sits at **Demonstrated + Deployable-by-design**: 503 automated tests pass with no API key; production-readiness (CSV/CSA, live integration, penetration test) is the engagement. (A tenth agent, 10 Scientific Intelligence & Target Discovery, is at roadmap/Documented maturity — cited deck + design spec.)
 
 ---
 
@@ -133,11 +133,11 @@ withheld from every agent** — only a bound human reviewer may commit (enforced
 | "What about prompt injection / OWASP-LLM?" | [`docs/OWASP-LLM-ATLAS-MAPPING.md`](docs/OWASP-LLM-ATLAS-MAPPING.md) — OWASP LLM Top-10 + MITRE ATLAS |
 | "Can the AI take an irreversible action?" | No — `policy.CONSEQUENTIAL_COMMITS` is withheld from every agent grant; a bound human reviewer commits ([`SECURITY.md`](SECURITY.md) §3) |
 | "How is human approval tamper-proof?" | Bound tokens: single-use, separation-of-duties, args-bound (`mcp_gateway/approvals.py`); `STRICT_APPROVAL=1` in prod |
-| "Does PHI leave our account?" | No — masked before any model/audit write; in-VPC Bedrock; no egress ([`docs/THREAT-MODEL.md`](docs/THREAT-MODEL.md) T4) |
+| "Does PHI leave our account?" | Masked before any model/audit write; in-VPC Bedrock; in-account AWS traffic kept on VPC endpoints (PrivateLink/gateway), **configurable, on by default** in the customer-VPC deployment ([`docs/THREAT-MODEL.md`](docs/THREAT-MODEL.md) T4, `infra/cloudformation/network.yaml`) |
 | "What's your incident response / key management?" | [`docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md`](docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md) |
 | "What's reference vs. what we must finish?" | [`docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md`](docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md) |
 | "How do we report a vulnerability?" | [`SECURITY.md`](SECURITY.md) |
-| "How do we know it behaves?" | **492 automated tests** (incl. governance + red-team + the commit-withholding test), one command: `make test` |
+| "How do we know it behaves?" | **503 automated tests** (incl. governance + red-team + the commit-withholding test), one command: `make test` |
 
 For per-stakeholder talk tracks see [`docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`](docs/STAKEHOLDER-SECURITY-BRIEFINGS.md) and the board deck `decks/HCLS-CIO-Adoption-Review.pptx`.
 
