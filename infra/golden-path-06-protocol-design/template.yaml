@@ -1,0 +1,259 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  HCLS Golden Path — 06 Clinical Protocol Design & Feasibility, fully wired end to end.
+  Deploys the real agent workflow: a shared layer (platform_core + governance + core), the five
+  workflow Lambdas (assemble -> draft -> check -> human gate (waitForTaskToken) -> finalize), the
+  governed connector Lambda (the deployed gateway enforcement point), the Step Functions state
+  machine from the native ASL, an HTTP API with a Cognito JWT authorizer + access logging +
+  throttling, a PHI-tuned Bedrock Guardrail (prompt-attack in+out), an append-only audit table, and
+  a pending-approvals table. Per-function least-privilege roles. Deploy: ./deploy.sh ; tear down: ./destroy.sh
+  NOTE: irreversible regulated commits are WITHHELD from the agent (policy.CONSEQUENTIAL_COMMITS);
+  the agent records a DRAFT and a qualified person commits. CSV/CSA + live connectors are the engagement.
+
+Parameters:
+  Environment: { Type: String, Default: dev, AllowedValues: [dev, test, prod] }
+  ConnectorMode: { Type: String, Default: fixture, AllowedValues: [fixture, live] }
+  BedrockModelId: { Type: String, Default: anthropic.claude-3-5-sonnet-20240620-v1:0 }
+  TokenSecret:
+    Type: String
+    NoEcho: true
+    Default: dev-only-not-for-production
+    Description: "HMAC secret for gateway/approval tokens. PRODUCTION: replace with AgentCore Identity / KMS via Secrets Manager (docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md)."
+  StrictApproval: { Type: String, Default: "1", AllowedValues: ["0", "1"], Description: "1 = require a bound approval token (single-use, SoD, args-bound). Recommended in all deployed environments." }
+  ApiThrottleBurst: { Type: Number, Default: 20 }
+  ApiThrottleRate: { Type: Number, Default: 10 }
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 256
+    Architectures: [arm64]
+    Layers: [!Ref SharedLayer]
+    Environment:
+      Variables:
+        CONNECTOR_MODE: !Ref ConnectorMode
+        AUDIT_TABLE: !Ref AuditTable
+        PENDING_TABLE: !Ref PendingApprovalsTable
+        AGENT_ID: 06-protocol-design
+        GATEWAY_TOKEN_SECRET: !Ref TokenSecret
+        APPROVAL_TOKEN_SECRET: !Ref TokenSecret
+        STRICT_APPROVAL: !Ref StrictApproval
+        LLM_PROVIDER: bedrock
+        BEDROCK_GUARDRAIL_ID: !Ref AgentGuardrail
+        BEDROCK_GUARDRAIL_VERSION: DRAFT
+        BEDROCK_NARRATIVE_MODEL_ID: !Ref BedrockModelId
+        BEDROCK_REGION: !Ref AWS::Region
+
+Resources:
+  SharedLayer:
+    Type: AWS::Serverless::LayerVersion
+    Metadata: { BuildMethod: makefile }
+    Properties:
+      LayerName: !Sub "hcls-06-${Environment}-shared"
+      Description: platform_core + governance + agent core for the pharmacovigilance golden path.
+      ContentUri: layer/
+      CompatibleRuntimes: [python3.12]
+      RetentionPolicy: Delete
+
+  AuditTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "hcls-06-${Environment}-audit"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: audit_id, AttributeType: S }
+        - { AttributeName: ts, AttributeType: S }
+      KeySchema:
+        - { AttributeName: audit_id, KeyType: HASH }
+        - { AttributeName: ts, KeyType: RANGE }
+      PointInTimeRecoverySpecification: { PointInTimeRecoveryEnabled: true }
+      SSESpecification: { SSEEnabled: true }
+
+  PendingApprovalsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "hcls-06-${Environment}-pending-approvals"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [ { AttributeName: approval_id, AttributeType: S } ]
+      KeySchema: [ { AttributeName: approval_id, KeyType: HASH } ]
+      TimeToLiveSpecification: { AttributeName: ttl, Enabled: true }
+      SSESpecification: { SSEEnabled: true }
+
+  AssembleFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "hcls-06-${Environment}-assemble"
+      Handler: assemble.handler
+      CodeUri: ../../aws-native-reference/06-protocol-design/lambdas/
+      Policies: [AWSLambdaBasicExecutionRole]
+  DraftFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "hcls-06-${Environment}-draft"
+      Handler: draft.handler
+      CodeUri: ../../aws-native-reference/06-protocol-design/lambdas/
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - { Effect: Allow, Action: [bedrock:InvokeModel], Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}" }
+        - Statement:
+            - { Effect: Allow, Action: [bedrock:ApplyGuardrail], Resource: !GetAtt AgentGuardrail.GuardrailArn }
+  CheckFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "hcls-06-${Environment}-check"
+      Handler: check.handler
+      CodeUri: ../../aws-native-reference/06-protocol-design/lambdas/
+      Policies: [AWSLambdaBasicExecutionRole]
+  FinalizeFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "hcls-06-${Environment}-finalize"
+      Handler: finalize.handler
+      CodeUri: ../../aws-native-reference/06-protocol-design/lambdas/
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - { Effect: Allow, Action: [dynamodb:PutItem], Resource: !GetAtt AuditTable.Arn }
+  HitlNotifyFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "hcls-06-${Environment}-hitl-notify"
+      Handler: hitl_notify.handler
+      CodeUri: ../../aws-native-reference/06-protocol-design/lambdas/
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - { Effect: Allow, Action: [dynamodb:PutItem], Resource: !GetAtt PendingApprovalsTable.Arn }
+
+  ConnectorFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "hcls-06-${Environment}-connector"
+      Handler: handler.handler
+      CodeUri: ../../aws-native-reference/_shared/connector/
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - { Effect: Allow, Action: [dynamodb:PutItem], Resource: !GetAtt AuditTable.Arn }
+      Events:
+        Tool:
+          Type: HttpApi
+          Properties: { ApiId: !Ref GatewayApi, Method: POST, Path: "/tool/{kind}/{method}" }
+
+  AgentGuardrail:
+    Type: AWS::Bedrock::Guardrail
+    Properties:
+      Name: !Sub "hcls-06-${Environment}"
+      Description: PHI-tuned PII + prompt-attack (in+out) for Clinical Protocol Design & Feasibility.
+      BlockedInputMessaging: "I can't help with that request."
+      BlockedOutputsMessaging: "I can't provide that information."
+      ContentPolicyConfig:
+        FiltersConfig:
+          - { Type: PROMPT_ATTACK, InputStrength: HIGH, OutputStrength: HIGH }
+      SensitiveInformationPolicyConfig:
+        PiiEntitiesConfig:
+          - { Type: US_SOCIAL_SECURITY_NUMBER, Action: BLOCK }
+          - { Type: NAME, Action: ANONYMIZE }
+          - { Type: ADDRESS, Action: ANONYMIZE }
+          - { Type: AGE, Action: ANONYMIZE }
+          - { Type: EMAIL, Action: ANONYMIZE }
+          - { Type: PHONE, Action: ANONYMIZE }
+      TopicPolicyConfig:
+        TopicsConfig:
+          - Name: UnauthorizedDesign
+            Definition: Finalizing a protocol; clinical leads own the design.
+            Type: DENY
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      UserPoolName: !Sub "hcls-06-${Environment}"
+      AdminCreateUserConfig: { AllowAdminCreateUserOnly: true }
+      MfaConfiguration: "ON"
+      EnabledMfas: [SOFTWARE_TOKEN_MFA]
+      Policies:
+        PasswordPolicy: { MinimumLength: 14, RequireUppercase: true, RequireLowercase: true, RequireNumbers: true, RequireSymbols: true }
+      UserPoolAddOns: { AdvancedSecurityMode: ENFORCED }
+      Schema: [ { Name: hcls_role, AttributeDataType: String, Mutable: false } ]
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub "hcls-06-${Environment}-app"
+      GenerateSecret: false
+      ExplicitAuthFlows: [ALLOW_USER_SRP_AUTH, ALLOW_REFRESH_TOKEN_AUTH]
+      TokenValidityUnits: { AccessToken: minutes, IdToken: minutes, RefreshToken: hours }
+      AccessTokenValidity: 15
+      IdTokenValidity: 15
+      RefreshTokenValidity: 8
+
+  GatewayApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+      Auth:
+        DefaultAuthorizer: CognitoJwt
+        Authorizers:
+          CognitoJwt:
+            IdentitySource: "$request.header.Authorization"
+            JwtConfiguration:
+              audience: [!Ref UserPoolClient]
+              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"
+      AccessLogSettings:
+        DestinationArn: !GetAtt GatewayAccessLogs.Arn
+        Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","route":"$context.routeKey","status":"$context.status","sub":"$context.authorizer.claims.sub"}'
+      DefaultRouteSettings: { ThrottlingBurstLimit: !Ref ApiThrottleBurst, ThrottlingRateLimit: !Ref ApiThrottleRate }
+  GatewayAccessLogs:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties: { LogGroupName: !Sub "/hcls/06/${Environment}/gateway-access", RetentionInDays: 365 }
+
+  AgentStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub "hcls-06-${Environment}"
+      DefinitionUri: ../../aws-native-reference/06-protocol-design/stepfunctions/protocol_design.asl.json
+      DefinitionSubstitutions:
+        AssembleFunctionArn: !GetAtt AssembleFn.Arn
+        DraftFunctionArn: !GetAtt DraftFn.Arn
+        CheckFunctionArn: !GetAtt CheckFn.Arn
+        HitlNotifyFunctionArn: !GetAtt HitlNotifyFn.Arn
+        FinalizeFunctionArn: !GetAtt FinalizeFn.Arn
+      Logging:
+        Level: ALL
+        IncludeExecutionData: false
+        Destinations: [ { CloudWatchLogsLogGroup: { LogGroupArn: !GetAtt StateMachineLogs.Arn } } ]
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [lambda:InvokeFunction]
+              Resource: [!GetAtt AssembleFn.Arn, !GetAtt DraftFn.Arn, !GetAtt CheckFn.Arn, !GetAtt HitlNotifyFn.Arn, !GetAtt FinalizeFn.Arn]
+        - Statement:
+            - Effect: Allow
+              Action: [logs:CreateLogDelivery, logs:GetLogDelivery, logs:UpdateLogDelivery, logs:DeleteLogDelivery, logs:ListLogDeliveries, logs:PutResourcePolicy, logs:DescribeResourcePolicies, logs:DescribeLogGroups]
+              Resource: "*"
+  StateMachineLogs:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties: { LogGroupName: !Sub "/hcls/06/${Environment}/statemachine", RetentionInDays: 365 }
+
+Outputs:
+  StateMachineArn:
+    Description: Start an execution with aws-native-reference/06-protocol-design/sample_input.json
+    Value: !Ref AgentStateMachine
+  GatewayUrl: { Value: !Sub "https://${GatewayApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}" }
+  AuditTableName: { Value: !Ref AuditTable }
+  PendingApprovalsTableName: { Value: !Ref PendingApprovalsTable }
+  UserPoolId: { Value: !Ref UserPool }
+  GuardrailId: { Value: !Ref AgentGuardrail }

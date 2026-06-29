@@ -82,6 +82,7 @@ decks:
 # --- GTM deck PDF leave-behinds (requires LibreOffice 'soffice') ------------
 decks-pdf:
 	soffice --headless --convert-to pdf --outdir decks decks/HCLS-*.pptx
+	$(PYTHON) decks/build_combined.py
 
 # --- ROI calculator workbook ------------------------------------------------
 roi:

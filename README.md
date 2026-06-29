@@ -115,6 +115,8 @@ See `governance/README.md` for the full governance layer documentation.
 
 ---
 
+Deploy **one agent from a single folder** with a SAM **golden path** (`infra/golden-path-<agent>/`): `./deploy.sh` + `./smoke_test.sh` (exercises the human gate with a bound, separation-of-duties approval) + `./destroy.sh`. Index: [`infra/GOLDEN-PATHS.md`](infra/GOLDEN-PATHS.md).
+
 ## Security & Compliance (the CISO / CIO answer kit)
 
 A security or architecture review can be answered entirely from these documents — each names the issue

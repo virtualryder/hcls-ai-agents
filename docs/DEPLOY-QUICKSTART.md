@@ -15,6 +15,11 @@ per-control explanations, and the full per-agent appendix, use
 [`DEPLOYMENT-HANDBOOK.md`](DEPLOYMENT-HANDBOOK.md). For operations after go-live, use
 [`../runbooks/`](../runbooks/).
 
+> **Faster single-agent path:** to stand up **one** agent from a single folder (SAM build +
+> deploy + a smoke test that exercises the human gate), use a **golden path** instead — see
+> [`../infra/GOLDEN-PATHS.md`](../infra/GOLDEN-PATHS.md). The steps below are the shared,
+> multi-agent quickstart.
+
 ---
 
 ## 0. What you are about to deploy

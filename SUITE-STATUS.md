@@ -33,6 +33,13 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 ## Changelog (most recent first)
 
+- **Security & deployability deepening (SLG-parity pass)** — closed the gaps where SLG-AI-Agents went deeper, so HCLS now exceeds it on every axis:
+  - **CISO/CIO security answer kit:** `SECURITY.md` + `docs/THREAT-MODEL.md` (STRIDE→control→file) + `docs/NIST-800-53-CONTROL-MATRIX.md` + `docs/OWASP-LLM-ATLAS-MAPPING.md` + `docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md` + `docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md`, plus a README "CISO/CIO question index".
+  - **Defense-in-depth in code:** the irreversible commit (`safety.submit_report`/`qms.close_capa`/`mes.record_disposition`) is **withheld from every agent grant** (`policy.CONSEQUENTIAL_COMMITS`), enforced by `test_consequential_actions_withheld_from_agents`; a bound human-approval primitive (`mcp_gateway/approvals.py`: single-use, separation-of-duties, args-bound; `STRICT_APPROVAL` for prod). 02/09 finalize now write reversible drafts.
+  - **One-command test harness:** `make test` / `scripts/run_all_tests.sh` runs all **492** tests across 20 suites and prints one total; root `conftest.py` + `pytest.ini`.
+  - **Deploy ergonomics:** `infra/cloudformation/edge.yaml` (CloudFront + WAF) closes the edge-in-IaC gap; **per-agent SAM golden paths** (`infra/golden-path-<agent>/` × 9: `template.yaml` + `deploy.sh` + `destroy.sh` + `smoke_test.sh` + `mint_approval.py` + layer) so an SA deploys one agent from a single folder — all cfn-lint clean. Index: `infra/GOLDEN-PATHS.md`.
+  - **Hygiene:** `CHANGELOG.md`, `VERSION`, `SOURCES.md`; `decks/leave-behinds/HCLS-AI-Agent-Suite-COMBINED.pdf` (77-page all-in-one); `09-manufacturing-batch-review` added to the Lambda build list.
+
 - **Agent 09 (Manufacturing Batch-Review) built to flagship depth** — promoted from roadmap to a built agent: `09-manufacturing-batch-review-agent/` (LangGraph review-by-exception workflow with a QA release gate, gateway-backed `mes`/`lims` tools, deterministic exception scanner, demo-fallback drafter + grounding check, 3 batch fixtures, Streamlit dashboard, 4-doc set) + an AWS-native rebuild (`aws-native-reference/09-manufacturing-batch-review/`: Strands + Step Functions `waitForTaskToken` QA gate). New connector kinds `mes` + `lims` (policy + fixtures + `connectors.yaml` targets) and roles `MFG_OPERATOR` / `QA_RELEASE`. **36 new tests pass** (14 agent + 22 native); platform/governance/agent-02 unaffected. Suite is now **9 built agents**; 10 (Scientific Intelligence) remains roadmap.
 
 - **Cited AWS-style GTM deck system + GTM citation spine** — brought GTM collateral to (and past) the EDU/SLG standard:
