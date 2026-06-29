@@ -49,7 +49,6 @@ Globals:
 Resources:
   SharedLayer:
     Type: AWS::Serverless::LayerVersion
-    Metadata: { BuildMethod: makefile }
     Properties:
       LayerName: !Sub "hcls-03-${Environment}-shared"
       Description: platform_core + governance + agent core for the pharmacovigilance golden path.

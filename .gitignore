@@ -62,3 +62,7 @@ _fv/
 # LibreOffice lock files & temp files
 .~lock.*#
 *.tmp
+
+# SAM golden-path build artifacts (staged at deploy time)
+infra/golden-path-*/layer/python/
+infra/golden-path-*/.aws-sam/

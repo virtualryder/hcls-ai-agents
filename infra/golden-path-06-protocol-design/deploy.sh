@@ -5,6 +5,8 @@ set -euo pipefail
 cd "$(dirname "$0")"
 STACK="${1:-hcls-06-dev}"
 REGION="${AWS_REGION:-us-east-1}"
+echo "==> stage shared layer"
+bash prepare_layer.sh
 echo "==> sam build"
 sam build
 echo "==> sam deploy (stack: $STACK, region: $REGION)"

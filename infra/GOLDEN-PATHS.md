@@ -12,7 +12,7 @@ cd infra/golden-path-02-pharmacovigilance     # pick any agent below
 ./destroy.sh hcls-02-dev                        # sam delete (Retain-policy tables remain)
 ```
 
-**Prereqs:** AWS SAM CLI, account credentials, Bedrock model access (see `docs/AWS-ACCOUNT-PREREQUISITES.md`).
+**Prereqs:** AWS SAM CLI, **Python 3.12** on PATH (the Lambda runtime; `sam build` validates it), account credentials, Bedrock model access (see `docs/AWS-ACCOUNT-PREREQUISITES.md`).
 Defaults to `ConnectorMode=fixture` (safe demo data) and `StrictApproval=1` (a bound, single-use,
 separation-of-duties, args-bound approval token is required at the human gate).
 
