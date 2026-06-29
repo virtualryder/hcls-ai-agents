@@ -1,8 +1,14 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >
-  HCLS Agent Suite - Network stack. Isolated VPC with public/private subnets,
-  NAT, and security groups. Agents, data, and AgentCore inference run in private
-  subnets; no system-of-record data egresses to the public internet.
+  HCLS Agent Suite - Network stack. Isolated VPC with public/private subnets and
+  security groups. Agents, data, and in-account Bedrock inference run in private
+  subnets and reach AWS services over private VPC endpoints (PrivateLink +
+  gateway endpoints) rather than the public internet. F7 — network isolation: S3
+  + DynamoDB via gateway endpoints; bedrock-runtime, secretsmanager, kms, logs,
+  sns, states, lambda via interface (PrivateLink) endpoints, each locked to 443
+  from the app SG only; app SG egress restricted to 443; NAT retained as a
+  documented fallback for dependencies without an in-region endpoint; VPC Flow
+  Logs on. Configurable; private connectivity on by default.
 
 Parameters:
   Environment:
@@ -91,6 +97,10 @@ Resources:
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties: { VpcId: !Ref Vpc }
+  # NAT retained as a documented fallback for any dependency without an in-region
+  # VPC endpoint (e.g. an out-of-account live vendor connector). In-account AWS
+  # service traffic (S3, DynamoDB, Bedrock, KMS, Secrets Manager, Logs, SNS,
+  # States, Lambda) goes via the VPC endpoints below, not this route.
   PrivateRoute:
     Type: AWS::EC2::Route
     Properties:
@@ -104,13 +114,165 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties: { RouteTableId: !Ref PrivateRouteTable, SubnetId: !Ref PrivateSubnetB }
 
+  # App tier SG. Egress restricted to 443 (was -1/all): the app may reach AWS
+  # service endpoints and HTTPS dependencies, nothing else.
   AppSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: HCLS agent app tier (ECS Fargate / AgentCore)
+      GroupDescription: HCLS agent app tier (ECS Fargate / AgentCore / Lambdas)
       VpcId: !Ref Vpc
       SecurityGroupEgress:
-        - { IpProtocol: -1, CidrIp: 0.0.0.0/0, Description: egress via NAT to approved endpoints }
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS to AWS service VPC endpoints and approved HTTPS dependencies
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # F7 — VPC ENDPOINTS
+  # ───────────────────────────────────────────────────────────────────────────
+
+  # Endpoint SG: accept 443 from the app SG only. Attached to every interface
+  # endpoint so only the app tier can resolve/reach PrivateLink ENIs.
+  EndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: HCLS interface VPC endpoints - 443 from the app SG only
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+          Description: HTTPS from the HCLS app tier
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !Ref VpcCidr
+          Description: Responses within the VPC
+
+  # Gateway endpoints (no SG; attached to the private route table) — S3 + DynamoDB
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
+      VpcEndpointType: Gateway
+      RouteTableIds: [!Ref PrivateRouteTable]
+  DynamoDbEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.dynamodb"
+      VpcEndpointType: Gateway
+      RouteTableIds: [!Ref PrivateRouteTable]
+
+  # Interface (PrivateLink) endpoints — private DNS on, in both private subnets,
+  # locked to the endpoint SG.
+  BedrockRuntimeEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.bedrock-runtime"
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+      SecurityGroupIds: [!Ref EndpointSecurityGroup]
+  SecretsManagerEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.secretsmanager"
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+      SecurityGroupIds: [!Ref EndpointSecurityGroup]
+  KmsEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.kms"
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+      SecurityGroupIds: [!Ref EndpointSecurityGroup]
+  LogsEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.logs"
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+      SecurityGroupIds: [!Ref EndpointSecurityGroup]
+  SnsEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.sns"
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+      SecurityGroupIds: [!Ref EndpointSecurityGroup]
+  StatesEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.states"
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+      SecurityGroupIds: [!Ref EndpointSecurityGroup]
+  LambdaEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.lambda"
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+      SecurityGroupIds: [!Ref EndpointSecurityGroup]
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # F7 — VPC FLOW LOGS (all ENI traffic, accepted + rejected) to CloudWatch Logs
+  # ───────────────────────────────────────────────────────────────────────────
+  FlowLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/hcls/${Environment}/vpc-flow-logs"
+      RetentionInDays: 365
+  FlowLogRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: vpc-flow-logs.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: flow-logs-write
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogStreams
+                Resource: !GetAtt FlowLogGroup.Arn
+  VpcFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      ResourceId: !Ref Vpc
+      ResourceType: VPC
+      TrafficType: ALL
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref FlowLogGroup
+      DeliverLogsPermissionArn: !GetAtt FlowLogRole.Arn
 
 Outputs:
   VpcId: { Value: !Ref Vpc, Export: { Name: !Sub "hcls-${Environment}-vpc" } }
@@ -123,3 +285,6 @@ Outputs:
   AppSecurityGroupId:
     Value: !Ref AppSecurityGroup
     Export: { Name: !Sub "hcls-${Environment}-app-sg" }
+  EndpointSecurityGroupId:
+    Value: !Ref EndpointSecurityGroup
+    Export: { Name: !Sub "hcls-${Environment}-endpoint-sg" }

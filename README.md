@@ -76,7 +76,7 @@ One headline figure and the cost of doing nothing per agent — every stat is so
 Every agent shares the same platform stack. Controls compound: a governance improvement to the PHI masker, the grounding checker, or the audit trail benefits all nine agents simultaneously.
 
 ### LLM Factory
-A single abstraction layer routes inference to **Anthropic Claude** (API) or **Amazon Bedrock** (in-account, no data leaves the customer VPC) depending on deployment mode. `EXTRACT_MODE=demo` bypasses the LLM entirely for local testing.
+A single abstraction layer routes inference to **Anthropic Claude** (API) or **Amazon Bedrock** (in-account) depending on deployment mode. With Bedrock and the customer-VPC deployment, model traffic stays on AWS via a **`bedrock-runtime` VPC interface endpoint** (PrivateLink) rather than the public internet — see [Network isolation](#network-isolation-no-public-egress-by-default). `EXTRACT_MODE=demo` bypasses the LLM entirely for local testing.
 
 ### PHI Masking
 Structured entity recognition (NER) replaces patient identifiers, dates of birth, and case-linkable fields with stable pseudonyms before any content enters a prompt or an audit record. The masking layer is stateless and runs before every gateway invocation.
@@ -115,7 +115,9 @@ See `governance/README.md` for the full governance layer documentation.
 
 ---
 
-Deploy **one agent from a single folder** with a SAM **golden path** (`infra/golden-path-<agent>/`): `./deploy.sh` + `./smoke_test.sh` (exercises the human gate with a bound, separation-of-duties approval) + `./destroy.sh`. Index: [`infra/GOLDEN-PATHS.md`](infra/GOLDEN-PATHS.md).
+### Canonical deployment path — the per-agent SAM golden path
+
+**The per-agent SAM golden path (`infra/golden-path-<agent>/`) is the canonical, fully-wired path for a pilot.** Deploy one agent from a single folder: `./deploy.sh` + `./smoke_test.sh` (exercises the human gate with a bound, separation-of-duties approval) + `./destroy.sh`. Index: [`infra/GOLDEN-PATHS.md`](infra/GOLDEN-PATHS.md). The shared CloudFormation quickstart below is the **multi-agent / scale-out reference** that nests the same control stacks.
 
 ## Security & Compliance (the CISO / CIO answer kit)
 
@@ -158,19 +160,19 @@ CFN_BUCKET=my-cfn-bucket CODE_BUCKET=my-code-bucket \
 > create the agent → human-gate smoke test → go-live checklist). The deeper console
 > click-through with screenshots is [`docs/DEPLOYMENT-HANDBOOK.md`](docs/DEPLOYMENT-HANDBOOK.md).
 
-### CloudFormation Quick Deploy (primary path)
+### CloudFormation Quick Deploy (multi-agent / scale-out reference)
 One master template provisions a customer-isolated environment:
 
 ```
 infra/cloudformation/
 ├── quickstart.yaml          # Master — nests all stacks; GatewayMode + DeployMode switch the variants
-├── network.yaml             # VPC, subnets, NAT, security groups
-├── security.yaml            # KMS, Bedrock Guardrail, Cognito (pool + app client), least-privilege agent role
+├── network.yaml             # VPC, private subnets, S3/DynamoDB + PrivateLink VPC endpoints, restricted egress SG, flow logs (NAT retained as fallback)
+├── security.yaml            # KMS, Bedrock Guardrail, Cognito (pool + app client + optional IdP federation), least-privilege agent role
 ├── data.yaml                # Append-only DynamoDB audit, S3 Object Lock WORM, HITL table
 ├── connectors.yaml          # One connector Lambda per system of record (governed backend per gateway target)
 ├── gateway-portable.yaml    # MCP layer — Path A: API Gateway + Cognito JWT authorizer (ANY region)
 ├── agentcore-gateway.yaml   # MCP layer — Path B: Bedrock AgentCore Gateway + Identity (AgentCore regions)
-└── agent-service.yaml       # The agent — native (Step Functions + Lambdas + human gate) or container (ECS Fargate)
+└── agent-service.yaml       # The agent — native (Step Functions + Lambdas + human gate, VPC-attached) or container (ECS Fargate behind an internal ALB)
 ```
 
 ### Two MCP gateway paths, one policy (`GatewayMode`)
@@ -188,8 +190,27 @@ Migrating Path A → Path B later changes only the gateway stack — agent and c
 - **`native`** — deterministic core in Lambda, Strands/Bedrock drafting, **Step Functions**
   orchestration with a `waitForTaskToken` HITL gate. The state machine *is* the agent.
 - **`container`** — lift the LangGraph agent unchanged onto **ECS Fargate** (ARM64, the
-  AgentCore `/invocations` + `/ping` contract). The running service *is* the agent; the same
-  image registers with AgentCore Runtime in an AgentCore Region. No code changes.
+  AgentCore `/invocations` + `/ping` contract) **behind an internal Application Load Balancer**
+  (target group + `/ping` health check + service-DNS output in `agent-service.yaml`); the running
+  service *is* the agent, and the same image registers with AgentCore Runtime in an AgentCore Region.
+  `scripts/deploy.sh` **requires `CONTAINER_IMAGE_URI`** in container mode and refuses otherwise (no
+  silent broken stack). This path is a complete **reference / scale-out** pattern; the SAM golden path
+  above is the canonical pilot path.
+
+### Network isolation (no public egress by default)
+
+The customer-VPC deployment keeps system-of-record and model traffic on AWS private connectivity, **configurable and on by default**:
+
+- **Gateway VPC endpoints** for **S3** and **DynamoDB** (audit, review, WORM access stays on the AWS backbone).
+- **Interface (PrivateLink) VPC endpoints** for **bedrock-runtime, Secrets Manager, KMS, CloudWatch Logs, SNS, Step Functions, and Lambda**, each locked to **443 from the app security group only** via a dedicated endpoint SG.
+- **App security-group egress restricted to 443** (was previously all-protocols/all-destinations).
+- **Lambdas are VPC-attached** (private subnets + app SG) in both the golden path and the shared service template when network params are supplied; the **container service runs in private subnets behind an internal ALB**.
+- **VPC Flow Logs** record all ENI traffic (accepted + rejected) for audit.
+- A **NAT gateway is retained** on the private route table as a documented fallback for any dependency without an in-region VPC endpoint (e.g. an out-of-account live vendor connector). With the endpoints in place, in-account AWS-service traffic does **not** traverse it.
+
+> **Accurate framing.** With Bedrock + the customer-VPC deployment and these endpoints, in-account AWS service traffic does not egress to the public internet. This is **configurable** (the endpoints are part of `network.yaml`) and **on by default** in that deployment. It is **not** an absolute "no packet ever leaves the VPC" guarantee: the NAT path remains for non-endpoint dependencies, and any *live* third-party connector reaches that vendor over the internet/PrivateLink the customer configures. Defined in `infra/cloudformation/network.yaml`.
+
+**IdP federation.** `security.yaml` provisions an `AWS::Cognito::UserPoolIdentityProvider` (+ hosted-UI domain + federated app-client wiring), gated by the `FederationEnabled` condition (on when `IdpMetadataUrl` is non-empty; native Cognito otherwise). Okta and Microsoft Entra ID setup, the group→`custom:hcls_role` claim mapping, and the on/off switch are in [`docs/IDP-FEDERATION-RUNBOOK.md`](docs/IDP-FEDERATION-RUNBOOK.md).
 
 ### Terraform Parity
 `infra/terraform/` provides equivalent IaC for customers whose platform engineering teams standardize on Terraform. Identical resource topology; different surface syntax.

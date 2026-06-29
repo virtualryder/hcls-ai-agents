@@ -138,6 +138,8 @@ quickstart creates the pool; you connect it to the customer IdP:
 
 1. **Amazon Cognito** → **User pools** → open `hcls-dev-users` (created by the stack).
 2. **Sign-in experience** → **Federated identity provider sign-in** → **Add identity provider** → **SAML** (or OIDC).
+   *(When `IdpMetadataUrl` is set the stack creates this `UserPoolIdentityProvider`, the hosted-UI domain,
+   and the federated app-client wiring for you — see `IDP-FEDERATION-RUNBOOK.md` for Okta/Entra specifics.)*
 3. Paste the customer's **metadata document URL** (the `IdpMetadataUrl` you'll also pass to the stack).
 4. **Attribute mapping:** map the IdP group/claim that designates the approver to the custom attribute **`custom:hcls_role`** (e.g. group `GRP-PV-PHYSICIANS` → `PV_MEDICAL_REVIEWER`).
 5. Save. Provisioning a user = adding them to the IdP group; no accounts are managed in AWS.
@@ -220,7 +222,10 @@ per-agent service (Step Functions + Lambdas, or AgentCore Runtime).
    - `TemplateBaseUrl` = `https://my-cfn-bucket.s3.amazonaws.com/hcls`
    - `LambdaCodeBucket` = `my-code-bucket`
    - `LambdaCodeKey` = `02-pharmacovigilance/lambdas.zip`
-   - `IdpMetadataUrl` = the customer IdP metadata URL (optional in dev)
+   - `IdpMetadataUrl` = the customer IdP metadata URL (optional in dev; **non-empty turns on
+     Cognito federation** — see `IDP-FEDERATION-RUNBOOK.md`)
+   - `CallbackUrl` / `UserPoolDomainPrefix` = OAuth callback + hosted-UI domain (required when
+     `IdpMetadataUrl` is set)
 5. **Next** → leave defaults → **Next**.
 6. **Capabilities:** check **"I acknowledge that AWS CloudFormation might create IAM resources with custom names."**
 7. **Submit.** Watch the **Events** tab until **CREATE_COMPLETE** (~10–20 min; nested stacks for network/security/data/gateway/agent appear under **Stacks**).
@@ -241,7 +246,8 @@ aws cloudformation deploy \
       Environment=dev AgentId=02-pharmacovigilance DeployMode=native \
       TemplateBaseUrl=https://my-cfn-bucket.s3.amazonaws.com/hcls \
       LambdaCodeBucket=my-code-bucket LambdaCodeKey=02-pharmacovigilance/lambdas.zip \
-      IdpMetadataUrl=https://customer.okta.com/app/xxx/sso/saml/metadata
+      IdpMetadataUrl=https://customer.okta.com/app/xxx/sso/saml/metadata \
+      CallbackUrl=https://reviewer.acme.example/callback UserPoolDomainPrefix=acme-hcls-dev
 aws cloudformation describe-stacks --stack-name hcls-dev-02-pharmacovigilance \
   --query "Stacks[0].Outputs" --output table
 ```
