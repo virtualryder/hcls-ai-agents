@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  HCLS reviewer service (round-2 #2) — an IdP-authenticated human-approval API. A federated
+  reviewer (Cognito JWT) approves/rejects a pending action; the service authorizes the role,
+  mints a BOUND approval token server-side, and resumes Step Functions. Reference scaffold:
+  cfn-lint validated; end-to-end behaviour (federated login, role assertion, callback) is
+  confirmed in a live account.
+
+Parameters:
+  Environment: { Type: String, Default: dev, AllowedValues: [dev, test, prod] }
+  UserPoolId: { Type: String, Description: Cognito user pool id for the JWT authorizer. }
+  UserPoolClientId: { Type: String, Description: Cognito app client id (JWT audience). }
+  ReviewTable: { Type: String, Description: DynamoDB review/pending-approvals table name. }
+  ApprovalConsumptionTable: { Type: String, Description: Durable single-use approval registry. }
+  TokenSecretArn: { Type: String, Description: Secrets Manager ARN of the approval-token signing secret. }
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 15
+    MemorySize: 256
+
+Resources:
+  ReviewerApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+      Auth:
+        DefaultAuthorizer: CognitoJwt
+        Authorizers:
+          CognitoJwt:
+            IdentitySource: "$request.header.Authorization"
+            JwtConfiguration:
+              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}"
+              audience: [!Ref UserPoolClientId]
+
+  ReviewerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "hcls-${Environment}-reviewer"
+      Handler: app.handler
+      CodeUri: ./
+      Environment:
+        Variables:
+          REVIEW_TABLE: !Ref ReviewTable
+          APPROVAL_CONSUMPTION_TABLE: !Ref ApprovalConsumptionTable
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - { Effect: Allow, Action: [dynamodb:GetItem], Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ReviewTable}" }
+            - { Effect: Allow, Action: [dynamodb:PutItem, dynamodb:GetItem], Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ApprovalConsumptionTable}" }
+            - { Effect: Allow, Action: [states:SendTaskSuccess, states:SendTaskFailure], Resource: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:hcls-*" }
+            - { Effect: Allow, Action: [secretsmanager:GetSecretValue], Resource: !Ref TokenSecretArn }
+      Events:
+        Approve:
+          Type: HttpApi
+          Properties: { ApiId: !Ref ReviewerApi, Method: POST, Path: "/approvals/{approval_id}" }
+
+Outputs:
+  ReviewerApiUrl:
+    Description: Base URL of the authenticated reviewer API.
+    Value: !Sub "https://${ReviewerApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"

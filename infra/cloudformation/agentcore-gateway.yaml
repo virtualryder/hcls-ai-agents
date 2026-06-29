@@ -1,4 +1,9 @@
 AWSTemplateFormatVersion: "2010-09-09"
+# ⚠️ EXPERIMENTAL (round-2 #7): the AgentCore Gateway path is a reference, not the
+# default. AWS's MCP Lambda target requires BOTH LambdaArn AND a ToolSchema per target;
+# the targets below supply LambdaArn only and must be completed with each tool's schema
+# before this stack will deploy. The PORTABLE path (gateway-portable.yaml) is the
+# supported default. Do not describe the two paths as interchangeable until schemas land.
 Description: >
   HCLS Agent Suite - MCP layer (Path B, MANAGED) as Amazon Bedrock AgentCore
   Gateway + AgentCore Identity. The gateway is the governed front door to every

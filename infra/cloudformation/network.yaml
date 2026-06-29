@@ -7,8 +7,8 @@ Description: >
   + DynamoDB via gateway endpoints; bedrock-runtime, secretsmanager, kms, logs,
   sns, states, lambda via interface (PrivateLink) endpoints, each locked to 443
   from the app SG only; app SG egress restricted to 443; NAT retained as a
-  documented fallback for dependencies without an in-region endpoint; VPC Flow
-  Logs on. Configurable; private connectivity on by default.
+  documented fallback ONLY in ApprovedExternalConnectors mode; PrivateOnly mode
+  (default) has no NAT route at all. VPC Flow Logs on.
 
 Parameters:
   Environment:
@@ -18,6 +18,18 @@ Parameters:
   VpcCidr:
     Type: String
     Default: 10.40.0.0/16
+  NetworkMode:
+    Type: String
+    Default: PrivateOnly
+    AllowedValues: [PrivateOnly, ApprovedExternalConnectors]
+    Description: >
+      PrivateOnly = no NAT route; in-account AWS access via VPC endpoints ONLY (no public
+      egress path exists). ApprovedExternalConnectors = a NAT route is added for dependencies
+      without an in-region endpoint (e.g. an out-of-account live vendor connector); pair it with
+      an egress proxy / domain allowlist / Network Firewall and log every exception.
+
+Conditions:
+  AllowExternalEgress: !Equals [!Ref NetworkMode, ApprovedExternalConnectors]
 
 Resources:
   Vpc:
@@ -70,9 +82,11 @@ Resources:
 
   NatEip:
     Type: AWS::EC2::EIP
+    Condition: AllowExternalEgress
     Properties: { Domain: vpc }
   NatGateway:
     Type: AWS::EC2::NatGateway
+    Condition: AllowExternalEgress
     Properties:
       AllocationId: !GetAtt NatEip.AllocationId
       SubnetId: !Ref PublicSubnetA
@@ -101,8 +115,12 @@ Resources:
   # VPC endpoint (e.g. an out-of-account live vendor connector). In-account AWS
   # service traffic (S3, DynamoDB, Bedrock, KMS, Secrets Manager, Logs, SNS,
   # States, Lambda) goes via the VPC endpoints below, not this route.
+  # round-2 #6: this NAT route exists ONLY in ApprovedExternalConnectors mode.
+  # In PrivateOnly mode there is no 0.0.0.0/0 route at all — AWS access is
+  # endpoint-only and no public egress path exists from the private subnets.
   PrivateRoute:
     Type: AWS::EC2::Route
+    Condition: AllowExternalEgress
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       DestinationCidrBlock: 0.0.0.0/0

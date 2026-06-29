@@ -105,46 +105,99 @@ def _claims(event: Dict[str, Any]) -> Dict[str, Any]:
     return {}
 
 
-def _audit_to_dynamo(result: Any) -> None:
-    """Persist the audit entry into the append-only DynamoDB table.
+import hashlib
+import datetime
 
-    SECURITY (F5): for a regulated action the audit record is part of the transaction
-    boundary, not a best-effort side effect. We therefore:
-      * write a COMPLETE evidence record (identity, agent, tool, args hash, approval,
-        decision, scope, reason) — not just a four-field summary;
-      * use a conditional PutItem (attribute_not_exists) so an existing record can
-        never be silently overwritten — the trail is immutable at write time; and
-      * FAIL CLOSED — if the table is configured and the write fails for any reason
-        other than the idempotent already-exists case, we raise, so the caller does
-        not get to claim success without a durable audit row.
-    A duplicate write (same audit_id) is treated as idempotent success.
-    """
-    table = os.getenv("AUDIT_TABLE")
-    if not table:
-        return  # demo / fixture mode: no table configured, nothing to persist
-    import datetime
-    import boto3
-    from botocore.exceptions import ClientError
 
+def _now() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def _args_hash(args: Dict[str, Any]) -> str:
+    body = json.dumps(args or {}, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(body).hexdigest()
+
+
+def _idempotency_key(agent_id: str, tool: str, args: Dict[str, Any], approval: Any) -> str:
+    """Stable key for an action: same agent+tool+args+approval-jti = same logical action.
+    Lets a retried invocation be de-duplicated by the connector / system of record."""
+    jti = ""
+    if isinstance(approval, dict):
+        tok = approval.get("token") or ""
+        # the jti is embedded in the signed token body (json.sig)
+        try:
+            jti = json.loads(tok.rsplit(".", 1)[0]).get("jti", "") if tok else ""
+        except Exception:
+            jti = ""
+    seed = f"{agent_id}|{tool}|{_args_hash(args)}|{jti}"
+    return hashlib.sha256(seed.encode()).hexdigest()
+
+
+def _approval_meta(approval: Any) -> Dict[str, str]:
+    if not isinstance(approval, dict):
+        return {"approval_jti": "", "approver": ""}
+    tok = approval.get("token") or ""
+    jti = ""
+    try:
+        jti = json.loads(tok.rsplit(".", 1)[0]).get("jti", "") if tok else ""
+    except Exception:
+        jti = ""
+    reviewer = approval.get("reviewer") or {}
+    approver = reviewer.get("sub", "") if isinstance(reviewer, dict) else str(reviewer)
+    return {"approval_jti": jti, "approver": approver}
+
+
+def _evidence(*, audit_id, status, idem, claims, agent_id, tool, args, approval,
+              decision, allowed, reason, scope, lineage=None, response=None) -> Dict[str, Any]:
+    """The COMPLETE 21 CFR Part 11-relevant audit record (round-2 #4).
+
+    Contains identity, agent, tool, canonical args hash, approval id + reviewer,
+    model + prompt version, system-of-record lineage and response, decision/scope —
+    not a four-field summary."""
     item = {
-        "audit_id": {"S": str(result.audit_id)},
-        "ts": {"S": datetime.datetime.now(datetime.timezone.utc).isoformat()},
-        "decision": {"S": str(result.decision)},
-        "tool": {"S": str(result.tool)},
-        "allowed": {"BOOL": bool(getattr(result, "allowed", False))},
-        "reason": {"S": str(getattr(result, "reason", "") or "")},
-        "scope": {"S": json.dumps(getattr(result, "scope", None))},
+        "audit_id": {"S": str(audit_id)},
+        "idempotency_key": {"S": str(idem)},
+        "status": {"S": status},                                # INTENT | COMMITTED
+        "ts": {"S": _now()},
+        "agent_id": {"S": str(agent_id or "")},
+        "tool": {"S": str(tool or "")},
+        "user_sub": {"S": str((claims or {}).get("sub", ""))},
+        "user_role": {"S": str((claims or {}).get("custom:hcls_role", ""))},
+        "args_hash": {"S": _args_hash(args)},
+        "decision": {"S": str(decision)},
+        "allowed": {"BOOL": bool(allowed)},
+        "reason": {"S": str(reason or "")},
+        "scope": {"S": json.dumps(scope)},
+        "model_version": {"S": os.getenv("MODEL_ID", os.getenv("BEDROCK_MODEL_ID", ""))},
+        "prompt_version": {"S": os.getenv("PROMPT_VERSION", "")},
+        "connector_mode": {"S": os.getenv("CONNECTOR_MODE", "fixture")},
     }
+    item.update(_approval_meta(approval))
+    item["approval_jti"] = {"S": item.pop("approval_jti")}
+    item["approver"] = {"S": item.pop("approver")}
+    if lineage is not None:
+        item["lineage"] = {"S": json.dumps(lineage)}
+    if response is not None:
+        # System-of-record response becomes part of the evidence (truncated).
+        item["sor_response"] = {"S": json.dumps(response)[:1500]}
+    return item
+
+
+def _put_immutable(table: str, item: Dict[str, Any]) -> None:
+    """Conditional, append-only PutItem. FAIL CLOSED: a non-idempotent failure raises.
+    Factored out so tests can substitute an in-memory store."""
+    import boto3  # pragma: no cover - requires AWS
+    from botocore.exceptions import ClientError  # pragma: no cover
+
     try:  # pragma: no cover - requires AWS
         boto3.client("dynamodb").put_item(
-            TableName=table,
-            Item=item,
+            TableName=table, Item=item,
             ConditionExpression="attribute_not_exists(audit_id)",
         )
-    except ClientError as exc:  # pragma: no cover - requires AWS
+    except ClientError as exc:  # pragma: no cover
         if exc.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":
-            return  # record already exists — immutable, idempotent: OK
-        raise  # any other failure must block the action (fail closed)
+            return  # already written — immutable, idempotent: OK
+        raise
 
 
 # ── Lambda entry point ───────────────────────────────────────────────────────
@@ -152,30 +205,48 @@ def handler(event: Dict[str, Any], _ctx: Any = None) -> Dict[str, Any]:
     event = _normalize(event)
     tool = event.get("tool") or event.get("name") or ""
     kind = os.getenv("CONNECTOR_KIND", "")
+    agent_id = event.get("agent_id", "")
+    args = event.get("arguments") or event.get("args") or {}
+    approval = event.get("approval")
+    claims = _claims(event)
+    table = os.getenv("AUDIT_TABLE")
+    idem = _idempotency_key(agent_id, tool, args, approval)
 
     # Defense in depth: a target may only serve its own connector kind.
     if kind and tool and not tool.startswith(f"{kind}."):
-        return {
-            "decision": "DENY",
-            "tool": tool,
-            "audit_id": "",
-            "result": None,
-            "reason": f"tool '{tool}' not served by the '{kind}' target",
-        }
+        return {"decision": "DENY", "tool": tool, "audit_id": "", "result": None,
+                "reason": f"tool '{tool}' not served by the '{kind}' target"}
 
-    result = _GATEWAY.invoke(
-        user_claims=_claims(event),
-        agent_id=event.get("agent_id", ""),
-        tool=tool,
-        args=event.get("arguments") or event.get("args") or {},
-        approval=event.get("approval"),
-    )
-    _audit_to_dynamo(result)
+    # Transaction boundary (round-2 #4): for a CONSEQUENTIAL action (one carrying a
+    # human approval) write an immutable INTENT record BEFORE executing, so a crash
+    # between execution and the outcome write is detectable by reconciliation. Reads
+    # need no intent row.
+    consequential = approval is not None
+    if table and consequential:
+        _put_immutable(table, _evidence(
+            audit_id=f"{idem}#intent", status="INTENT", idem=idem, claims=claims,
+            agent_id=agent_id, tool=tool, args=args, approval=approval,
+            decision="INTENT", allowed=False, reason="action intended; awaiting execution",
+            scope=None, lineage={"connector": kind, "method": tool.split(".")[-1] if tool else ""}))
+
+    result = _GATEWAY.invoke(user_claims=claims, agent_id=agent_id, tool=tool,
+                             args=args, approval=approval)
+
+    # Immutable OUTCOME record with the system-of-record response. Fail closed.
+    if table:
+        _put_immutable(table, _evidence(
+            audit_id=str(result.audit_id), status="COMMITTED", idem=idem, claims=claims,
+            agent_id=agent_id, tool=tool, args=args, approval=approval,
+            decision=result.decision, allowed=result.allowed, reason=result.reason,
+            scope=getattr(result, "scope", None),
+            lineage={"connector": kind, "method": tool.split(".")[-1] if tool else ""},
+            response=result.result))
 
     return {
         "decision": result.decision,
         "tool": result.tool,
         "audit_id": result.audit_id,
+        "idempotency_key": idem,
         "allowed": result.allowed,
         "result": result.result,
         "reason": result.reason,

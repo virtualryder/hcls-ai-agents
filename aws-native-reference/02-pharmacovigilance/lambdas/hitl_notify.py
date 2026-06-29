@@ -83,11 +83,17 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
         },
     }
 
-    # DynamoDB persistence (production)
-    if REVIEW_TABLE:  # pragma: no cover
-        try:
-            import boto3
+    # DynamoDB persistence — FAIL CLOSED (round-2 #5).
+    # If the review record cannot be durably created, we must NOT leave the Step
+    # Functions execution waiting on a human gate with no entry in the queue. We
+    # raise, so the state machine routes the run into its catch / operational-
+    # exception path instead of hanging. A duplicate approval_id (idempotent retry)
+    # is treated as success.
+    if REVIEW_TABLE:  # pragma: no cover - requires AWS
+        import boto3
+        from botocore.exceptions import ClientError
 
+        try:
             boto3.client("dynamodb").put_item(
                 TableName=REVIEW_TABLE,
                 Item={
@@ -95,11 +101,15 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
                     "case_id": {"S": str(case_id)},
                     "payload": {"S": json.dumps(record)},
                 },
-                # F5: never overwrite an existing pending-approval record in place.
                 ConditionExpression="attribute_not_exists(approval_id)",
             )
-        except Exception as exc:
-            logger.warning("DynamoDB put_item failed: %s", exc)
+        except ClientError as exc:
+            if exc.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":
+                logger.info("review record %s already exists (idempotent)", approval_id)
+            else:
+                # Durable creation failed → fail the workflow rather than hang the gate.
+                logger.error("FAIL-CLOSED: could not persist review request %s: %s", approval_id, exc)
+                raise
 
     # SNS notification (production)
     message = {

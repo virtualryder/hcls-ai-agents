@@ -26,6 +26,7 @@ for p in (str(_LAMBDAS), str(_PLATFORM)):
         sys.path.insert(0, p)
 
 os.environ.setdefault("APPROVAL_TOKEN_SECRET", "test-secret-finalize")
+os.environ.setdefault("HCLS_LOCAL_TEST", "1")  # unit tests have no AWS connector
 
 import finalize  # noqa: E402
 from hcls_agent_platform.mcp_gateway import approvals  # noqa: E402
@@ -105,3 +106,12 @@ def test_replayed_token_rejected(monkeypatch):
     assert first["case_status"] == "SUBMITTED"          # single use consumed
     second = _body(finalize.handler(_event({"approval_token": token})))
     assert second["case_status"] == "PENDING_REVIEW"    # replay denied
+
+
+def test_strict_without_connector_refuses_local_submit(monkeypatch):
+    # round-2 #3: outside local-test mode, strict mode must NOT fall back to a local id.
+    monkeypatch.setenv("STRICT_APPROVAL", "1")
+    monkeypatch.delenv("HCLS_LOCAL_TEST", raising=False)
+    monkeypatch.delenv("SAFETY_CONNECTOR_FUNCTION", raising=False)
+    with pytest.raises(RuntimeError, match="SAFETY_CONNECTOR_FUNCTION is required"):
+        finalize.handler(_event({"approval_token": _mint()}))

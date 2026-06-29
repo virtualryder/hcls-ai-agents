@@ -65,6 +65,13 @@ def _submit_report(case_state: Dict[str, Any], approval: Optional[Dict[str, Any]
     case_id = case_state.get("case_id", "ICSR-UNKNOWN")
     fn = os.getenv("SAFETY_CONNECTOR_FUNCTION")
     if not fn:
+        # round-2 #3: a real (non-demo) deployment MUST route the submit through the
+        # governed connector. In strict mode, refuse to fall back to a local id —
+        # except under explicit local-test mode (unit tests have no AWS).
+        if _strict() and os.getenv("HCLS_LOCAL_TEST") != "1":
+            raise RuntimeError(
+                "SAFETY_CONNECTOR_FUNCTION is required when STRICT_APPROVAL=1 "
+                "(the consequential submit must run through the governed connector)")
         return f"SUBMITTED-{case_id}"
     import boto3  # pragma: no cover - requires AWS
 
