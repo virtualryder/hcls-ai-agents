@@ -5,7 +5,7 @@ HB     := tooling/handbooks
 CONSOLE:= docs/assets/console
 AGENTS := deliverables/agent-handbooks
 
-.PHONY: help handbooks figures master agent-handbooks deck decks decks-pdf roi install clean-handbooks \
+.PHONY: help test handbooks figures master agent-handbooks deck decks decks-pdf roi install clean-handbooks \
         build-lambdas deploy
 
 help:
@@ -66,6 +66,10 @@ handbooks: figures master agent-handbooks
 deck: HCLS-Agentic-AI-Suite-Executive-Overview.pdf
 HCLS-Agentic-AI-Suite-Executive-Overview.pdf: HCLS-Agentic-AI-Suite-Executive-Overview.pptx
 	soffice --headless --convert-to pdf --outdir . $<
+
+# --- verify the entire suite in one command (no API key, no AWS) -------------
+test:
+	bash scripts/run_all_tests.sh
 
 # --- GTM decks (pptxgenjs; requires `npm install`) --------------------------
 # Builds 8 agent decks + executive overview + CIO/CISO board deck, then deflate-

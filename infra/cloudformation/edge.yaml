@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  HCLS AI Agent Suite — EDGE layer (CloudFront + AWS WAF + ACM + Route 53 alias).
+  The production public front door. Closes the "edge not in IaC" gap: rate limiting,
+  managed rule groups, TLS, and a single audited ingress to the agent's ALB/API.
+  Referenced by NIST SC-7 (boundary protection), THREAT-MODEL T5 (DoS/cost), and the
+  CIO deck shortfalls slide. Wire via quickstart.yaml (TemplateBaseUrl + this stack).
+
+Parameters:
+  Environment: { Type: String, Default: dev }
+  OriginDomainName:
+    Type: String
+    Description: The ALB / API Gateway domain the agent serves from (the CloudFront origin).
+  AcmCertificateArn:
+    Type: String
+    Default: ""
+    Description: ACM cert ARN in us-east-1 for the custom domain (optional in dev).
+  WebAclRateLimit:
+    Type: Number
+    Default: 2000
+    Description: Requests per 5-minute window per IP before WAF blocks (T5 DoS/cost control).
+
+Conditions:
+  HasCert: !Not [!Equals [!Ref AcmCertificateArn, ""]]
+
+Resources:
+  WebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub "hcls-${Environment}-edge-acl"
+      Scope: CLOUDFRONT
+      DefaultAction: { Allow: {} }
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub "hcls-${Environment}-edge"
+      Rules:
+        - Name: RateLimit
+          Priority: 0
+          Action: { Block: {} }
+          Statement:
+            RateBasedStatement: { Limit: !Ref WebAclRateLimit, AggregateKeyType: IP }
+          VisibilityConfig: { SampledRequestsEnabled: true, CloudWatchMetricsEnabled: true, MetricName: ratelimit }
+        - Name: AWSCommonRules
+          Priority: 1
+          OverrideAction: { None: {} }
+          Statement:
+            ManagedRuleGroupStatement: { VendorName: AWS, Name: AWSManagedRulesCommonRuleSet }
+          VisibilityConfig: { SampledRequestsEnabled: true, CloudWatchMetricsEnabled: true, MetricName: common }
+        - Name: AWSKnownBadInputs
+          Priority: 2
+          OverrideAction: { None: {} }
+          Statement:
+            ManagedRuleGroupStatement: { VendorName: AWS, Name: AWSManagedRulesKnownBadInputsRuleSet }
+          VisibilityConfig: { SampledRequestsEnabled: true, CloudWatchMetricsEnabled: true, MetricName: badinputs }
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub "HCLS ${Environment} governed edge"
+        WebACLId: !GetAtt WebAcl.Arn
+        Origins:
+          - Id: agentOrigin
+            DomainName: !Ref OriginDomainName
+            CustomOriginConfig: { OriginProtocolPolicy: https-only, OriginSSLProtocols: [TLSv1.2] }
+        DefaultCacheBehavior:
+          TargetOriginId: agentOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # Managed-CachingDisabled (dynamic API)
+          OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3  # Managed-AllViewer
+        ViewerCertificate:
+          !If
+            - HasCert
+            - { AcmCertificateArn: !Ref AcmCertificateArn, SslSupportMethod: sni-only, MinimumProtocolVersion: TLSv1.2_2021 }
+            - { CloudFrontDefaultCertificate: true }
+
+Outputs:
+  DistributionDomainName: { Value: !GetAtt Distribution.DomainName, Export: { Name: !Sub "hcls-${Environment}-edge-domain" } }
+  WebAclArn: { Value: !GetAtt WebAcl.Arn, Export: { Name: !Sub "hcls-${Environment}-edge-acl" } }

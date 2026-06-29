@@ -9,7 +9,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 |---|---|
 | Agents | **9**, all built to flagship depth (01–08 core lifecycle + 09 Manufacturing Batch-Review) |
 | AWS-native rebuilds | **9** (Strands + Step Functions, `waitForTaskToken` HITL) |
-| Automated tests passing | **488** (platform 21 · governance 13 · agents 277 · native 177) |
+| Automated tests passing | **492** (platform 31 · governance 7 · agents 277 · native 177), verified in one command via `make test` |
 | LLM | Anthropic Claude / in-account Amazon Bedrock + Guardrails / deterministic demo |
 | MCP layer | Two interchangeable gateway modes — portable (API Gateway + Cognito JWT) and managed (Bedrock AgentCore Gateway + Identity) — both fronting shared connector Lambdas (reference logic in `platform_core`) |
 | IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in any Region (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform parity |

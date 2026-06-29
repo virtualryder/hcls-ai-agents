@@ -156,4 +156,4 @@ def test_graph_case_status_after_finalize():
     graph = build_pharmacovigilance_graph(use_memory=False)
     out = graph.invoke(_seed("ICSR-TEST-STATUS", "EMAIL", _SERIOUS_RAW))
     # finalize sets PENDING (no human approval provided) or SUBMITTED (gateway)
-    assert out["case_status"] in ("PENDING", "SUBMITTED", "PENDING_REVIEW")
+    assert out["case_status"] in ("PENDING", "DRAFT_RECORDED_PENDING_QP", "PENDING_REVIEW")

@@ -189,14 +189,14 @@ def human_review_gate(state: BatchReviewState) -> BatchReviewState:
 
 
 def finalize(state: BatchReviewState) -> BatchReviewState:
-    """Record the QA disposition (HIGH-RISK write) ONLY with a verified human
-    approval bound at the gateway. Without approval the gateway returns PENDING
-    and no disposition is recorded."""
+    """Record the exception report + recommendation as a DRAFT (reversible) with a
+    bound human approval. The irreversible release/reject (mes.record_disposition) is
+    WITHHELD from the agent — a QA reviewer commits it in the MES. No approval -> PENDING."""
     state["current_step"] = "finalize"
     claims = _claims(state)
     approval = state.get("approval")
     try:
-        res = gateway_tools.record_disposition(
+        res = gateway_tools.write_disposition_draft(
             claims,
             {
                 "batch_id": state.get("batch_id"),
@@ -207,9 +207,11 @@ def finalize(state: BatchReviewState) -> BatchReviewState:
             approval=approval,
         )
         if getattr(res, "allowed", False):
-            decision = (res.result or {}).get("decision") or state.get("disposition_recommendation")
-            state["disposition_id"] = (res.result or {}).get("disposition_id", "DISP-PENDING")
-            state["batch_status"] = "RELEASED" if decision == "RELEASE" else "HELD"
+            # Agent records the exception report + recommendation as a DRAFT only; the
+            # irreversible batch release/reject (mes.record_disposition) is WITHHELD from the
+            # agent and is a QA decision made in the MES under a bound human identity.
+            state["disposition_id"] = (res.result or {}).get("disposition_id", "DISP-DRAFT-PENDING")
+            state["batch_status"] = "DRAFT_RECORDED_PENDING_QA"
         else:
             state["batch_status"] = "PENDING"
     except Exception as exc:

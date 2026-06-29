@@ -36,12 +36,12 @@ def test_high_risk_via_a2a_still_requires_human_approval():
     # Entitled human (reviewer), high-risk tool, no approval -> PENDING_APPROVAL.
     sup = A2ASupervisor("orchestrator")
     pending = sup.dispatch(A2ARequest(specialist_id="02-pharmacovigilance",
-                                      user_claims=PV_REVIEWER, tool="safety.submit_report",
+                                      user_claims=PV_REVIEWER, tool="safety.write_case_draft",
                                       args={"case_id": "ICSR-1"}))
     assert pending.gateway.decision == "PENDING_APPROVAL"
     # With a verified human approval bound, it proceeds.
     ok = sup.dispatch(A2ARequest(specialist_id="02-pharmacovigilance",
-                                 user_claims=PV_REVIEWER, tool="safety.submit_report",
+                                 user_claims=PV_REVIEWER, tool="safety.write_case_draft",
                                  args={"case_id": "ICSR-1"},
                                  approval={"approved": True, "reviewer": {"sub": "u-md-7"}}))
     assert ok.gateway.decision == "ALLOW"

@@ -56,7 +56,7 @@ A "repo" is just a **folder of folders**. Here's the whole thing, what each part
 | `gtm/` | "Go-to-market": the **cited sources** for every stat, a **demo script**, and an **ROI calculator** (Excel). | **Yes — your proof + numbers** |
 | `docs/` | All the guides — including **this one**, the deploy quickstart, the FAQ, and the architecture. | **Yes — your reference** |
 | `offerings/` | Sales paperwork: battlecard, pricing/TCO, SOW template, objection handling. | **Yes — when scoping a deal** |
-| `governance/` | The tests + safety checks (grounding, red-team, human-gate tests). Proof it behaves. | No (just cite "488 tests pass") |
+| `governance/` | The tests + safety checks (grounding, red-team, human-gate tests). Proof it behaves. | No (just cite "492 tests pass") |
 | `runbooks/` | What ops does *after* go-live (incident, disaster recovery). | Later |
 | `Makefile` | Shortcuts. `make decks`, `make roi`, `make build-lambdas`. | Optional |
 
@@ -244,7 +244,7 @@ This runs one agent on **your own laptop** with fake (but realistic) data. Perfe
 4. **What you'll see:** your web browser pops open to a page like `http://localhost:8501` with the agent's dashboard. Click a sample case → watch it triage, code, and draft → it **stops at the human gate** → you approve → it finalizes and shows the audit trail. **That pause is the whole story** — point at it.
 5. **To stop it:** click back in the Terminal and press `Ctrl + C`.
 
-> `EXTRACT_MODE=demo` means "use fake data, no AI key needed." This is exactly how the **488 automated tests** run. You can demo the suite with zero cloud setup.
+> `EXTRACT_MODE=demo` means "use fake data, no AI key needed." This is exactly how the **492 automated tests** run. You can demo the suite with zero cloud setup.
 
 ---
 

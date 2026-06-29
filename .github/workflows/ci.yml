@@ -32,7 +32,10 @@ jobs:
           pip install -e platform_core
           pip install pytest "langgraph>=0.2" "langchain-core>=0.3"
 
-      - name: Platform + governance tests
+      - name: Full suite (all agents + native, one command)
+        run: bash scripts/run_all_tests.sh
+
+      - name: Platform + governance tests (shared suite)
         run: pytest platform_core/tests governance/tests -q
 
       - name: Agent tests (each in its own process — duplicate package names)

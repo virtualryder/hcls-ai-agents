@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Optional
 
 from . import policy as _policy
 from . import tokens as _tokens
+from . import approvals as _approvals
 from .audit import GatewayAuditLog
 from .errors import ApprovalRequired, PolicyDenied
 
@@ -100,7 +101,7 @@ class MCPGateway:
             return GatewayResult("DENY", tool, aid, reason=decision.reason)
 
         # 3. Human approval gate for high-risk (write/irreversible) tools
-        if decision.requires_approval and not self._approval_ok(approval):
+        if decision.requires_approval and not self._approval_valid(approval, requestor=subject, agent_id=agent_id, tool=tool, args=args):
             aid = self.audit.record({
                 "decision": "PENDING_APPROVAL", "tool": tool, "agent_id": agent_id,
                 "user": subject, "roles": roles,
@@ -140,11 +141,23 @@ class MCPGateway:
                              requires_approval=decision.requires_approval)
 
     # ── helpers ───────────────────────────────────────────────────────────────
-    @staticmethod
-    def _approval_ok(approval: Optional[Dict[str, Any]]) -> bool:
-        """A valid approval carries a verified reviewer identity and an approve decision."""
+    def _approval_valid(self, approval: Optional[Dict[str, Any]], *, requestor: str,
+                        agent_id: str, tool: str, args: Dict[str, Any]) -> bool:
+        """A valid approval is a BOUND token (preferred: tamper-evident, single-use, SoD,
+        args-bound) OR — only when STRICT_APPROVAL is unset (dev/demo) — the legacy reviewer
+        dict {approved, reviewer.sub}. Production sets STRICT_APPROVAL=1 to require the token."""
+        import os
         if not approval:
             return False
+        if _approvals.is_bound_approval(approval):
+            try:
+                _approvals.verify_approval_token(
+                    approval["token"], requestor=requestor, agent_id=agent_id, tool=tool, args=args)
+                return True
+            except _approvals.ApprovalInvalid:
+                return False
+        if os.getenv("STRICT_APPROVAL"):
+            return False  # unbound legacy dict not accepted in strict/production mode
         reviewer = approval.get("reviewer") or {}
         return bool(approval.get("approved")) and bool(reviewer.get("sub"))
 

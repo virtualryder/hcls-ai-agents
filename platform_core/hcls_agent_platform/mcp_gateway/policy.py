@@ -65,6 +65,17 @@ TOOL_REGISTRY: Dict[str, Tuple[str, str, bool]] = {
 
 HIGH_RISK_TOOLS: FrozenSet[str] = frozenset(t for t, (_, _, hr) in TOOL_REGISTRY.items() if hr)
 
+# Legally / regulatorily CONSEQUENTIAL commits — the irreversible act that closes a
+# regulated record (submit an ICSR, close a CAPA, release/reject a batch). These are
+# DELIBERATELY ABSENT from every AGENT_TOOL_GRANTS set below: an agent can draft and
+# propose, but only a bound human reviewer identity may commit. Enforced by
+# platform_core/tests/test_mcp_gateway.py::test_consequential_actions_withheld_from_agents.
+CONSEQUENTIAL_COMMITS: FrozenSet[str] = frozenset({
+    "safety.submit_report",     # ICSR submission (Agent 02 → PV_MEDICAL_REVIEWER)
+    "qms.close_capa",           # CAPA closure   (Agent 05 → QUALIFIED_PERSON)
+    "mes.record_disposition",   # batch release  (Agent 09 → QA_RELEASE)
+})
+
 # ── What each AGENT is allowed to call (its job description as code) ───────────
 AGENT_TOOL_GRANTS: Dict[str, FrozenSet[str]] = {
     "01-regulatory-writing": frozenset({
@@ -73,7 +84,9 @@ AGENT_TOOL_GRANTS: Dict[str, FrozenSet[str]] = {
     }),
     "02-pharmacovigilance": frozenset({
         "safety.get_case", "safety.search_duplicates", "safety.write_case_draft",
-        "safety.submit_report", "meddra.code_term", "whodrug.code_drug",
+        "meddra.code_term", "whodrug.code_drug",
+        # NOTE: no safety.submit_report — the irreversible regulatory submission is a
+        # qualified-person decision, withheld from the agent and held only by a human role.
     }),
     "03-clinical-trial-ops": frozenset({
         "ctms.get_study_status", "etmf.get_completeness", "edc.get_subject_data",
@@ -83,7 +96,8 @@ AGENT_TOOL_GRANTS: Dict[str, FrozenSet[str]] = {
         "rwd.run_cohort_query", "ctms.get_study_status",
     }),
     "05-quality-capa": frozenset({
-        "qms.get_complaint", "qms.search_similar", "qms.create_capa_draft", "qms.close_capa",
+        "qms.get_complaint", "qms.search_similar", "qms.create_capa_draft",
+        # NOTE: no qms.close_capa — CAPA closure is a quality-owner decision, withheld from the agent.
     }),
     "06-protocol-design": frozenset({
         "rim.search_guidance", "rwd.run_cohort_query", "ctms.get_study_status",
@@ -95,8 +109,8 @@ AGENT_TOOL_GRANTS: Dict[str, FrozenSet[str]] = {
         "crm.get_hcp", "dms.get_document", "mlr.submit_for_review",
     }),
     "09-manufacturing-batch-review": frozenset({
-        "mes.get_batch_record", "lims.get_results",
-        "mes.write_disposition_draft", "mes.record_disposition",
+        "mes.get_batch_record", "lims.get_results", "mes.write_disposition_draft",
+        # NOTE: no mes.record_disposition — batch release/reject is a QA decision, withheld from the agent.
     }),
 }
 

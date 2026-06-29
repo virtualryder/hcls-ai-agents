@@ -257,16 +257,17 @@ def human_review_gate(state: PharmacovigilanceState) -> PharmacovigilanceState:
 
 def finalize(state: PharmacovigilanceState) -> PharmacovigilanceState:
     """
-    Submit the ICSR to the safety database (HIGH-RISK write) ONLY with a verified
-    human approval bound at the gateway. Without approval the gateway returns
-    PENDING and no case is filed.
+    Record the ICSR DRAFT (reversible write) with a verified human approval bound at
+    the gateway. The irreversible submission (safety.submit_report) is WITHHELD from the
+    agent and is a qualified-person action in the safety system. Without approval the
+    gateway returns PENDING and nothing is written.
     """
     state["current_step"] = "finalize"
     claims = _claims(state)
     approval = state.get("approval")
     import datetime as dt
     try:
-        res = gateway_tools.submit_report(
+        res = gateway_tools.write_case_draft(
             claims,
             {
                 "case_id": state.get("case_id"),
@@ -278,8 +279,10 @@ def finalize(state: PharmacovigilanceState) -> PharmacovigilanceState:
             approval=approval,
         )
         if getattr(res, "allowed", False):
-            state["submission_case_id"] = res.result.get("case_id", "ICSR-SUBMITTED-PENDING")
-            state["case_status"] = "SUBMITTED"
+            state["submission_case_id"] = res.result.get("case_id", "ICSR-DRAFT-PENDING")
+            # Agent records a DRAFT only; the irreversible ICSR submission is a qualified-person
+            # action performed in the safety system (safety.submit_report is withheld from the agent).
+            state["case_status"] = "DRAFT_RECORDED_PENDING_QP"
             clock = state.get("reporting_clock_days")
             if clock:
                 deadline = (

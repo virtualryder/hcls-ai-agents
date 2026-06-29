@@ -3,9 +3,10 @@ from .audit import GatewayAuditLog  # noqa: F401
 from .errors import ApprovalRequired, GatewayError, PolicyDenied  # noqa: F401
 from .gateway import GatewayResult, MCPGateway  # noqa: F401
 from .policy import PolicyDecision, decide  # noqa: F401
+from . import approvals  # noqa: F401
 
 __all__ = [
     "MCPGateway", "GatewayResult", "GatewayAuditLog",
     "GatewayError", "PolicyDenied", "ApprovalRequired",
-    "PolicyDecision", "decide",
+    "PolicyDecision", "decide", "approvals",
 ]

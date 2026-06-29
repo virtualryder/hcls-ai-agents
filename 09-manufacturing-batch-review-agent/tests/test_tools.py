@@ -78,10 +78,13 @@ def test_policy_operator_can_read_but_not_record():
     assert not decide(agent, ["MFG_OPERATOR"], "mes.record_disposition").allowed
 
 
-def test_policy_qa_release_requires_approval_for_record():
-    from hcls_agent_platform.mcp_gateway.policy import decide
+def test_record_disposition_is_withheld_from_agent_but_human_entitled():
+    # Phase-2: the irreversible batch release/reject is WITHHELD from the agent grant.
+    # An agent can never invoke it (over-reach DENY), but the human QA_RELEASE role IS entitled.
+    from hcls_agent_platform.mcp_gateway.policy import decide, user_entitlements
     d = decide("09-manufacturing-batch-review", ["QA_RELEASE"], "mes.record_disposition")
-    assert d.allowed and d.requires_approval
+    assert not d.allowed  # agent is not granted the consequential commit
+    assert "mes.record_disposition" in user_entitlements(["QA_RELEASE"])  # the human still holds it
 
 
 def test_policy_agent_cannot_exceed_user():
