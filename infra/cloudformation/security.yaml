@@ -1,16 +1,45 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >
   HCLS Agent Suite - Security stack. Per-customer KMS key, Bedrock Guardrail
-  (PHI + off-label + grounding controls), Cognito user pool federated to the
-  customer IdP, and the agent execution role. These are the controls that make
-  the data-residency and Part-11 stories real.
+  (PHI + off-label + grounding controls), Cognito user pool optionally federated
+  to the customer IdP (SAML/OIDC), and the agent execution role. These are the
+  controls that make the data-residency and Part-11 stories real.
+
+  F6 — Customer IdP federation: an AWS::Cognito::UserPoolIdentityProvider, a
+  hosted-UI domain, and federated app-client wiring are created when
+  IdpMetadataUrl is non-empty (Condition FederationEnabled). With an empty
+  IdpMetadataUrl (dev default) the pool stays native Cognito and nothing
+  federated is provisioned, so dev still deploys unchanged.
 
 Parameters:
   Environment: { Type: String, Default: dev }
   IdpMetadataUrl:
     Type: String
     Default: ""
-    Description: SAML/OIDC metadata URL for the customer IdP (Okta/Entra/AD). Optional in dev.
+    Description: >
+      SAML (or OIDC) metadata document URL for the customer IdP (Okta/Entra/AD
+      FS). When non-empty, a Cognito UserPoolIdentityProvider + hosted-UI domain
+      + federated app-client wiring are created. Empty (dev default) = native
+      Cognito only. See docs/IDP-FEDERATION-RUNBOOK.md.
+  CallbackUrl:
+    Type: String
+    Default: "https://localhost/callback"
+    Description: >
+      OAuth callback (redirect) URL registered on the app client for the hosted
+      UI / reviewer app. Logout URL is derived as the same origin's /logout.
+  UserPoolDomainPrefix:
+    Type: String
+    Default: ""
+    Description: >
+      Hosted-UI domain prefix (the {prefix}.auth.<region>.amazoncognito.com
+      label). Required when federation is enabled; ignored otherwise. Lowercase
+      letters, numbers and hyphens; must be globally unique in the region.
+
+Conditions:
+  # Federation is wired only when the customer passes a non-empty metadata URL.
+  FederationEnabled: !Not [!Equals [!Ref IdpMetadataUrl, ""]]
+  # Use the explicit domain prefix when supplied, else a deterministic default.
+  HasDomainPrefix: !Not [!Equals [!Ref UserPoolDomainPrefix, ""]]
 
 Resources:
   AgentKmsKey:
@@ -73,8 +102,43 @@ Resources:
         - { Name: hcls_role, AttributeDataType: String, Mutable: true }
       AdminCreateUserConfig: { AllowAdminCreateUserOnly: true }
 
+  # F6 — External (customer) identity provider. SAML via the customer metadata
+  # URL. Created only when FederationEnabled. AttributeMapping carries the
+  # IdP-asserted email and the group/role claim into Cognito: the role claim
+  # lands in custom:hcls_role, which the gateway authorizer reads to decide who
+  # may approve. OIDC is an accepted alternative — see the runbook for the
+  # ProviderType/ProviderDetails swap.
+  CustomerIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Condition: FederationEnabled
+    Properties:
+      UserPoolId: !Ref CognitoUserPool
+      ProviderName: CustomerIdP
+      ProviderType: SAML
+      ProviderDetails:
+        MetadataURL: !Ref IdpMetadataUrl
+        IDPSignout: "true"
+      AttributeMapping:
+        email: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+        "custom:hcls_role": "http://schemas.xmlsoap.org/claims/Group"
+
+  # Hosted-UI domain — the federated sign-in entry point and the OAuth
+  # callback/logout origin. Created only when federation is enabled.
+  CognitoUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Condition: FederationEnabled
+    Properties:
+      Domain: !If
+        - HasDomainPrefix
+        - !Ref UserPoolDomainPrefix
+        - !Sub "hcls-${Environment}-${AWS::AccountId}"
+      UserPoolId: !Ref CognitoUserPool
+
   # App client — the JWT audience for the portable gateway authorizer and the
-  # token client for the reviewer UI. Federated sign-in flows through the IdP.
+  # token client for the reviewer UI. When federation is enabled the client adds
+  # the external IdP to SupportedIdentityProviders and registers the OAuth
+  # code-flow callback/logout URLs; otherwise it stays native-Cognito only so
+  # dev deploys unchanged.
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -85,7 +149,18 @@ Resources:
       AllowedOAuthFlowsUserPoolClient: true
       AllowedOAuthFlows: [code]
       AllowedOAuthScopes: [openid, email, profile]
-      SupportedIdentityProviders: [COGNITO]
+      SupportedIdentityProviders: !If
+        - FederationEnabled
+        - [COGNITO, CustomerIdP]
+        - [COGNITO]
+      CallbackURLs: !If
+        - FederationEnabled
+        - [!Ref CallbackUrl]
+        - !Ref "AWS::NoValue"
+      LogoutURLs: !If
+        - FederationEnabled
+        - [!Ref CallbackUrl]
+        - !Ref "AWS::NoValue"
 
   AgentExecutionRole:
     Type: AWS::IAM::Role
@@ -156,12 +231,30 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/hcls-${Environment}-*:*"
+              # --- F7: VPC attachment. Lambdas run in the private subnets, so the
+              #     execution role must manage its own ENIs. These EC2 actions do
+              #     not support resource-level scoping and are account/region-bound. ---
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:AssignPrivateIpAddresses
+                  - ec2:UnassignPrivateIpAddresses
+                Resource: "*"
 
 Outputs:
   KmsKeyArn: { Value: !GetAtt AgentKmsKey.Arn, Export: { Name: !Sub "hcls-${Environment}-kms" } }
   GuardrailId: { Value: !Ref BedrockGuardrail, Export: { Name: !Sub "hcls-${Environment}-guardrail" } }
   UserPoolId: { Value: !Ref CognitoUserPool, Export: { Name: !Sub "hcls-${Environment}-userpool" } }
   UserPoolClientId: { Value: !Ref CognitoUserPoolClient, Export: { Name: !Sub "hcls-${Environment}-userpool-client" } }
+  FederationEnabled:
+    Description: Whether an external customer IdP is wired (true when IdpMetadataUrl was non-empty).
+    Value: !If [FederationEnabled, "true", "false"]
+  HostedUiDomain:
+    Condition: FederationEnabled
+    Description: Cognito hosted-UI domain prefix for federated sign-in.
+    Value: !Ref CognitoUserPoolDomain
   AgentExecutionRoleArn:
     Value: !GetAtt AgentExecutionRole.Arn
     Export: { Name: !Sub "hcls-${Environment}-agent-role" }

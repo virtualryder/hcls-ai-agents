@@ -2,8 +2,22 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: >
   HCLS Agent Suite - Per-agent service stack. Deploys the native rebuild
   (Step Functions orchestrating Lambdas, with a waitForTaskToken human gate) OR
-  the container lift (AgentCore Runtime / ECS). Parameterized by AgentId so the
-  same template serves every agent in the suite.
+  the container lift (ECS Fargate behind an internal ALB). Parameterized by
+  AgentId so the same template serves every agent in the suite.
+
+  CANONICAL PATH: the per-agent SAM golden path (infra/golden-path-<agent>/) is
+  the canonical, fully-wired pilot deployment. This shared template is the
+  scale-out / multi-agent reference. F7: native Lambdas attach to the VPC
+  (private subnets + app SG) when those params are supplied. F8: the container
+  path is now a complete, honest reference — internal ALB + target group +
+  listener + /ping health check + service-DNS output — gated by required
+  ContainerImageUri/AgentModule params.
+
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W1030  # optional network params default to '' and resolve at deploy time
 
 Parameters:
   Environment: { Type: String, Default: dev }
@@ -20,17 +34,18 @@ Parameters:
   AgentExecutionRoleArn: { Type: String }
   BedrockGuardrailId: { Type: String, Default: "" }
   ReviewTableName: { Type: String }
-  # --- Container (ECS Fargate) path parameters (ignored in native mode) ---
+  # --- Network params. Used to VPC-attach native Lambdas (F7) and to place the
+  #     container service + internal ALB (F8). ---
   VpcId: { Type: String, Default: "" }
   PrivateSubnets:
     Type: CommaDelimitedList
     Default: ""
-    Description: Private subnet IDs (from the network stack) for the Fargate service.
+    Description: Private subnet IDs (from the network stack) for Fargate + Lambda VpcConfig.
   AppSecurityGroupId: { Type: String, Default: "" }
   ContainerImageUri:
     Type: String
     Default: ""
-    Description: ECR image URI (ARM64) built from aws-native-reference/_shared/runtime.
+    Description: ECR image URI (ARM64) built from aws-native-reference/_shared/runtime. REQUIRED in container mode.
   AgentModule:
     Type: String
     Default: agent.graph:build_graph
@@ -39,6 +54,10 @@ Parameters:
 Conditions:
   IsNative: !Equals [!Ref DeployMode, native]
   IsContainer: !Equals [!Ref DeployMode, container]
+  # VPC-attach native Lambdas only when both subnets and an app SG are supplied.
+  VpcAttach: !And
+    - !Not [!Equals [!Join ["", !Ref PrivateSubnets], ""]]
+    - !Not [!Equals [!Ref AppSecurityGroupId, ""]]
 
 Resources:
   StateMachineRole:
@@ -67,6 +86,11 @@ Resources:
       Handler: lambdas.assemble.handler
       Timeout: 60
       Role: !Ref AgentExecutionRoleArn
+      VpcConfig: !If
+        - VpcAttach
+        - SubnetIds: !Ref PrivateSubnets
+          SecurityGroupIds: [!Ref AppSecurityGroupId]
+        - !Ref "AWS::NoValue"
       Code: { S3Bucket: !Ref LambdaCodeBucket, S3Key: !Ref LambdaCodeKey }
 
   DraftFunction:
@@ -78,6 +102,11 @@ Resources:
       Handler: lambdas.draft.handler
       Timeout: 120
       Role: !Ref AgentExecutionRoleArn
+      VpcConfig: !If
+        - VpcAttach
+        - SubnetIds: !Ref PrivateSubnets
+          SecurityGroupIds: [!Ref AppSecurityGroupId]
+        - !Ref "AWS::NoValue"
       Environment:
         Variables:
           BEDROCK_GUARDRAIL_ID: !Ref BedrockGuardrailId
@@ -93,6 +122,11 @@ Resources:
       Handler: lambdas.check.handler
       Timeout: 60
       Role: !Ref AgentExecutionRoleArn
+      VpcConfig: !If
+        - VpcAttach
+        - SubnetIds: !Ref PrivateSubnets
+          SecurityGroupIds: [!Ref AppSecurityGroupId]
+        - !Ref "AWS::NoValue"
       Code: { S3Bucket: !Ref LambdaCodeBucket, S3Key: !Ref LambdaCodeKey }
 
   HitlNotifyFunction:
@@ -104,6 +138,11 @@ Resources:
       Handler: lambdas.hitl_notify.handler
       Timeout: 60
       Role: !Ref AgentExecutionRoleArn
+      VpcConfig: !If
+        - VpcAttach
+        - SubnetIds: !Ref PrivateSubnets
+          SecurityGroupIds: [!Ref AppSecurityGroupId]
+        - !Ref "AWS::NoValue"
       Environment: { Variables: { REVIEW_TABLE: !Ref ReviewTableName } }
       Code: { S3Bucket: !Ref LambdaCodeBucket, S3Key: !Ref LambdaCodeKey }
 
@@ -116,6 +155,11 @@ Resources:
       Handler: lambdas.finalize.handler
       Timeout: 60
       Role: !Ref AgentExecutionRoleArn
+      VpcConfig: !If
+        - VpcAttach
+        - SubnetIds: !Ref PrivateSubnets
+          SecurityGroupIds: [!Ref AppSecurityGroupId]
+        - !Ref "AWS::NoValue"
       Code: { S3Bucket: !Ref LambdaCodeBucket, S3Key: !Ref LambdaCodeKey }
 
   WorkflowStateMachine:
@@ -145,16 +189,19 @@ Resources:
         }
 
   # ─────────────────────────────────────────────────────────────────────────
-  # CONTAINER PATH — ECS Fargate (ARM64). Runs the LangGraph agent unchanged via
-  # the shared AgentCore-contract runtime image (serve.py: /invocations + /ping,
-  # port 8080). This is the "creating the agent itself" resource in container
-  # mode: the running service IS the agent. Works in any commercial region. In an
-  # AgentCore-enabled region you may instead register the same ECR image with
-  # AgentCore Runtime — same image, no code change.
+  # CONTAINER PATH — ECS Fargate (ARM64) behind an INTERNAL Application Load
+  # Balancer. Runs the LangGraph agent unchanged via the shared AgentCore-contract
+  # runtime image (serve.py: /invocations + /ping, port 8080). The ALB is
+  # internet-facing=false (internal): reachable only from inside the VPC, so the
+  # service has a stable, health-checked DNS endpoint without exposing the agent
+  # publicly. In an AgentCore-enabled region you may instead register the same
+  # ECR image with AgentCore Runtime — same image, no code change.
   # ─────────────────────────────────────────────────────────────────────────
   AgentLogGroup:
     Type: AWS::Logs::LogGroup
     Condition: IsContainer
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
       LogGroupName: !Sub "/aws/ecs/hcls-${Environment}-${AgentId}"
       RetentionInDays: 30
@@ -164,6 +211,64 @@ Resources:
     Condition: IsContainer
     Properties:
       ClusterName: !Sub "hcls-${Environment}-${AgentId}"
+
+  # SG for the internal ALB: accept 80 from inside the VPC; egress to the app SG.
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: IsContainer
+    Properties:
+      GroupDescription: HCLS internal ALB for the agent service
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 10.40.0.0/16
+          Description: HTTP from inside the VPC (internal ALB)
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          DestinationSecurityGroupId: !Ref AppSecurityGroupId
+          Description: Forward to the agent task port
+
+  InternalAlb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Condition: IsContainer
+    Properties:
+      Name: !Sub "hcls-${Environment}-${AgentId}"
+      Type: application
+      Scheme: internal
+      Subnets: !Ref PrivateSubnets
+      SecurityGroups: [!Ref AlbSecurityGroup]
+
+  AgentTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Condition: IsContainer
+    Properties:
+      Name: !Sub "hcls-${Environment}-${AgentId}"
+      VpcId: !Ref VpcId
+      Port: 8080
+      Protocol: HTTP
+      TargetType: ip
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /ping
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Matcher: { HttpCode: "200" }
+
+  AlbListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Condition: IsContainer
+    Properties:
+      LoadBalancerArn: !Ref InternalAlb
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref AgentTargetGroup
 
   # Task EXECUTION role: pulls the image from ECR and writes logs (separate from
   # the app/task role, which is the shared least-privilege AgentExecutionRole).
@@ -210,12 +315,18 @@ Resources:
   AgentService:
     Type: AWS::ECS::Service
     Condition: IsContainer
+    DependsOn: AlbListener
     Properties:
       ServiceName: !Sub "hcls-${Environment}-${AgentId}"
       Cluster: !Ref EcsCluster
       LaunchType: FARGATE
       DesiredCount: 1
       TaskDefinition: !Ref AgentTaskDefinition
+      HealthCheckGracePeriodSeconds: 60
+      LoadBalancers:
+        - ContainerName: agent
+          ContainerPort: 8080
+          TargetGroupArn: !Ref AgentTargetGroup
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: DISABLED
@@ -231,3 +342,8 @@ Outputs:
     Condition: IsContainer
     Value: !Ref AgentService
     Export: { Name: !Sub "hcls-${Environment}-${AgentId}-ecs" }
+  AgentServiceEndpoint:
+    Condition: IsContainer
+    Description: Internal ALB DNS for the agent service (POST http://{dns}/invocations, GET /ping).
+    Value: !Sub "http://${InternalAlb.DNSName}"
+    Export: { Name: !Sub "hcls-${Environment}-${AgentId}-endpoint" }

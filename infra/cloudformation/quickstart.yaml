@@ -60,6 +60,17 @@ Parameters:
   IdpMetadataUrl:
     Type: String
     Default: ""
+    Description: >
+      SAML/OIDC metadata URL for the customer IdP. Non-empty turns on Cognito
+      federation in the security stack (F6). Empty (default) = native Cognito.
+  CallbackUrl:
+    Type: String
+    Default: "https://localhost/callback"
+    Description: OAuth callback/logout URL for the hosted UI when federation is enabled.
+  UserPoolDomainPrefix:
+    Type: String
+    Default: ""
+    Description: Hosted-UI domain prefix (required when IdpMetadataUrl is set).
 
 Conditions:
   UsePortable: !Equals [!Ref GatewayMode, portable]
@@ -79,6 +90,8 @@ Resources:
       Parameters:
         Environment: !Ref Environment
         IdpMetadataUrl: !Ref IdpMetadataUrl
+        CallbackUrl: !Ref CallbackUrl
+        UserPoolDomainPrefix: !Ref UserPoolDomainPrefix
 
   DataStack:
     Type: AWS::CloudFormation::Stack

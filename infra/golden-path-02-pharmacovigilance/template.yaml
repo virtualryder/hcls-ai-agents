@@ -23,6 +23,25 @@ Parameters:
   StrictApproval: { Type: String, Default: "1", AllowedValues: ["0", "1"], Description: "1 = require a bound approval token (single-use, SoD, args-bound). Recommended in all deployed environments." }
   ApiThrottleBurst: { Type: Number, Default: 20 }
   ApiThrottleRate: { Type: Number, Default: 10 }
+  # F7 — VPC attachment for the workflow Lambdas. Pass the private subnets + app
+  # SG from the network stack to keep all function egress inside the customer VPC
+  # (over the VPC endpoints in network.yaml). Leave empty (default) for a quick
+  # standalone `sam deploy` where the functions run in the Lambda-managed network.
+  VpcSubnetIds:
+    Type: CommaDelimitedList
+    Default: ""
+    Description: Private subnet IDs for Lambda VpcConfig. Empty = no VPC attachment.
+  VpcSecurityGroupId:
+    Type: String
+    Default: ""
+    Description: App security group id for Lambda VpcConfig. Empty = no VPC attachment.
+
+Conditions:
+  # Attach Lambdas to the VPC only when both a subnet list and an app SG are
+  # supplied. Keeps the standalone `sam deploy` (empty defaults) working.
+  VpcAttach: !And
+    - !Not [!Equals [!Join ["", !Ref VpcSubnetIds], ""]]
+    - !Not [!Equals [!Ref VpcSecurityGroupId, ""]]
 
 Globals:
   Function:
@@ -31,6 +50,11 @@ Globals:
     MemorySize: 256
     Architectures: [arm64]
     Layers: [!Ref SharedLayer]
+    VpcConfig: !If
+      - VpcAttach
+      - SubnetIds: !Ref VpcSubnetIds
+        SecurityGroupIds: [!Ref VpcSecurityGroupId]
+      - !Ref "AWS::NoValue"
     Environment:
       Variables:
         CONNECTOR_MODE: !Ref ConnectorMode
