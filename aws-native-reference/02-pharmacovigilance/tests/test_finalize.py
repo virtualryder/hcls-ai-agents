@@ -99,13 +99,15 @@ def test_retargeted_tool_rejected(monkeypatch):
     assert out["case_status"] == "PENDING_REVIEW"
 
 
-def test_replayed_token_rejected(monkeypatch):
+def test_finalize_defers_single_use_to_connector(monkeypatch):
+    # finalize verifies the bound approval with consume=False; the GOVERNED CONNECTOR is
+    # the single-use enforcement point (durable jti claim — see test_approval_consumption
+    # and test_connector_audit). So finalize itself does not consume the jti.
     monkeypatch.setenv("STRICT_APPROVAL", "1")
     token = _mint()
     first = _body(finalize.handler(_event({"approval_token": token})))
-    assert first["case_status"] == "SUBMITTED"          # single use consumed
-    second = _body(finalize.handler(_event({"approval_token": token})))
-    assert second["case_status"] == "PENDING_REVIEW"    # replay denied
+    assert first["case_status"] == "SUBMITTED"
+    assert first["approval_verified"] is True
 
 
 def test_strict_without_connector_refuses_local_submit(monkeypatch):

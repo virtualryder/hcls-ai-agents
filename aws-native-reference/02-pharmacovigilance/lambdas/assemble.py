@@ -249,6 +249,13 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
         "case_id": case_id,
         "source_type": source_type,
         "raw_source": raw_source,
+        # Identity lineage: carry the acting user through the pipeline so the
+        # consequential-action requestor at Finalize matches the approval binding
+        # (separation of duties is enforced against THIS subject).
+        "requestor": (body.get("requestor")
+                      or (body.get("acting_user_claims") or {}).get("sub")
+                      or "pv-agent-02"),
+        "acting_user_claims": body.get("acting_user_claims"),
         # validity
         **validity,
         # extracted fields

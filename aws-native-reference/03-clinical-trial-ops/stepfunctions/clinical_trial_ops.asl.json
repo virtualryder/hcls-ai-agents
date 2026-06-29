@@ -5,6 +5,7 @@
     "Assemble": {
       "Type": "Task",
       "Resource": "${AssembleFunctionArn}",
+      "ResultSelector": { "body.$": "States.StringToJson($.body)" },
       "ResultPath": "$",
       "Next": "Draft",
       "Retry": [
@@ -26,6 +27,7 @@
     "Draft": {
       "Type": "Task",
       "Resource": "${DraftFunctionArn}",
+      "ResultSelector": { "body.$": "States.StringToJson($.body)" },
       "ResultPath": "$",
       "Next": "Check",
       "Retry": [
@@ -47,6 +49,7 @@
     "Check": {
       "Type": "Task",
       "Resource": "${CheckFunctionArn}",
+      "ResultSelector": { "body.$": "States.StringToJson($.body)" },
       "ResultPath": "$",
       "Next": "RouteDecision",
       "Retry": [
@@ -115,6 +118,7 @@
         "body.$": "$.body",
         "human_decision.$": "$.humanReviewResult.decision"
       },
+      "ResultSelector": { "body.$": "States.StringToJson($.body)" },
       "ResultPath": "$",
       "End": true,
       "Retry": [

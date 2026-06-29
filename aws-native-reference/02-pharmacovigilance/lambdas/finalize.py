@@ -55,7 +55,8 @@ def _strict() -> bool:
     return os.getenv("STRICT_APPROVAL") == "1"
 
 
-def _submit_report(case_state: Dict[str, Any], approval: Optional[Dict[str, Any]]) -> str:
+def _submit_report(case_state: Dict[str, Any], approval: Optional[Dict[str, Any]],
+                   reviewer_sub: str = "", reviewer_role: str = "PV_MEDICAL_REVIEWER") -> str:
     """Governed safety-DB write.
 
     Production: invokes the governed connector Lambda with the verified approval, so the
@@ -80,8 +81,12 @@ def _submit_report(case_state: Dict[str, Any], approval: Optional[Dict[str, Any]
         Payload=json.dumps({
             "tool": SUBMIT_TOOL,
             "agent_id": AGENT_ID,
-            "arguments": {"case_id": case_id, "meddra_pt": case_state.get("meddra_pt", "")},
+            "arguments": {"case_id": case_id},
             "approval": approval,
+            # The human authority performing the commit is the approver. This is a
+            # direct (IAM-authenticated) Lambda invoke, so the connector accepts the
+            # identity from the payload (never from a network request body).
+            "identity": {"sub": reviewer_sub, "custom:hcls_role": reviewer_role},
         }).encode("utf-8"),
     )
     payload = json.loads(resp["Payload"].read() or b"{}")  # pragma: no cover
@@ -112,12 +117,16 @@ def _verify_approval(case_state: Dict[str, Any], review: Dict[str, Any]) -> Dict
                 agent_id=AGENT_ID,
                 tool=SUBMIT_TOOL,
                 args=args,
+                consume=False,  # the governed connector is the single-use enforcement point
             )
         except Exception as exc:  # ApprovalInvalid or malformed → fail closed
             return {"approved": False, "verified": False, "reviewer": "",
                     "reason": f"approval rejected: {exc}", "approval": None}
+        reviewer = review.get("reviewer") or {}
         return {"approved": True, "verified": True,
-                "reviewer": payload.get("approver", ""), "reason": "bound approval verified",
+                "reviewer": payload.get("approver", ""),
+                "reviewer_role": reviewer.get("custom:hcls_role", "PV_MEDICAL_REVIEWER"),
+                "reason": "bound approval verified",
                 "approval": {"token": token, **payload}}
 
     if _strict():
@@ -150,7 +159,9 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
     approved = decision["approved"]
 
     if approved:
-        submission_id = _submit_report(case_state, decision["approval"])
+        submission_id = _submit_report(case_state, decision["approval"],
+                                       reviewer_sub=decision.get("reviewer", ""),
+                                       reviewer_role=decision.get("reviewer_role", "PV_MEDICAL_REVIEWER"))
         case_state["submission_case_id"] = submission_id
         case_state["case_status"] = "SUBMITTED"
         clock = case_state.get("reporting_clock_days")

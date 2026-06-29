@@ -96,8 +96,13 @@ def _claims(event: Dict[str, Any]) -> Dict[str, Any]:
     authz = (rc.get("authorizer") or {}).get("jwt", {}).get("claims")
     if isinstance(authz, dict) and authz:
         return authz
-    # 2) Body-supplied identity: ONLY in local-test mode. Never trusted on the wire.
-    if os.getenv("HCLS_LOCAL_TEST") == "1":
+    # 2) Body-supplied identity is accepted only for a genuine DIRECT invoke (no
+    #    requestContext present) — i.e. an IAM-authenticated internal caller such as
+    #    the finalize Lambda committing on the approver's authority — or in explicit
+    #    local-test mode. A network request always carries requestContext, so this
+    #    branch is unreachable from the API and the F3 protection still holds there.
+    direct_invoke = "requestContext" not in event
+    if direct_invoke or os.getenv("HCLS_LOCAL_TEST") == "1":
         for key in ("identity", "claims", "userClaims"):
             val = event.get(key)
             if isinstance(val, dict) and val:

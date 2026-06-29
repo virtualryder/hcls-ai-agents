@@ -89,8 +89,12 @@ class MCPGateway:
                 raise PolicyDenied("no authenticated subject")
             return GatewayResult("DENY", tool, aid, reason="no authenticated subject")
 
-        # 2. Authorization (deny-by-default, least-privilege intersection)
-        decision = _policy.decide(agent_id, roles, tool)
+        # 2. Authorization (deny-by-default). A CONSEQUENTIAL_COMMIT is withheld from
+        #    every agent grant; when a human authority commits it, authorize on the
+        #    approver's ROLE entitlement (no agent in the loop) — see policy.
+        is_commit = tool in _policy.CONSEQUENTIAL_COMMITS
+        decision = (_policy.decide_human_commit(roles, tool) if is_commit
+                    else _policy.decide(agent_id, roles, tool))
         if not decision.allowed:
             aid = self.audit.record({
                 "decision": "DENY", "tool": tool, "agent_id": agent_id, "user": subject,
@@ -101,7 +105,10 @@ class MCPGateway:
             return GatewayResult("DENY", tool, aid, reason=decision.reason)
 
         # 3. Human approval gate for high-risk (write/irreversible) tools
-        if decision.requires_approval and not self._approval_valid(approval, requestor=subject, agent_id=agent_id, tool=tool, args=args):
+        approval_ok = (self._commit_approval_valid(approval, subject=subject, agent_id=agent_id, tool=tool, args=args)
+                       if is_commit else
+                       self._approval_valid(approval, requestor=subject, agent_id=agent_id, tool=tool, args=args))
+        if decision.requires_approval and not approval_ok:
             aid = self.audit.record({
                 "decision": "PENDING_APPROVAL", "tool": tool, "agent_id": agent_id,
                 "user": subject, "roles": roles,
@@ -160,6 +167,26 @@ class MCPGateway:
             return False  # unbound legacy dict not accepted in strict/production mode
         reviewer = approval.get("reviewer") or {}
         return bool(approval.get("approved")) and bool(reviewer.get("sub"))
+
+    def _commit_approval_valid(self, approval: Optional[Dict[str, Any]], *, subject: str,
+                               agent_id: str, tool: str, args: Dict[str, Any]) -> bool:
+        """A consequential commit is valid when a BOUND approval verifies (signature,
+        expiry, separation of duties, exact args, single-use) AND the actor performing
+        the commit IS the approver (the human authority who signed off)."""
+        if not approval or not _approvals.is_bound_approval(approval):
+            return False
+        token = approval["token"]
+        try:
+            import json as _json
+            requestor = _json.loads(token.rsplit(".", 1)[0]).get("requestor")
+            payload = _approvals.verify_approval_token(
+                token, requestor=requestor, agent_id=agent_id, tool=tool, args=args)
+        except _approvals.ApprovalInvalid:
+            return False
+        except Exception:
+            return False
+        return (payload.get("approver") == subject
+                and payload.get("approver") != payload.get("requestor"))
 
     def _invoke_connector(self, decision: "_policy.PolicyDecision", args: Dict[str, Any]) -> Any:
         from hcls_agent_platform.connectors import get_connector
