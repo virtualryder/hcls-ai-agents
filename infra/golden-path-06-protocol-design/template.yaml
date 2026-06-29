@@ -155,7 +155,7 @@ Resources:
       BlockedOutputsMessaging: "I can't provide that information."
       ContentPolicyConfig:
         FiltersConfig:
-          - { Type: PROMPT_ATTACK, InputStrength: HIGH, OutputStrength: HIGH }
+          - { Type: PROMPT_ATTACK, InputStrength: HIGH, OutputStrength: NONE }
       SensitiveInformationPolicyConfig:
         PiiEntitiesConfig:
           - { Type: US_SOCIAL_SECURITY_NUMBER, Action: BLOCK }

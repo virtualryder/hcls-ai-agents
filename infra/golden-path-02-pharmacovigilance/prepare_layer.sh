@@ -9,5 +9,5 @@ rm -rf layer/python
 mkdir -p layer/python
 cp -r "$REPO/platform_core/hcls_agent_platform" layer/python/
 cp -r "$REPO/governance" layer/python/
-cp "$REPO/aws-native-reference/$AGENT/core.py" layer/python/
+cp "$REPO/aws-native-reference/$AGENT/"*.py layer/python/   # core.py + strands_agent.py + any agent-root modules
 echo "layer staged: $(du -sh layer/python | cut -f1)"
