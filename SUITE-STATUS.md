@@ -11,7 +11,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 | AWS-native rebuilds | **9** (Strands + Step Functions, `waitForTaskToken` HITL) |
 | Automated tests passing | **503** (platform 35 · governance 7 · agents 277 · native 184), verified in one command via `make test` |
 | LLM | Anthropic Claude / in-account Amazon Bedrock + Guardrails / deterministic demo |
-| MCP layer | Two interchangeable gateway modes — portable (API Gateway + Cognito JWT) and managed (Bedrock AgentCore Gateway + Identity) — both fronting shared connector Lambdas (reference logic in `platform_core`) |
+| MCP layer | Portable gateway (API Gateway + Cognito JWT) is the **supported default**; a **managed Bedrock AgentCore Gateway** path is **experimental** (each target additionally requires a ToolSchema — `agentcore-gateway.yaml`). Both front shared connector Lambdas (reference logic in `platform_core`) |
 | IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in any Region (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform parity |
 | Live reference path | Agent 02 — real Bedrock + real HTTP connector, end-to-end |
 | GTM collateral | **Cited, generated AWS-style deck system: 8 per-agent decks + executive overview + CIO/CISO board deck** (`decks/`, `make decks`), each with PDF leave-behind (`make decks-pdf`); GTM citation spine (`gtm/HCLS-DECK-SOURCES.md`, `DECK-CONTENT-SPEC.md`, `DEMO-STORYBOARD.md`) + SA-fillable ROI calculator (`gtm/roi-calculator/`, `make roi`); plus the original executive deck, 5-slide teaser, and one-page leave-behind |

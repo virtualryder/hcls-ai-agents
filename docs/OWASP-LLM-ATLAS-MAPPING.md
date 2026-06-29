@@ -9,7 +9,7 @@
 | ID | Risk | Mitigation in this suite | Proof |
 |---|---|---|---|
 | **LLM01** | Prompt Injection | Authorization/approval/masking live **outside** the model (gateway); deny-by-default; Guardrails; consequential commits withheld from agents | `governance/redteam/` (injection denied), `policy.py` |
-| **LLM02** | Sensitive Information Disclosure | PHI masking **before** any model call or audit write; in-VPC Bedrock (no egress); Guardrails PII filters | `phi.py`, `tests/.../test_pii*`, `llm_factory.py` |
+| **LLM02** | Sensitive Information Disclosure | PHI masking **before** any model call or audit write; in-VPC Bedrock via VPC endpoint (PrivateOnly = no NAT route); Guardrails PII filters | `phi.py`, `tests/.../test_pii*`, `llm_factory.py` |
 | **LLM03** | Supply Chain | Pinned deps vendored deterministically into Lambda zips; CI compile + 503 tests gate every change | `scripts/build_lambdas.sh`, CI |
 | **LLM04** | Data & Model Poisoning | Grounding verification rejects ungrounded claims; approved-corpus RAG; prompt hash-pinning | `governance/grounding.py`, `prompt_registry.py` |
 | **LLM05** | Improper Output Handling | Outputs are decision-support drafts; a human gate + grounding/quality checks precede any consequential use | per-agent `quality_checker.py`, HITL gate |
@@ -27,7 +27,7 @@
 | **AML.T0057 LLM Data Leakage** | PHI masked pre-model; in-VPC inference; Guardrails; append-only audit detects attempts |
 | **AML.T0054 LLM Jailbreak** | Bedrock Guardrails + grounding + the human gate; the consequential act is not model-reachable |
 | **AML.T0048 Societal/again Harm (bias)** | Fairness / four-fifths screen on flag/rank workflows; human review | 
-| **AML.T0049 Exfiltration via Inference API** | No egress: in-account Bedrock via VPC endpoint; least-privilege connectors |
+| **AML.T0049 Exfiltration via Inference API** | Endpoint-only (PrivateOnly mode): in-account Bedrock via VPC endpoint; least-privilege connectors |
 | **AML.T0043 Craft Adversarial Data** | Grounding rejects ungrounded outputs; deterministic checks precede the human gate |
 
 > **One-line CISO takeaway:** every model-layer attack class is contained because the model has **no

@@ -12,7 +12,7 @@
 | | AC-4 | Information-flow enforced at the gateway; no SoR/model access except through it | `mcp_gateway/gateway.py` | Reference |
 | **IA — Identification & Auth** | IA-2, IA-5, IA-8 | RS256/JWKS JWT verification; federated IdP; no trusted client roles | `auth.py` | Reference + Customer (IdP) |
 | **AU — Audit & Accountability** | AU-2, AU-3, AU-9, AU-10 | Append-only audit of every attempt with full lineage; WORM (S3 Object Lock); non-repudiation via bound reviewer identity | `mcp_gateway/audit*.py`, `data.yaml` | Reference |
-| **SC — System & Comms Protection** | SC-7, SC-8, SC-12, SC-13, SC-28 | Per-customer VPC + edge (CloudFront/WAF); TLS 1.3; KMS CMK per data class; in-VPC Bedrock (no egress) | `network.yaml`, `edge.yaml`, `security.yaml` | Reference |
+| **SC — System & Comms Protection** | SC-7, SC-8, SC-12, SC-13, SC-28 | Per-customer VPC + edge (CloudFront/WAF); TLS 1.3; KMS CMK per data class; in-VPC Bedrock via VPC endpoints (PrivateOnly mode = no NAT route) | `network.yaml`, `edge.yaml`, `security.yaml` | Reference |
 | | SC-23 | Short-lived, per-call scoped tokens; no standing service accounts | `mcp_gateway/tokens.py` | Reference |
 | **SI — System & Info Integrity** | SI-4, SI-7, SI-10 | Grounding verification (input/output integrity); PHI masking; Bedrock Guardrails; red-team monitoring | `governance/grounding.py`, `phi.py` | Reference |
 | **CM — Configuration Mgmt** | CM-2, CM-3, CM-6 | IaC-defined config; prompt hash-pinning + CI drift gate (model-risk change control) | `infra/`, `governance/prompt_registry.py` | Reference |

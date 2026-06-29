@@ -43,7 +43,7 @@ A governed, auditable AI agent accelerator for pharma, biotech, medtech, and CRO
 |---|---|
 | *"AI will hallucinate — we can't use it for submissions."* | "The grounding layer verifies every claim against source documents before it reaches a reviewer — the same check your medical writers do manually, but deterministic and logged." |
 | *"We'll build this ourselves."* | "You can. Most teams underestimate the compliance scaffolding — the audit trail, human gates, PHI masking, and prompt version control. This accelerator is that scaffolding; your team builds the workflows on top." |
-| *"We already have Copilot / ChatGPT / [other tool]."* | "Those tools assist humans on a screen. This platform automates regulated workflows with a deny-by-default authorization layer and an audit trail that satisfies Part 11. Different category." |
+| *"We already have Copilot / ChatGPT / [other tool]."* | "Those tools assist humans on a screen. This platform automates regulated workflows with a deny-by-default authorization layer and an audit trail designed to support Part 11 controls (validated with the customer). Different category." |
 | *"Our CISO won't approve LLMs touching PHI."* | "PHI is masked at the audit boundary before any LLM sees it. The architecture was designed for that conversation — we have a CISO briefing deck and a TPRM packet ready." |
 | *"We're not ready — we need to sort out our data first."* | "The Assessment engagement is specifically designed to tell you what's ready and what isn't, so you don't invest in a POC on a bad foundation. That's the right starting point." |
 | *"It's too expensive."* | "The ROI model for Agent 02 alone shows payback in under 6 months at 300+ ICSRs/month. We can run your numbers in 30 minutes with the TCO tool." |

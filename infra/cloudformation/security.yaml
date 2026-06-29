@@ -170,7 +170,7 @@ Resources:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
-            Principal: { Service: [ecs-tasks.amazonaws.com, lambda.amazonaws.com, bedrock.amazonaws.com] }
+            Principal: { Service: [ecs-tasks.amazonaws.com, lambda.amazonaws.com] }
             Action: sts:AssumeRole
       Policies:
         - PolicyName: hcls-agent-least-privilege
@@ -178,12 +178,16 @@ Resources:
             Version: "2012-10-17"
             Statement:
               # --- Inference: in-account Bedrock + Guardrail on every call ---
+              # round-2 #9: scoped off Resource:"*" — InvokeModel to foundation models
+              # in-region, ApplyGuardrail to THIS guardrail only.
               - Effect: Allow
                 Action:
                   - bedrock:InvokeModel
                   - bedrock:InvokeModelWithResponseStream
-                  - bedrock:ApplyGuardrail
-                Resource: "*"
+                Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/*"
+              - Effect: Allow
+                Action: [bedrock:ApplyGuardrail]
+                Resource: !GetAtt BedrockGuardrail.GuardrailArn
               # --- Credentials for live systems of record (hcls/ prefix only) ---
               - Effect: Allow
                 Action: [secretsmanager:GetSecretValue]
@@ -243,6 +247,71 @@ Resources:
                   - ec2:UnassignPrivateIpAddresses
                 Resource: "*"
 
+  # ── round-2 #9: per-responsibility roles ──────────────────────────────────
+  # The canonical golden path (infra/golden-path-*/) already attaches a narrow
+  # inline policy PER FUNCTION. For the shared quickstart, these dedicated roles
+  # let each Lambda assume only what its job needs instead of the broad agent role:
+  #   AuditWriterRole      → audit/review append-only writers (connector, finalize, hitl)
+  #   ApprovalServiceRole  → the reviewer service: durable approval-consumption + token secret
+  #   WormExporterRole     → finalize: regulated artifacts to the Object-Lock store
+  AuditWriterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "hcls-${Environment}-audit-writer"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: [lambda.amazonaws.com] }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: audit-append-only
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [dynamodb:PutItem, dynamodb:GetItem, dynamodb:Query]   # NO Update/Delete/BatchWrite
+                Resource:
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/hcls-${Environment}-audit"
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/hcls-${Environment}-review"
+              - { Effect: Allow, Action: [kms:GenerateDataKey], Resource: !GetAtt AgentKmsKey.Arn }
+              - Effect: Allow
+                Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/hcls-${Environment}-*:*"
+
+  ApprovalServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "hcls-${Environment}-approval-svc"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: [lambda.amazonaws.com] }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: approval-consumption-and-secret
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [dynamodb:PutItem, dynamodb:GetItem]   # atomic single-use claim
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/hcls-${Environment}-approval-consumption"
+              - { Effect: Allow, Action: [secretsmanager:GetSecretValue], Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:hcls/approval-*" }
+              - { Effect: Allow, Action: [kms:Decrypt, kms:GenerateDataKey], Resource: !GetAtt AgentKmsKey.Arn }
+              - Effect: Allow
+                Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/hcls-${Environment}-*:*"
+
+  WormExporterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "hcls-${Environment}-worm-exporter"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: [lambda.amazonaws.com] }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: worm-put-only
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Action: [s3:PutObject], Resource: !Sub "arn:aws:s3:::hcls-${Environment}-regulated-${AWS::AccountId}/*" }
+              - { Effect: Allow, Action: [kms:GenerateDataKey], Resource: !GetAtt AgentKmsKey.Arn }
+
 Outputs:
   KmsKeyArn: { Value: !GetAtt AgentKmsKey.Arn, Export: { Name: !Sub "hcls-${Environment}-kms" } }
   GuardrailId: { Value: !Ref BedrockGuardrail, Export: { Name: !Sub "hcls-${Environment}-guardrail" } }
@@ -258,3 +327,12 @@ Outputs:
   AgentExecutionRoleArn:
     Value: !GetAtt AgentExecutionRole.Arn
     Export: { Name: !Sub "hcls-${Environment}-agent-role" }
+  AuditWriterRoleArn:
+    Value: !GetAtt AuditWriterRole.Arn
+    Export: { Name: !Sub "hcls-${Environment}-audit-writer-role" }
+  ApprovalServiceRoleArn:
+    Value: !GetAtt ApprovalServiceRole.Arn
+    Export: { Name: !Sub "hcls-${Environment}-approval-svc-role" }
+  WormExporterRoleArn:
+    Value: !GetAtt WormExporterRole.Arn
+    Export: { Name: !Sub "hcls-${Environment}-worm-exporter-role" }
