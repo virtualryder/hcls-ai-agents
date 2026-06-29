@@ -13,6 +13,7 @@ In production:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -47,7 +48,22 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
     clock = payload.get("reporting_clock_days")
     meddra_pt = payload.get("meddra_pt", "")
 
+    # F4: the review/approval record is keyed by a stable approval_id (NOT case_id),
+    # matching the DynamoDB review table's HASH key. The reviewer needs the binding
+    # fields below to mint a correctly-bound approval token (requestor / agent / tool
+    # / args) that finalize will verify before the consequential submit.
+    requestor = (payload.get("requestor")
+                 or (payload.get("acting_user_claims") or {}).get("sub")
+                 or "pv-agent-02")
+    agent_id = payload.get("agent_id", "02-pharmacovigilance")
+    submit_tool = "safety.submit_report"
+    submit_args = {"case_id": case_id}  # stable binding (see finalize._verify_approval)
+    approval_id = hashlib.sha256(
+        f"{case_id}|{task_token}".encode("utf-8")
+    ).hexdigest()[:32]
+
     record = {
+        "approval_id": approval_id,
         "task_token": task_token,
         "case_id": case_id,
         "action": action,
@@ -58,6 +74,13 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
         "phi_findings": routing.get("phi_findings", []),
         "grounding_findings": routing.get("grounding_findings", []),
         "missing_elements": routing.get("missing_elements", []),
+        # Binding for the reviewer's bound approval token (separation of duties):
+        "approval_binding": {
+            "requestor": requestor,
+            "agent_id": agent_id,
+            "tool": submit_tool,
+            "args": submit_args,
+        },
     }
 
     # DynamoDB persistence (production)
@@ -68,9 +91,12 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
             boto3.client("dynamodb").put_item(
                 TableName=REVIEW_TABLE,
                 Item={
+                    "approval_id": {"S": str(approval_id)},
                     "case_id": {"S": str(case_id)},
                     "payload": {"S": json.dumps(record)},
                 },
+                # F5: never overwrite an existing pending-approval record in place.
+                ConditionExpression="attribute_not_exists(approval_id)",
             )
         except Exception as exc:
             logger.warning("DynamoDB put_item failed: %s", exc)
@@ -78,6 +104,8 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
     # SNS notification (production)
     message = {
         "subject": f"[PV] ICSR medical review required — {case_id}",
+        "approval_id": approval_id,
+        "approval_binding": record["approval_binding"],
         "case_id": case_id,
         "action": action,
         "is_serious": is_serious,
@@ -121,6 +149,7 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
     return ok(
         {
             "queued_for_review": True,
+            "approval_id": approval_id,
             "case_id": case_id,
             "audit_trail": audit_trail,
         }

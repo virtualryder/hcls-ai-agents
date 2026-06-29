@@ -38,7 +38,7 @@ done
 OUT=$(aws stepfunctions describe-execution --execution-arn "$EXEC_ARN" --region "$REGION" --query output --output text)
 CASE=$(printf '%s' "$OUT" | python3 -c "import sys,json;b=json.load(sys.stdin);print(b.get('case_status') or json.loads(b.get('body','{}')).get('case_status',''))" 2>/dev/null || echo "")
 echo "status=$STATUS case_status=$CASE"
-if [ "$STATUS" = "SUCCEEDED" ]; then
-  echo "PASS: workflow completed through the governed human gate (case_status=$CASE)."; exit 0
+if [ "$STATUS" = "SUCCEEDED" ] && [ "$CASE" = "SUBMITTED" ]; then
+  echo "PASS: governed human gate honored a BOUND approval and the case was SUBMITTED."; exit 0
 fi
-echo "FAIL: execution status=$STATUS"; exit 1
+echo "FAIL: execution status=$STATUS case_status=$CASE (expected SUCCEEDED / SUBMITTED)."; exit 1

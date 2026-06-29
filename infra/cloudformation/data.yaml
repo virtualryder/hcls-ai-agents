@@ -32,8 +32,8 @@ Resources:
     Properties:
       TableName: !Sub "hcls-${Environment}-review"
       BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions: [{ AttributeName: request_id, AttributeType: S }]
-      KeySchema: [{ AttributeName: request_id, KeyType: HASH }]
+      AttributeDefinitions: [{ AttributeName: approval_id, AttributeType: S }]
+      KeySchema: [{ AttributeName: approval_id, KeyType: HASH }]
       SSESpecification: { SSEEnabled: true, SSEType: KMS, KMSMasterKeyId: !Ref KmsKeyArn }
       TimeToLiveSpecification: { AttributeName: ttl, Enabled: true }
 

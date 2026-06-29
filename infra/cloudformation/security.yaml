@@ -120,13 +120,15 @@ Resources:
               # --- Audit + review tables: the HITL-notify and finalize Lambdas
               #     write the task token, draft, and append-only audit entries.
               #     Without this the native workflow fails at the human gate. ---
+              # F5: append-only. NO UpdateItem / DeleteItem / BatchWriteItem on the
+              # audit or review tables — the trail is immutable at the IAM layer, and
+              # the writer additionally uses a conditional PutItem so a record can
+              # never be overwritten in place.
               - Effect: Allow
                 Action:
                   - dynamodb:PutItem
                   - dynamodb:GetItem
                   - dynamodb:Query
-                  - dynamodb:UpdateItem
-                  - dynamodb:BatchWriteItem
                 Resource:
                   - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/hcls-${Environment}-audit"
                   - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/hcls-${Environment}-review"

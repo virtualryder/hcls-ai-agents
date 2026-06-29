@@ -82,40 +82,69 @@ def _normalize(event: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _claims(event: Dict[str, Any]) -> Dict[str, Any]:
-    """Verified IdP claims. Prefer the API-Gateway/AgentCore authorizer context."""
-    for key in ("identity", "claims", "userClaims"):
-        val = event.get(key)
-        if isinstance(val, dict) and val:
-            return val
-    # API Gateway JWT authorizer surfaces claims here.
+    """Resolve the caller's verified identity/role.
+
+    SECURITY (F3): for any network-originated request, identity MUST come from the
+    authenticated authorizer context — never from the request body, which the caller
+    controls and could use to assert a more privileged role. We therefore read the
+    JWT authorizer claims FIRST. Body-supplied identity keys ("identity"/"claims"/
+    "userClaims") are honored only in explicit local-test mode (HCLS_LOCAL_TEST=1),
+    so unit tests and fixture runs can inject a subject without a real IdP.
+    """
+    # 1) Authenticated API Gateway / AgentCore JWT authorizer claims (authoritative).
     rc = event.get("requestContext") or {}
     authz = (rc.get("authorizer") or {}).get("jwt", {}).get("claims")
     if isinstance(authz, dict) and authz:
         return authz
+    # 2) Body-supplied identity: ONLY in local-test mode. Never trusted on the wire.
+    if os.getenv("HCLS_LOCAL_TEST") == "1":
+        for key in ("identity", "claims", "userClaims"):
+            val = event.get(key)
+            if isinstance(val, dict) and val:
+                return val
     return {}
 
 
 def _audit_to_dynamo(result: Any) -> None:
-    """Best-effort mirror of the audit entry into the append-only DynamoDB table."""
+    """Persist the audit entry into the append-only DynamoDB table.
+
+    SECURITY (F5): for a regulated action the audit record is part of the transaction
+    boundary, not a best-effort side effect. We therefore:
+      * write a COMPLETE evidence record (identity, agent, tool, args hash, approval,
+        decision, scope, reason) — not just a four-field summary;
+      * use a conditional PutItem (attribute_not_exists) so an existing record can
+        never be silently overwritten — the trail is immutable at write time; and
+      * FAIL CLOSED — if the table is configured and the write fails for any reason
+        other than the idempotent already-exists case, we raise, so the caller does
+        not get to claim success without a durable audit row.
+    A duplicate write (same audit_id) is treated as idempotent success.
+    """
     table = os.getenv("AUDIT_TABLE")
     if not table:
-        return
+        return  # demo / fixture mode: no table configured, nothing to persist
+    import datetime
+    import boto3
+    from botocore.exceptions import ClientError
+
+    item = {
+        "audit_id": {"S": str(result.audit_id)},
+        "ts": {"S": datetime.datetime.now(datetime.timezone.utc).isoformat()},
+        "decision": {"S": str(result.decision)},
+        "tool": {"S": str(result.tool)},
+        "allowed": {"BOOL": bool(getattr(result, "allowed", False))},
+        "reason": {"S": str(getattr(result, "reason", "") or "")},
+        "scope": {"S": json.dumps(getattr(result, "scope", None))},
+    }
     try:  # pragma: no cover - requires AWS
-        import datetime
-
-        import boto3
-
         boto3.client("dynamodb").put_item(
             TableName=table,
-            Item={
-                "audit_id": {"S": str(result.audit_id)},
-                "ts": {"S": datetime.datetime.now(datetime.timezone.utc).isoformat()},
-                "decision": {"S": result.decision},
-                "tool": {"S": result.tool},
-            },
+            Item=item,
+            ConditionExpression="attribute_not_exists(audit_id)",
         )
-    except Exception:  # never fail the call because the mirror failed
-        pass
+    except ClientError as exc:  # pragma: no cover - requires AWS
+        if exc.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":
+            return  # record already exists — immutable, idempotent: OK
+        raise  # any other failure must block the action (fail closed)
 
 
 # ── Lambda entry point ───────────────────────────────────────────────────────
