@@ -48,10 +48,22 @@ def test_claims_prefers_authorizer_over_body(monkeypatch):
 
 def test_body_identity_ignored_on_the_wire(monkeypatch):
     monkeypatch.delenv("HCLS_LOCAL_TEST", raising=False)
-    # No authorizer context → body identity must NOT be trusted by default.
+    # A NETWORK request always carries requestContext (added by API Gateway). With a
+    # requestContext present but no usable authorizer claims, body identity must NOT be
+    # trusted. (A genuine direct Lambda invoke has no requestContext and is IAM-gated.)
     claims = handler._claims({"tool": "safety.get_case",
+                              "requestContext": {"http": {"method": "POST"}},
                               "identity": {"custom:hcls_role": "QUALIFIED_PERSON"}})
     assert claims == {}
+
+
+def test_direct_invoke_identity_trusted(monkeypatch):
+    monkeypatch.delenv("HCLS_LOCAL_TEST", raising=False)
+    # No requestContext = direct (IAM-authenticated) invoke, e.g. finalize committing
+    # on the approver's authority. Body identity is accepted here.
+    claims = handler._claims({"tool": "safety.submit_report",
+                              "identity": {"sub": "pv-physician-1", "custom:hcls_role": "PV_MEDICAL_REVIEWER"}})
+    assert claims.get("sub") == "pv-physician-1"
 
 
 def test_body_identity_allowed_only_in_local_test(monkeypatch):

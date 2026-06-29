@@ -172,6 +172,28 @@ def user_entitlements(roles: Iterable[str]) -> FrozenSet[str]:
     return frozenset(out)
 
 
+def decide_human_commit(user_roles: Iterable[str], tool: str) -> PolicyDecision:
+    """Authorize a CONSEQUENTIAL_COMMIT performed by a HUMAN authority.
+
+    These irreversible commits are withheld from every agent grant (see
+    CONSEQUENTIAL_COMMITS) — no agent may ever hold them. When a qualified human
+    commits (carrying a valid bound approval), authorization is by the human's ROLE
+    entitlement alone; there is no agent in the loop to intersect against."""
+    if tool not in TOOL_REGISTRY:
+        return PolicyDecision(False, tool, f"unknown tool {tool!r}")
+    if tool not in CONSEQUENTIAL_COMMITS:
+        return PolicyDecision(False, tool, f"{tool!r} is not a human-commit tool")
+    connector_kind, method, _ = TOOL_REGISTRY[tool]
+    ent = user_entitlements(user_roles)
+    if tool not in ent:
+        return PolicyDecision(False, tool,
+                              f"approver (roles={list(user_roles)}) is not entitled to commit {tool!r}",
+                              connector_kind=connector_kind, method=method)
+    return PolicyDecision(True, tool, "human-authority commit (approver role + bound approval)",
+                          requires_approval=True, connector_kind=connector_kind, method=method,
+                          effective_scope=[tool])
+
+
 def decide(agent_id: str, user_roles: Iterable[str], tool: str) -> PolicyDecision:
     """Deny-by-default authorization with least-privilege intersection."""
     if tool not in TOOL_REGISTRY:
