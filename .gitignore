@@ -66,5 +66,3 @@ _fv/
 # SAM golden-path build artifacts (staged at deploy time)
 infra/golden-path-*/layer/python/
 infra/golden-path-*/.aws-sam/
-*.log
-exec_arn.txt
