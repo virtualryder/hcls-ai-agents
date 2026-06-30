@@ -9,7 +9,7 @@ A large systems integrator deploying AI in a pharmaceutical, biotech, medtech, o
 
 The result is a deployable accelerator — not a certified product — that gives an SI engagement team a credible, compliant starting point across nine high-value life-sciences workflows.
 
-**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **503 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + a portable MCP gateway (AgentCore mode is experimental — see `infra/cloudformation/agentcore-gateway.yaml`) + native/container agent) deployable in a new customer account in any Region · Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included · **external-review hardening (P0):** deployed-path human-approval enforcement (bound, single-use, separation-of-duties, args-bound tokens; `STRICT_APPROVAL` fails closed), authenticated-authorizer-only identity, immutable fail-closed audit, customer IdP (SAML/OIDC) federation, VPC PrivateLink isolation, and fail-closed CI.
+**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **519 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + a portable MCP gateway (AgentCore mode is experimental — see `infra/cloudformation/agentcore-gateway.yaml`) + native/container agent) deployable in a new customer account in any Region · **all 9 golden paths deployed and run end-to-end in a clean AWS account (us-east-1) — full Assemble→…→human gate→bound approval→Finalize to SUCCEEDED — then torn down** · Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included · **external-review hardening (P0):** deployed-path human-approval enforcement (bound, single-use, separation-of-duties, args-bound tokens; `STRICT_APPROVAL` fails closed), authenticated-authorizer-only identity, immutable fail-closed audit, customer IdP (SAML/OIDC) federation, VPC PrivateLink isolation, and fail-closed CI.
 
 ---
 
@@ -35,7 +35,7 @@ Every agent and platform component is positioned honestly against four levels:
 | **Deployable** | CloudFormation templates, container contracts (ARM64, `/invocations`, `/ping`), and CI pass; requires customer AWS account and Bedrock access | Suitable for a customer pilot with SI-managed infrastructure |
 | **Production-ready** | Customer computer-system validation (CSV) complete, IdP integrated, connectors tested against live systems, penetration test passed | Engagement milestone, not a day-one deliverable |
 
-**All nine agents are built to flagship depth** — a full LangGraph workflow, governed tool access, deterministic fixtures, flagship-level test suites, a Streamlit dashboard, a four-document doc set, and a matching **AWS-native rebuild** (Strands + Step Functions with a `waitForTaskToken` human gate). Agent 02 (Pharmacovigilance) additionally ships a **live path**: real Amazon Bedrock inference and a real HTTP system-of-record connector, exercised end-to-end (see `02-pharmacovigilance-agent/demo/`). The suite sits at **Demonstrated + Deployable-by-design**: 503 automated tests pass with no API key; production-readiness (CSV/CSA, live integration, penetration test) is the engagement. (A tenth agent, 10 Scientific Intelligence & Target Discovery, is at roadmap/Documented maturity — cited deck + design spec.)
+**All nine agents are built to flagship depth** — a full LangGraph workflow, governed tool access, deterministic fixtures, flagship-level test suites, a Streamlit dashboard, a four-document doc set, and a matching **AWS-native rebuild** (Strands + Step Functions with a `waitForTaskToken` human gate). Agent 02 (Pharmacovigilance) additionally ships a **live path**: real Amazon Bedrock inference and a real HTTP system-of-record connector, exercised end-to-end (see `02-pharmacovigilance-agent/demo/`). The suite sits at **Demonstrated + Deploy-validated**: 519 automated tests pass with no API key; **all nine golden paths were deployed into a clean AWS account, ran the full governed workflow (human gate + bound separation-of-duties approval + immutable audit) to `SUCCEEDED`, and were torn down** (see `docs/GOLDEN-PATH-DEPLOY-NOTES.md`); production-readiness (CSV/CSA, live system integration, penetration test) remains the engagement. (A tenth agent, 10 Scientific Intelligence & Target Discovery, is at roadmap/Documented maturity — cited deck + design spec.)
 
 ---
 
@@ -119,6 +119,21 @@ See `governance/README.md` for the full governance layer documentation.
 
 **The per-agent SAM golden path (`infra/golden-path-<agent>/`) is the canonical, fully-wired path for a pilot.** Deploy one agent from a single folder: `./deploy.sh` + `./smoke_test.sh` (exercises the human gate with a bound, separation-of-duties approval) + `./destroy.sh`. Index: [`infra/GOLDEN-PATHS.md`](infra/GOLDEN-PATHS.md). The shared CloudFormation quickstart below is the **multi-agent / scale-out reference** that nests the same control stacks.
 
+> **Validated live.** All nine golden paths were deployed into a clean AWS account, exercised end to
+> end, and destroyed. **Before your first deploy, read [`docs/GOLDEN-PATH-DEPLOY-NOTES.md`](docs/GOLDEN-PATH-DEPLOY-NOTES.md)**
+> — prereqs (SAM, Python 3.12 / or skip `sam build`, the `python-dateutil` gotcha, Bedrock optional) and
+> the nine issues already found and fixed by deploying every agent.
+
+```bash
+cd infra/golden-path-02-pharmacovigilance          # any agent
+bash prepare_layer.sh                                # stage platform_core + governance + agent modules
+sam deploy --stack-name hcls-02-dev --region us-east-1 \
+  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+  --resolve-s3 --no-confirm-changeset --parameter-overrides Environment=dev ConnectorMode=fixture
+python ../_smoke/resume_any.py <executionArn> "$PWD"  # start a run, approve the human gate, assert SUCCEEDED
+aws cloudformation delete-stack --stack-name hcls-02-dev --region us-east-1   # + delete Retain-policy tables
+```
+
 ## Security & Compliance (the CISO / CIO answer kit)
 
 A security or architecture review can be answered entirely from these documents — each names the issue
@@ -137,7 +152,7 @@ withheld from every agent** — only a bound human reviewer may commit (enforced
 | "What's your incident response / key management?" | [`docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md`](docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md) |
 | "What's reference vs. what we must finish?" | [`docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md`](docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md) |
 | "How do we report a vulnerability?" | [`SECURITY.md`](SECURITY.md) |
-| "How do we know it behaves?" | **503 automated tests** (incl. governance + red-team + the commit-withholding test), one command: `make test` |
+| "How do we know it behaves?" | **519 automated tests** (incl. governance + red-team + the commit-withholding test), one command: `make test` |
 
 For per-stakeholder talk tracks see [`docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`](docs/STAKEHOLDER-SECURITY-BRIEFINGS.md) and the board deck `decks/HCLS-CIO-Adoption-Review.pptx`.
 
