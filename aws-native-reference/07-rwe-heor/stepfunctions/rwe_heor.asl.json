@@ -12,7 +12,7 @@
     "Synthesize": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": {"FunctionName": "${SynthesizeFunctionArn}", "Payload.$": "$"},
+      "Parameters": {"FunctionName": "${DraftFunctionArn}", "Payload.$": "$"},
       "OutputPath": "$.Payload",
       "Next": "Check"
     },
