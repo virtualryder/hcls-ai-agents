@@ -29,7 +29,7 @@ it points you at the right artifact for every moment of a deal.
 7. **Fund it** → `docs/AWS-FUNDING-AND-GTM.md` (MAP / PoA / ISV Accelerate), `docs/AWS-MARKETPLACE-PATH.md`.
 8. **Scope the engagement** → `offerings/POC-OFFERING.md`, `offerings/PILOT-OFFERING.md`, `offerings/SOW-TEMPLATE.md`.
 9. **Pre-flight the account** → `docs/AWS-ACCOUNT-PREREQUISITES.md`.
-10. **Deploy** → `docs/DEPLOY-QUICKSTART.md` then `docs/DEPLOYMENT-HANDBOOK.md`.
+10. **Deploy** → `docs/DEPLOY-QUICKSTART.md` then `docs/DEPLOYMENT-HANDBOOK.md`. For the per-agent SAM golden paths, **read `docs/GOLDEN-PATH-DEPLOY-NOTES.md` first** (prereqs + lessons from deploying all nine end-to-end in a clean account).
 
 ## The five claims you can make (and how to keep them honest)
 
