@@ -9,7 +9,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 |---|---|
 | Agents | **9**, all built to flagship depth (01–08 core lifecycle + 09 Manufacturing Batch-Review) |
 | AWS-native rebuilds | **9** (Strands + Step Functions, `waitForTaskToken` HITL) |
-| Automated tests passing | **503** (platform 35 · governance 7 · agents 277 · native 184), verified in one command via `make test` |
+| Automated tests passing | **519** (platform 50 · governance 7 · agents 277 · native 185), verified in one command via `make test`; **all 9 golden paths also deployed + run end-to-end in a clean AWS account** |
 | LLM | Anthropic Claude / in-account Amazon Bedrock + Guardrails / deterministic demo |
 | MCP layer | Portable gateway (API Gateway + Cognito JWT) is the **supported default**; a **managed Bedrock AgentCore Gateway** path is **experimental** (each target additionally requires a ToolSchema — `agentcore-gateway.yaml`). Both front shared connector Lambdas (reference logic in `platform_core`) |
 | IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in any Region (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform parity |
@@ -32,6 +32,8 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 - A matching AWS-native rebuild under `aws-native-reference/<agent>/`.
 
 ## Changelog (most recent first)
+
+- **Live AWS deploy validation (all 9 golden paths)** — every per-agent SAM golden path was deployed into a clean account (us-east-1), ran the full governed workflow (Assemble→…→`waitForTaskToken` human gate→bound separation-of-duties approval→Finalize) to **SUCCEEDED**, and was torn down. Surfaced + fixed ~10 deploy/runtime issues invisible to cfn-lint (layer staging incl. `strands_agent`, Bedrock `PROMPT_ATTACK`=NONE, two ASL data contracts, identity lineage, the **human-authority commit** path for withheld consequential tools, SAM state-machine update-on-content-change, 07 `Synthesize`→`DraftFn`). New `docs/GOLDEN-PATH-DEPLOY-NOTES.md`; generic `infra/_smoke/resume_any.py`. Suite **519** green.
 
 - **External-review remediation (P0)** — an independent review (58/100) found gaps between the control
   narrative and the *deployed* path; all P0 items closed and verified one-command (`docs/CHATGPT-REVIEW-REMEDIATION-PLAN.md`):
