@@ -91,3 +91,6 @@ roi:
 clean-handbooks:
 	rm -f HCLS-Deployment-Handbook.pdf $(AGENTS)/*.pdf \
 	      $(CONSOLE)/.figures.stamp $(AGENTS)/.agents.stamp
+
+eval-agent02:  ## Scored eval for Agent 02 (Pharmacovigilance) — gates on regulatory thresholds
+	PYTHONPATH=.:platform_core python -m governance.evals.score_agent02

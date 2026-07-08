@@ -1,0 +1,164 @@
+{
+  "passed": true,
+  "metrics": {
+    "seriousness_recall": 1.0,
+    "seriousness_precision": 1.0,
+    "entity_f1": 1.0,
+    "duplicate_accuracy": 1.0,
+    "grounding_rate": 1.0,
+    "phi_leak_rate": 0.0,
+    "e2b_completeness": 1.0
+  },
+  "n_cases": 20,
+  "detail": [
+    {
+      "id": "PV-0001",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0002",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0003",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0004",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0005",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0006",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0007",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0008",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0009",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0010",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0011",
+      "serious_gold": true,
+      "serious_pred": true,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0012",
+      "serious_gold": false,
+      "serious_pred": false,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0013",
+      "serious_gold": false,
+      "serious_pred": false,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0014",
+      "serious_gold": false,
+      "serious_pred": false,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0015",
+      "serious_gold": false,
+      "serious_pred": false,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0016",
+      "serious_gold": false,
+      "serious_pred": false,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0017",
+      "serious_gold": false,
+      "serious_pred": false,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0018",
+      "serious_gold": false,
+      "serious_pred": false,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0019",
+      "serious_gold": false,
+      "serious_pred": false,
+      "grounded": true,
+      "phi_leak": false
+    },
+    {
+      "id": "PV-0020",
+      "serious_gold": false,
+      "serious_pred": false,
+      "grounded": true,
+      "phi_leak": false
+    }
+  ],
+  "confusion": {
+    "serious": {
+      "tp": 11,
+      "fp": 0,
+      "fn": 0,
+      "tn": 9
+    }
+  },
+  "failures": []
+}

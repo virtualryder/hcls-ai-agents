@@ -1,0 +1,839 @@
+{
+  "cases": [
+    {
+      "id": "PV-0001",
+      "faers": {
+        "safetyreportid": "PV-0001",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "67",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "METFORMIN",
+              "drugcharacterization": "1"
+            },
+            {
+              "medicinalproduct": "LISINOPRIL",
+              "drugcharacterization": "2"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Lactic acidosis",
+              "reactionoutcome": "1"
+            },
+            {
+              "reactionmeddrapt": "Acute kidney injury",
+              "reactionoutcome": "3"
+            }
+          ]
+        },
+        "seriousnesshospitalization": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Hospitalization"
+        ],
+        "drugs": [
+          "METFORMIN"
+        ],
+        "reactions": [
+          "Lactic acidosis",
+          "Acute kidney injury"
+        ],
+        "outcomes": [
+          "Not recovered/not resolved",
+          "Recovered/resolved"
+        ]
+      }
+    },
+    {
+      "id": "PV-0002",
+      "faers": {
+        "safetyreportid": "PV-0002",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "71",
+          "patientonsetageunit": "801",
+          "patientsex": "1",
+          "drug": [
+            {
+              "medicinalproduct": "WARFARIN",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Gastrointestinal haemorrhage",
+              "reactionoutcome": "5"
+            }
+          ]
+        },
+        "seriousnessdeath": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Death"
+        ],
+        "drugs": [
+          "WARFARIN"
+        ],
+        "reactions": [
+          "Gastrointestinal haemorrhage"
+        ],
+        "outcomes": [
+          "Fatal"
+        ]
+      }
+    },
+    {
+      "id": "PV-0003",
+      "faers": {
+        "safetyreportid": "PV-0003",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "54",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "AMOXICILLIN",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Anaphylactic reaction",
+              "reactionoutcome": "1"
+            }
+          ]
+        },
+        "seriousnesslifethreatening": "1",
+        "seriousnesshospitalization": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Life-threatening",
+          "Hospitalization"
+        ],
+        "drugs": [
+          "AMOXICILLIN"
+        ],
+        "reactions": [
+          "Anaphylactic reaction"
+        ],
+        "outcomes": [
+          "Recovered/resolved"
+        ]
+      }
+    },
+    {
+      "id": "PV-0004",
+      "faers": {
+        "safetyreportid": "PV-0004",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "60",
+          "patientonsetageunit": "801",
+          "patientsex": "1",
+          "drug": [
+            {
+              "medicinalproduct": "ATORVASTATIN",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Rhabdomyolysis",
+              "reactionoutcome": "2"
+            }
+          ]
+        },
+        "seriousnesshospitalization": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Hospitalization"
+        ],
+        "drugs": [
+          "ATORVASTATIN"
+        ],
+        "reactions": [
+          "Rhabdomyolysis"
+        ],
+        "outcomes": [
+          "Recovering/resolving"
+        ]
+      }
+    },
+    {
+      "id": "PV-0005",
+      "faers": {
+        "safetyreportid": "PV-0005",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "45",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "METHOTREXATE",
+              "drugcharacterization": "1"
+            },
+            {
+              "medicinalproduct": "FOLIC ACID",
+              "drugcharacterization": "2"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Hepatic fibrosis",
+              "reactionoutcome": "3"
+            }
+          ]
+        },
+        "seriousnessdisabling": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Disability"
+        ],
+        "drugs": [
+          "METHOTREXATE"
+        ],
+        "reactions": [
+          "Hepatic fibrosis"
+        ],
+        "outcomes": [
+          "Not recovered/not resolved"
+        ]
+      }
+    },
+    {
+      "id": "PV-0006",
+      "faers": {
+        "safetyreportid": "PV-0006",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "38",
+          "patientonsetageunit": "801",
+          "patientsex": "1",
+          "drug": [
+            {
+              "medicinalproduct": "ISOTRETINOIN",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Depression",
+              "reactionoutcome": "6"
+            }
+          ]
+        },
+        "seriousnessother": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Other medically important condition"
+        ],
+        "drugs": [
+          "ISOTRETINOIN"
+        ],
+        "reactions": [
+          "Depression"
+        ],
+        "outcomes": [
+          "Unknown"
+        ]
+      }
+    },
+    {
+      "id": "PV-0007",
+      "faers": {
+        "safetyreportid": "PV-0007",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "29",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "CLOZAPINE",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Agranulocytosis",
+              "reactionoutcome": "1"
+            }
+          ]
+        },
+        "seriousnesshospitalization": "1",
+        "seriousnesslifethreatening": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Hospitalization",
+          "Life-threatening"
+        ],
+        "drugs": [
+          "CLOZAPINE"
+        ],
+        "reactions": [
+          "Agranulocytosis"
+        ],
+        "outcomes": [
+          "Recovered/resolved"
+        ]
+      }
+    },
+    {
+      "id": "PV-0008",
+      "faers": {
+        "safetyreportid": "PV-0008",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "31",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "VALPROATE",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Foetal anticonvulsant syndrome",
+              "reactionoutcome": "6"
+            }
+          ]
+        },
+        "seriousnesscongenitalanomali": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Congenital anomaly"
+        ],
+        "drugs": [
+          "VALPROATE"
+        ],
+        "reactions": [
+          "Foetal anticonvulsant syndrome"
+        ],
+        "outcomes": [
+          "Unknown"
+        ]
+      }
+    },
+    {
+      "id": "PV-0009",
+      "faers": {
+        "safetyreportid": "PV-0009",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "80",
+          "patientonsetageunit": "801",
+          "patientsex": "1",
+          "drug": [
+            {
+              "medicinalproduct": "DIGOXIN",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Cardiac arrest",
+              "reactionoutcome": "5"
+            }
+          ]
+        },
+        "seriousnessdeath": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Death"
+        ],
+        "drugs": [
+          "DIGOXIN"
+        ],
+        "reactions": [
+          "Cardiac arrest"
+        ],
+        "outcomes": [
+          "Fatal"
+        ]
+      }
+    },
+    {
+      "id": "PV-0010",
+      "faers": {
+        "safetyreportid": "PV-0010",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "52",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "INFLIXIMAB",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Tuberculosis",
+              "reactionoutcome": "2"
+            }
+          ]
+        },
+        "seriousnesshospitalization": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Hospitalization"
+        ],
+        "drugs": [
+          "INFLIXIMAB"
+        ],
+        "reactions": [
+          "Tuberculosis"
+        ],
+        "outcomes": [
+          "Recovering/resolving"
+        ]
+      }
+    },
+    {
+      "id": "PV-0011",
+      "faers": {
+        "safetyreportid": "PV-0011",
+        "serious": "1",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "66",
+          "patientonsetageunit": "801",
+          "patientsex": "1",
+          "drug": [
+            {
+              "medicinalproduct": "METFORMIN",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Lactic acidosis",
+              "reactionoutcome": "1"
+            }
+          ]
+        },
+        "seriousnesshospitalization": "1"
+      },
+      "gold": {
+        "serious": true,
+        "criteria": [
+          "Hospitalization"
+        ],
+        "drugs": [
+          "METFORMIN"
+        ],
+        "reactions": [
+          "Lactic acidosis"
+        ],
+        "outcomes": [
+          "Recovered/resolved"
+        ],
+        "is_duplicate": true,
+        "dup_of": "PV-0001"
+      }
+    },
+    {
+      "id": "PV-0012",
+      "faers": {
+        "safetyreportid": "PV-0012",
+        "serious": "2",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "40",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "IBUPROFEN",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Nausea",
+              "reactionoutcome": "1"
+            }
+          ]
+        }
+      },
+      "gold": {
+        "serious": false,
+        "criteria": [],
+        "drugs": [
+          "IBUPROFEN"
+        ],
+        "reactions": [
+          "Nausea"
+        ],
+        "outcomes": [
+          "Recovered/resolved"
+        ]
+      }
+    },
+    {
+      "id": "PV-0013",
+      "faers": {
+        "safetyreportid": "PV-0013",
+        "serious": "2",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "33",
+          "patientonsetageunit": "801",
+          "patientsex": "1",
+          "drug": [
+            {
+              "medicinalproduct": "SERTRALINE",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Headache",
+              "reactionoutcome": "2"
+            }
+          ]
+        }
+      },
+      "gold": {
+        "serious": false,
+        "criteria": [],
+        "drugs": [
+          "SERTRALINE"
+        ],
+        "reactions": [
+          "Headache"
+        ],
+        "outcomes": [
+          "Recovering/resolving"
+        ]
+      }
+    },
+    {
+      "id": "PV-0014",
+      "faers": {
+        "safetyreportid": "PV-0014",
+        "serious": "2",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "27",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "LEVONORGESTREL",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Irregular menstruation",
+              "reactionoutcome": "1"
+            }
+          ]
+        }
+      },
+      "gold": {
+        "serious": false,
+        "criteria": [],
+        "drugs": [
+          "LEVONORGESTREL"
+        ],
+        "reactions": [
+          "Irregular menstruation"
+        ],
+        "outcomes": [
+          "Recovered/resolved"
+        ]
+      }
+    },
+    {
+      "id": "PV-0015",
+      "faers": {
+        "safetyreportid": "PV-0015",
+        "serious": "2",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "50",
+          "patientonsetageunit": "801",
+          "patientsex": "1",
+          "drug": [
+            {
+              "medicinalproduct": "OMEPRAZOLE",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Diarrhoea",
+              "reactionoutcome": "1"
+            }
+          ]
+        }
+      },
+      "gold": {
+        "serious": false,
+        "criteria": [],
+        "drugs": [
+          "OMEPRAZOLE"
+        ],
+        "reactions": [
+          "Diarrhoea"
+        ],
+        "outcomes": [
+          "Recovered/resolved"
+        ]
+      }
+    },
+    {
+      "id": "PV-0016",
+      "faers": {
+        "safetyreportid": "PV-0016",
+        "serious": "2",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "61",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "AMLODIPINE",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Peripheral oedema",
+              "reactionoutcome": "3"
+            }
+          ]
+        }
+      },
+      "gold": {
+        "serious": false,
+        "criteria": [],
+        "drugs": [
+          "AMLODIPINE"
+        ],
+        "reactions": [
+          "Peripheral oedema"
+        ],
+        "outcomes": [
+          "Not recovered/not resolved"
+        ]
+      }
+    },
+    {
+      "id": "PV-0017",
+      "faers": {
+        "safetyreportid": "PV-0017",
+        "serious": "2",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "22",
+          "patientonsetageunit": "801",
+          "patientsex": "1",
+          "drug": [
+            {
+              "medicinalproduct": "CETIRIZINE",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Somnolence",
+              "reactionoutcome": "1"
+            }
+          ]
+        }
+      },
+      "gold": {
+        "serious": false,
+        "criteria": [],
+        "drugs": [
+          "CETIRIZINE"
+        ],
+        "reactions": [
+          "Somnolence"
+        ],
+        "outcomes": [
+          "Recovered/resolved"
+        ]
+      }
+    },
+    {
+      "id": "PV-0018",
+      "faers": {
+        "safetyreportid": "PV-0018",
+        "serious": "2",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "48",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "METFORMIN",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Dyspepsia",
+              "reactionoutcome": "1"
+            }
+          ]
+        }
+      },
+      "gold": {
+        "serious": false,
+        "criteria": [],
+        "drugs": [
+          "METFORMIN"
+        ],
+        "reactions": [
+          "Dyspepsia"
+        ],
+        "outcomes": [
+          "Recovered/resolved"
+        ],
+        "is_duplicate": false,
+        "dup_of": "PV-0001"
+      }
+    },
+    {
+      "id": "PV-0019",
+      "faers": {
+        "safetyreportid": "PV-0019",
+        "serious": "2",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "35",
+          "patientonsetageunit": "801",
+          "patientsex": "1",
+          "drug": [
+            {
+              "medicinalproduct": "PARACETAMOL",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Rash",
+              "reactionoutcome": "2"
+            }
+          ]
+        }
+      },
+      "gold": {
+        "serious": false,
+        "criteria": [],
+        "drugs": [
+          "PARACETAMOL"
+        ],
+        "reactions": [
+          "Rash"
+        ],
+        "outcomes": [
+          "Recovering/resolving"
+        ]
+      }
+    },
+    {
+      "id": "PV-0020",
+      "faers": {
+        "safetyreportid": "PV-0020",
+        "serious": "2",
+        "receivedate": "20240101",
+        "occurcountry": "US",
+        "patient": {
+          "patientonsetage": "58",
+          "patientonsetageunit": "801",
+          "patientsex": "2",
+          "drug": [
+            {
+              "medicinalproduct": "SIMVASTATIN",
+              "drugcharacterization": "1"
+            }
+          ],
+          "reaction": [
+            {
+              "reactionmeddrapt": "Myalgia",
+              "reactionoutcome": "1"
+            }
+          ]
+        }
+      },
+      "gold": {
+        "serious": false,
+        "criteria": [],
+        "drugs": [
+          "SIMVASTATIN"
+        ],
+        "reactions": [
+          "Myalgia"
+        ],
+        "outcomes": [
+          "Recovered/resolved"
+        ]
+      }
+    }
+  ]
+}

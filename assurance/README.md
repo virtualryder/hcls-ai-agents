@@ -90,3 +90,5 @@ certification, and not production-ready for regulated data without customer-spec
 engineering, testing, authorization, and operational ownership.*
 
 - **GDPR / EU annex:** [`../docs/GDPR-EU-ANNEX.md`](../docs/GDPR-EU-ANNEX.md) and DPIA template [`../docs/DPIA-TEMPLATE.md`](../docs/DPIA-TEMPLATE.md) â€” roles, lawful basis, Art. 9 health data, residency/transfers, Art. 22 automated-decision posture.
+
+- **Agent 02 output-quality evidence:** [`../governance/evals/eval-report.md`](../governance/evals/eval-report.md) — scored PV benchmark (seriousness recall, entity F1, duplicate accuracy, grounding, **PHI-leak hard gate = 0**, E2B completeness) with regulatory thresholds gated in CI (`make eval-agent02`).

@@ -119,6 +119,8 @@ EVALUATORS = {
 def run_all() -> List[EvalResult]:
     results: List[EvalResult] = []
     for golden_file in sorted(GOLDEN_DIR.glob("*.json")):
+        if golden_file.stem not in EVALUATORS:
+            continue  # scored golden sets (e.g. agent02_pv_scored) have their own runner: score_agent02.py
         suite = json.loads(golden_file.read_text())
         evaluator = EVALUATORS[golden_file.stem]
         for case in suite["cases"]:
