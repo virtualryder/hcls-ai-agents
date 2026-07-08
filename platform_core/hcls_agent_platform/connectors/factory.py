@@ -52,10 +52,16 @@ def get_connector(kind: str, mode: Optional[str] = None) -> Connector:
 
     if mode == "live":
         if kind == "safety":
+            # SAFETY_SOURCE=openfda -> real, public, de-identified FAERS data
+            # (read-only; writes/submission stay human-gated against the customer's
+            # validated safety system). This is the "one real connector" reference.
+            if os.getenv("SAFETY_SOURCE", "").strip().lower() == "openfda":
+                from .openfda import OpenFDASafetyConnector
+                return OpenFDASafetyConnector()
             base_url = os.getenv("SAFETY_BASE_URL", "")
             if base_url:
                 return LiveSafetyConnector(base_url=base_url)
-            # SAFETY_BASE_URL not set: return stub so the error is informative.
+            # Neither SAFETY_SOURCE nor SAFETY_BASE_URL set: informative stub.
             return LiveConnector(kind)
         # MedDRA / WHODrug: remain fixture-backed in demo; implement live
         # subclasses when licensed API credentials are available.

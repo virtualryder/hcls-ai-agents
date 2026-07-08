@@ -1,0 +1,28 @@
+{
+  "meta": {"disclaimer": "openFDA public data", "results": {"total": 1, "limit": 1}},
+  "results": [
+    {
+      "safetyreportid": "18424955",
+      "serious": "1",
+      "seriousnesshospitalization": "1",
+      "seriousnessdeath": "0",
+      "receivedate": "20210115",
+      "occurcountry": "US",
+      "primarysourcecountry": "US",
+      "patient": {
+        "patientonsetage": "67",
+        "patientonsetageunit": "801",
+        "patientsex": "2",
+        "patientweight": "72",
+        "drug": [
+          {"medicinalproduct": "METFORMIN", "drugcharacterization": "1", "drugindication": "TYPE 2 DIABETES MELLITUS", "activesubstance": {"activesubstancename": "METFORMIN HYDROCHLORIDE"}},
+          {"medicinalproduct": "LISINOPRIL", "drugcharacterization": "2", "drugindication": "HYPERTENSION"}
+        ],
+        "reaction": [
+          {"reactionmeddrapt": "Lactic acidosis", "reactionoutcome": "1"},
+          {"reactionmeddrapt": "Acute kidney injury", "reactionoutcome": "3"}
+        ]
+      }
+    }
+  ]
+}
