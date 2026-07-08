@@ -88,3 +88,5 @@ questionnaire directly from repository artifacts.
 *Reference accelerator — not an AWS service, not AWS-supported software, not a compliance
 certification, and not production-ready for regulated data without customer-specific
 engineering, testing, authorization, and operational ownership.*
+
+- **GDPR / EU annex:** [`../docs/GDPR-EU-ANNEX.md`](../docs/GDPR-EU-ANNEX.md) and DPIA template [`../docs/DPIA-TEMPLATE.md`](../docs/DPIA-TEMPLATE.md) — roles, lawful basis, Art. 9 health data, residency/transfers, Art. 22 automated-decision posture.
