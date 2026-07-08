@@ -47,7 +47,7 @@ Data (private subnets):
   ├─ Aurora PostgreSQL  — brief drafts, workflow state
   ├─ DynamoDB           — append-only audit trail (21 CFR Part 11)
   ├─ S3 Object Lock     — approved brief archive (WORM, MLR record)
-  └─ Bedrock + Guardrails — in-account inference; off-label denied topics policy
+  └─ Bedrock + Guardrails — private-connectivity inference via PrivateLink; off-label denied topics policy
 ```
 
 ## Connector notes

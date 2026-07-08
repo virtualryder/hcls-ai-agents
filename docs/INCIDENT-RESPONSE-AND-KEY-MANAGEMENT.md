@@ -45,4 +45,4 @@
 
 **Rules:** no standing service accounts; tokens are short-lived and per-call; secrets resolve via Secrets
 Manager (env fallback only in dev with `DISABLE_SECRETS_MANAGER=1`); KMS encrypts every data class at rest;
-TLS 1.3 in transit; Bedrock inference stays in-VPC (no patient-data egress).
+TLS 1.3 in transit; Bedrock inference traffic stays on AWS private networking via PrivateLink (no patient-data egress to external AI APIs).

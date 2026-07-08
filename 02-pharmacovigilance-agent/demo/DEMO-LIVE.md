@@ -205,10 +205,12 @@ method before the HTTP call — the agent does not produce XML directly.
 
 ## Security talking points
 
-### 1. In-account inference (Bedrock)
-Narrative drafting runs inside the customer's AWS VPC via a Bedrock VPC
-interface endpoint. Source records (which contain patient PII) never leave the
-account boundary. This is the key data-residency argument for regulated data.
+### 1. Private-connectivity inference (Bedrock)
+Narrative drafting calls the regional Amazon Bedrock service from the customer's
+VPC over a Bedrock VPC interface endpoint (AWS PrivateLink) — traffic never
+traverses the public internet, and source records (which contain patient PII)
+never egress to an external AI API. This is the key data-residency argument for
+regulated data.
 
 ### 2. Guardrails (PHI filter + off-label blocking)
 `BEDROCK_GUARDRAIL_ID` wraps every Bedrock call. The guardrail is configured to:

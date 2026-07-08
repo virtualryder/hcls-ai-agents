@@ -183,10 +183,10 @@ The platform design maps to the overlapping regulatory frameworks as follows:
 
 ### HIPAA (45 CFR Parts 160/164)
 - **PHI masking**: NER-based entity recognition replaces identifiers before any content enters an LLM prompt or audit record; the masking is stateless and deterministic
-- **In-account inference**: Bedrock runs inside the customer's AWS account; PHI never traverses a network boundary to an external API
+- **Private-connectivity inference**: Bedrock is a regional AWS service reached from the customer's VPC over AWS PrivateLink; PHI never traverses a network boundary to an external AI API
 - **Minimum necessary**: The least-privilege intersection ensures agents access only the PHI fields their tool requires, not the full patient record
 - **Audit controls**: Append-only audit satisfies the HIPAA Security Rule audit log requirement
-- **BAA coverage**: AWS provides a Business Associate Agreement for Bedrock, DynamoDB, S3, KMS, and CloudWatch within the in-account deployment topology
+- **BAA coverage**: AWS provides a Business Associate Agreement for Bedrock, DynamoDB, S3, KMS, and CloudWatch within this deployment topology
 
 ### 21 CFR Part 11 (Electronic Records / Electronic Signatures)
 - **Audit trail**: Every node in every agent graph appends a timestamped, attributable entry — actor, action, data sources, model version, outcome — to the append-only audit store

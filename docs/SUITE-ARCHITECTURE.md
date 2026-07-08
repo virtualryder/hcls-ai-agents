@@ -150,7 +150,7 @@ graph TB
     end
 
     subgraph "Layer 5 — Models"
-        BR[Bedrock — Claude<br/>in-account inference]
+        BR[Bedrock — Claude<br/>private-connectivity inference]
         GR[Bedrock Guardrails<br/>PHI · off-label · topic filters]
         DET[Deterministic Services<br/>MedDRA · grounding · compliance checks]
     end
@@ -190,7 +190,7 @@ graph TB
 | Agent orchestration | **AWS Step Functions Express** | Parallel fan-out for multi-agent; audit in CloudWatch |
 | MCP authorization gateway | **Amazon Bedrock AgentCore Gateway** | Target registration; authorizer; deny-by-default |
 | Federated identity + scoped tokens | **Amazon Bedrock AgentCore Identity + Amazon Cognito** | IdP federation; short-lived credentials; role mapping |
-| LLM inference | **Amazon Bedrock (Claude models)** | In-account; no PHI egress; model access policies |
+| LLM inference | **Amazon Bedrock (Claude models)** | Reached via PrivateLink; no PHI egress to external AI APIs; model access policies |
 | Content safety + PHI controls | **Amazon Bedrock Guardrails** | PHI denial; off-label topic filter; grounding check |
 | Knowledge base / vector search | **Amazon Bedrock Knowledge Bases** | OpenSearch Serverless or Aurora pgvector backing |
 | Compute (fallback / batch) | **Amazon ECS Fargate** | Fallback if AgentCore Runtime not available in region |

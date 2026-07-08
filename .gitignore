@@ -68,3 +68,5 @@ infra/golden-path-*/layer/python/
 infra/golden-path-*/.aws-sam/
 *.log
 exec_arn.txt
+.aws-sam/
+_qa*/

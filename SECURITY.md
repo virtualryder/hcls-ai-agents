@@ -9,10 +9,11 @@ equivalents (Amazon Bedrock AgentCore Gateway/Identity, API Gateway + Cedar/Veri
 KMS, DynamoDB, S3 Object Lock). See `docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md`.
 
 ## Reporting a vulnerability
-Report suspected vulnerabilities privately to the maintainer: **ryderdavid75@gmail.com** (subject:
-`SECURITY — hcls-ai-agents`). Include affected file/commit, reproduction, and impact. Do **not** open a
-public issue for an unfixed vulnerability. Target: acknowledgement within 5 business days; triage and
-remediation plan within 15 business days. Coordinated disclosure is appreciated.
+Report vulnerabilities privately via GitHub Security Advisories: use the *Security* tab →
+*Report a vulnerability* on this repository. Please do not open public issues for security
+reports. Include affected file/commit, reproduction, and impact. Target: acknowledgement within
+5 business days; triage and remediation plan within 15 business days. Coordinated disclosure is
+appreciated.
 
 ## In scope
 - The Python control plane (`platform_core/`, `governance/`, `aws-native-reference/`).
@@ -40,7 +41,8 @@ remediation plan within 15 business days. Coordinated disclosure is appreciated.
 6. **Append-only audit + WORM** — DynamoDB append-only + S3 Object Lock (`infra/cloudformation/data.yaml`);
    every ALLOW/DENY/PENDING_APPROVAL/ERROR recorded with lineage (21 CFR Part 11 evidence).
 7. **Fail-closed PHI/PII masking** (`phi.py`) **before** any model call or audit write; **Bedrock Guardrails**
-   on input and output; **in-account inference** via VPC endpoint — no patient-data egress.
+   on input and output; **private-connectivity inference** via VPC endpoint (AWS PrivateLink) — no patient-data
+   egress to external AI APIs; traffic to the regional Bedrock service stays on AWS private networking.
 8. **Grounding verification** — every regulated figure/entity in an output must trace to the source corpus,
    or the step fails closed (`governance/grounding.py`).
 

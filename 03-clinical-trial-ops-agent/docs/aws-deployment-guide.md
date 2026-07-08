@@ -46,7 +46,7 @@ Data (private subnets):
   ├─ Aurora PostgreSQL  — briefings, workflow state
   ├─ DynamoDB           — append-only audit trail (21 CFR Part 11)
   ├─ S3 Object Lock     — finalized briefings (WORM)
-  └─ Bedrock + Guardrails — in-account inference, PHI scrubbing
+  └─ Bedrock + Guardrails — private-connectivity inference via PrivateLink, PHI scrubbing
 ```
 
 Each customer deployment is isolated; no shared infrastructure between sponsors or studies.

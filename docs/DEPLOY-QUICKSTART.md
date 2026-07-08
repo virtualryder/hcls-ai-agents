@@ -15,10 +15,12 @@ per-control explanations, and the full per-agent appendix, use
 [`DEPLOYMENT-HANDBOOK.md`](DEPLOYMENT-HANDBOOK.md). For operations after go-live, use
 [`../runbooks/`](../runbooks/).
 
-> **Faster single-agent path:** to stand up **one** agent from a single folder (SAM build +
-> deploy + a smoke test that exercises the human gate), use a **golden path** instead — see
-> [`../infra/GOLDEN-PATHS.md`](../infra/GOLDEN-PATHS.md). The steps below are the shared,
-> multi-agent quickstart.
+> **Canonical path: the per-agent golden paths.** To stand up **one** agent from a single folder
+> (SAM build + deploy + a smoke test that exercises the human gate), use a **golden path** — see
+> [`../infra/GOLDEN-PATHS.md`](../infra/GOLDEN-PATHS.md). That is the canonical, live-validated
+> deploy path (all nine validated in a clean account —
+> [`../evidence/CLEAN-ACCOUNT-ACCEPTANCE.md`](../evidence/CLEAN-ACCOUNT-ACCEPTANCE.md)). The steps
+> below are the shared, **multi-agent / scale-out reference**, not the acceptance-gated path.
 
 ---
 

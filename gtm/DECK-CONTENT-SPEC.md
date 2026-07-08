@@ -15,7 +15,7 @@ CloudFront + WAF edge; Cognito / IAM Identity Center federation with reviewer-ro
 (regulatory writer / safety physician / CRA / quality owner / MSL / MLR reviewer); MCP
 authorization gateway (managed AgentCore Gateway **or** portable API Gateway + Cognito JWT) with
 deny-by-default + least-privilege intersection + short-lived scoped tokens; Amazon Bedrock (Claude)
-+ Guardrails in-VPC (PHI never egresses after masking); PHI masker; grounding verification; HITL
++ Guardrails over AWS PrivateLink (no PHI egress to external AI APIs after masking); PHI masker; grounding verification; HITL
 gate (AgentCore approval or Step Functions `waitForTaskToken`); S3 Object Lock + DynamoDB
 append-only audit (21 CFR Part 11). Agent-specific blocks are called out per agent below.
 

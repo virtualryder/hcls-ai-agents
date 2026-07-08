@@ -124,7 +124,7 @@ This agent has a customer-ready live path: real Amazon Bedrock inference and a r
 PYTHONPATH=.:../platform_core python demo/demo_live.py
 
 # point at real systems
-export LLM_PROVIDER=bedrock BEDROCK_GUARDRAIL_ID=...        # in-account inference + Guardrails
+export LLM_PROVIDER=bedrock BEDROCK_GUARDRAIL_ID=...        # private-connectivity inference + Guardrails
 export CONNECTOR_MODE=live SAFETY_BASE_URL=https://safety.customer.example
 export SAFETY_API_TOKEN=...                                  # or Secrets Manager: hcls/safety_api_token
 ```

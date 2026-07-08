@@ -304,7 +304,7 @@ if needed):
 
 | Variable | Value | Effect |
 |---|---|---|
-| `LLM_PROVIDER` | `bedrock` | In-account inference (no data egress) |
+| `LLM_PROVIDER` | `bedrock` | Private-connectivity inference via PrivateLink (no data egress to external AI APIs) |
 | `BEDROCK_GUARDRAIL_ID` | from stack Outputs | PHI + off-label filter on every call |
 | `BEDROCK_REGION` | e.g. `us-east-1` | |
 | `CONNECTOR_MODE` | `live` | Use real connectors, not fixtures |

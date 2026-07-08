@@ -9,6 +9,27 @@
 
 ## Section 1 — AWS Run Cost Estimates (Monthly, Steady State)
 
+### 1.0 Scenario Summary — Pilot vs Production
+
+> **MODEL ASSUMPTION — illustrative estimate** built from published us-east-1 on-demand list
+> prices as of mid-2026; prices and token economics change frequently; validate with the AWS
+> Pricing Calculator and your AWS account team before quoting. **Bedrock token volume is the
+> dominant, workload-dependent variable.**
+
+Derived from the per-agent figures in §1.1–§1.2 (numbers unchanged):
+
+| | **Pilot** (1 agent, dept-scale) | **Production** (8-agent suite, §1.1 volumes) |
+|---|---:|---:|
+| Reference workload | Agent 02 @ ~100 ICSRs/mo (~10K governed requests/mo, ~50 users) | All 8 agents at §1.1 volumes (~2,000 users) |
+| Bedrock inference ← *sensitivity driver* | ~$360/mo (per §1.1 scale factor) | ~$6,060/mo |
+| Infrastructure baseline (§1.2, single-agent slice vs full suite) | ~$110/mo | ~$435/mo |
+| **TOTAL (monthly)** | **~$470/mo** | **~$6,500/mo** |
+
+**Sensitivity (one line):** 2× Bedrock token volume ≈ **+$6,060/mo** at suite scale (inference is
+~93% of the suite total). Not included: personnel, ProServe/SI delivery fees, data egress at
+scale, enterprise support plan, non-prod environments. The pilot *phase* budget in §1.3 is higher
+than this steady-state pilot column because acceptance testing runs at partial production volume.
+
 ### 1.1 Bedrock Inference Costs
 
 **Model assumptions:**

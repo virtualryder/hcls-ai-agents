@@ -353,7 +353,7 @@ const AGENTS = [
     s2: "[00:45] Hook. Lead with DiMasi's $2.6B/drug as the value at stake, then McKinsey's ~$60M/month delay cost. The Merck 55% figure is vendor-reported and shown as such — it's the proof that the workflow is real, not the lead claim.",
     s3: "[01:10] Issue + cost. The pain is retrieval-vs-reasoning and hallucination risk; the cost is delay NPV plus the $4.68M PDUFA fee. The bright line: the agent drafts and checks, a qualified human signs off — this is what makes it submittable, not just impressive.",
     s4: "[01:35] Pipeline. Five steps, human gate in red. The grounding checker is the differentiator: a figure with no source fails fast rather than being asserted. The three assurance cards answer the regulated-buyer questions.",
-    s5: "[02:15] Architecture — the most important slide. Trace the eight numbered flow steps. To deploy, the customer provides: an IdP, private connectivity to Veeva Vault, approved guidance content, and named reviewer/QP roles. Bedrock + Guardrails are in-VPC; PHI/PII never egresses after masking.",
+    s5: "[02:15] Architecture — the most important slide. Trace the eight numbered flow steps. To deploy, the customer provides: an IdP, private connectivity to Veeva Vault, approved guidance content, and named reviewer/QP roles. Bedrock + Guardrails are reached over AWS PrivateLink; PHI/PII never egresses to an external AI API after masking.",
     s6: "[02:45] Proof + deploy. Outcomes are documented-at-company or modeled-at-baseline, never guaranteed. Six deploy steps map to the native DEPLOY.md. Close on the takeaway: the governed platform is the product.",
   },
 },
@@ -1017,7 +1017,7 @@ const EXPANSION = [
       { t: "S3 Object Lock", s: "WORM rationale", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 scientist sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to discovery console   4 ELN + internal data reads over private connectivity (least-privilege)   5 demand scales the agent workers   6 model calls stay in-VPC via Bedrock + Guardrails; internal evidence never egresses after masking   7 full provenance + decisions persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
+    legend: "1 scientist sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to discovery console   4 ELN + internal data reads over private connectivity (least-privilege)   5 demand scales the agent workers   6 model calls reach Bedrock + Guardrails only over AWS PrivateLink; internal evidence never egresses to an external AI API after masking   7 full provenance + decisions persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
   },
   proofStats: [
     { big: "~18 mo", label: "AI novel-target → preclinical candidate (Insilico, company-reported)", tag: "[vendor — company-reported]" },
@@ -1039,7 +1039,7 @@ const EXPANSION = [
     s2: "[00:45] Hook. Lead with the peer-reviewed ~86% failure (Wong 2019) and the 11% reproducibility (Begley). PubMed scale is the overload pain. All three are gov/peer-reviewed.",
     s3: "[01:10] Issue + cost. The cost is the $2.6B/drug and ~$430M preclinical — failed targets are the dominant driver. Bright line: the scientist owns the hypothesis; provenance answers the reproducibility pain.",
     s4: "[01:35] Pipeline. The differentiator is provenance — every claim links to its source. Human gate (scientist) in red. This is evidence synthesis, not an autonomous decision.",
-    s5: "[02:15] Architecture. New connectors: ELN + literature/omics/patents into a Knowledge Base. Internal evidence stays in-VPC and never egresses after masking. Customer provides ELN access and the corpus.",
+    s5: "[02:15] Architecture. New connectors: ELN + literature/omics/patents into a Knowledge Base. Internal evidence reaches Bedrock only over AWS PrivateLink and never egresses to an external AI API after masking. Customer provides ELN access and the corpus.",
     s6: "[02:45] Proof + deploy. Insilico/AstraZeneca figures are company-/vendor-reported — never lead with them. Roadmap deck — deployment follows the build (docs/specs/10). Close on the takeaway.",
   },
 },
@@ -1096,9 +1096,9 @@ function buildOverview(P) {
         { t: "S3 Object Lock", s: "WORM", color: C_STORAGE },
         { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
       ],
-      legend: "1 sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT — no credentials in AWS)   3 authenticated session   4 systems-of-record read over private connectivity   5 queue/scale for event-driven agents   6 model calls stay in-VPC via Bedrock + Guardrails endpoint (PHI masked first)   7 every action persisted to append-only audit (21 CFR Part 11)   8 tools reachable only through the governed MCP gateway",
+      legend: "1 sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT — no credentials in AWS)   3 authenticated session   4 systems-of-record read over private connectivity   5 queue/scale for event-driven agents   6 model calls reach Bedrock + Guardrails over a PrivateLink VPC endpoint (PHI masked first)   7 every action persisted to append-only audit (21 CFR Part 11)   8 tools reachable only through the governed MCP gateway",
     },
-    notes: { s5: "[02:00] The shared platform — every agent inherits this. One control plane: CloudFront/WAF edge, Cognito federation, MCP authorization gateway (deny-by-default, short-lived scoped tokens), Bedrock + Guardrails in-VPC, HITL gate, S3 Object Lock + DynamoDB append-only audit, per-customer VPC + dedicated validated account. To the CISO: PHI never egresses after masking; least-privilege IAM throughout." },
+    notes: { s5: "[02:00] The shared platform — every agent inherits this. One control plane: CloudFront/WAF edge, Cognito federation, MCP authorization gateway (deny-by-default, short-lived scoped tokens), Bedrock + Guardrails over PrivateLink, HITL gate, S3 Object Lock + DynamoDB append-only audit, per-customer VPC + dedicated validated account. To the CISO: no PHI egress to external AI APIs after masking; least-privilege IAM throughout." },
   });
   // 4 & 5 PORTFOLIO
   function portfolioSlide(idxs, partLabel) {

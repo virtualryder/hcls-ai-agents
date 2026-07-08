@@ -101,7 +101,7 @@ Store the {{SYSTEM}} API token as **`{{SECRET}}`** (key `{{SECRET_KEY}}`). The `
 
 | Variable | Value | Effect |
 |---|---|---|
-| `LLM_PROVIDER` | `bedrock` | In-account inference (no data egress) |
+| `LLM_PROVIDER` | `bedrock` | Private-connectivity inference via PrivateLink (no data egress to external AI APIs) |
 | `BEDROCK_GUARDRAIL_ID` | from stack Outputs | PHI + off-label filter |
 | `CONNECTOR_MODE` | `live` | Real connectors, not fixtures |
 | `{{BASEVAR}}` | the {{SYSTEM}} base URL | Where the live connector calls |

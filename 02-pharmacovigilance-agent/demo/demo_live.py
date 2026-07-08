@@ -8,7 +8,7 @@ Demonstrates the full live path:
   * E2B-style ICSR submission with a verified human approval
 
 Mode selection (in priority order):
-  1. LLM_PROVIDER=bedrock + AWS credentials -> Amazon Bedrock (in-account inference)
+  1. LLM_PROVIDER=bedrock + AWS credentials -> Amazon Bedrock (private-connectivity inference)
   2. ANTHROPIC_API_KEY set               -> Anthropic API
   3. Otherwise                           -> EXTRACT_MODE=demo (deterministic, no API key)
 
@@ -332,7 +332,7 @@ def main() -> None:
     print(f"  Case status   : {final_state.get('case_status')}")
     print()
     print("  SECURITY PROPERTIES DEMONSTRATED:")
-    print("  * In-account inference (Bedrock) — PHI/IP never leaves the AWS VPC")
+    print("  * Private-connectivity inference (Bedrock via PrivateLink) — no PHI/IP egress to external AI APIs")
     print("  * Scoped bearer token minted per call (no standing service accounts)")
     print("  * Deny-by-default gateway: agent grants ∩ user entitlements")
     print("  * HITL gate: submit_report blocked until verified reviewer approves")

@@ -67,7 +67,7 @@ path and swap connector/LLM by configuration — no agent code changes:
   reference `LiveSafetyConnector` (real HTTP, stdlib-only, credentials via
   `get_secret`). Preserve the fixture method signatures. Activate with
   `CONNECTOR_MODE=live` and the system's `*_BASE_URL`.
-- **In-account inference:** set `LLM_PROVIDER=bedrock` + `BEDROCK_GUARDRAIL_ID`.
+- **Private-connectivity inference:** set `LLM_PROVIDER=bedrock` + `BEDROCK_GUARDRAIL_ID`.
 - **End-to-end worked example:** `02-pharmacovigilance-agent/demo/demo_live.py`
   and `02-pharmacovigilance-agent/demo/DEMO-LIVE.md` show the full live path
   (live Bedrock + a real HTTP connector against a reference service).

@@ -36,7 +36,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 - **Live AWS deploy validation (all 9 golden paths)** — every per-agent SAM golden path was deployed into a clean account (us-east-1), ran the full governed workflow (Assemble→…→`waitForTaskToken` human gate→bound separation-of-duties approval→Finalize) to **SUCCEEDED**, and was torn down. Surfaced + fixed ~10 deploy/runtime issues invisible to cfn-lint (layer staging incl. `strands_agent`, Bedrock `PROMPT_ATTACK`=NONE, two ASL data contracts, identity lineage, the **human-authority commit** path for withheld consequential tools, SAM state-machine update-on-content-change, 07 `Synthesize`→`DraftFn`). New `docs/GOLDEN-PATH-DEPLOY-NOTES.md`; generic `infra/_smoke/resume_any.py`. Suite **519** green.
 
 - **External-review remediation (P0)** — an independent review (58/100) found gaps between the control
-  narrative and the *deployed* path; all P0 items closed and verified one-command (`docs/CHATGPT-REVIEW-REMEDIATION-PLAN.md`):
+  narrative and the *deployed* path; all P0 items closed and verified one-command:
   deployed-path **bound-approval enforcement** in `finalize` (SoD/expiry/args/single-use, `STRICT_APPROVAL` fail-closed,
   governed-connector submit); **authorizer-only identity** in the connector; review/approval unified on `approval_id`;
   **immutable fail-closed audit** (conditional `PutItem`, no Update/BatchWrite IAM); **customer IdP federation** (Cognito
@@ -82,7 +82,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 - **Live Bedrock + real-connector path (Agent 02)** — `LiveSafetyConnector` (real HTTP,
   `platform_core/.../connectors/live.py`), a local reference safety service, `demo/demo_live.py`,
   `demo/DEMO-LIVE.md`, and live-connector tests. `CONNECTOR_MODE=live` + `SAFETY_BASE_URL`
-  swaps the local service for Argus/Veeva; `LLM_PROVIDER=bedrock` enables in-account inference.
+  swaps the local service for Argus/Veeva; `LLM_PROVIDER=bedrock` enables private-connectivity inference via PrivateLink to Bedrock.
 - **Agents 03–08 deepened to flagship depth** — richer tools/nodes/apps/fixtures, flagship
   test suites, full 4-doc sets, and an AWS-native rebuild each.
 - **AWS-native rebuild for Agent 02** added (registry now complete for all 8).

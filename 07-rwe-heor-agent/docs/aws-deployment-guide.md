@@ -46,7 +46,7 @@ Data (private subnets):
   ├─ Aurora PostgreSQL  — evidence summaries, workflow state
   ├─ DynamoDB           — append-only audit trail (21 CFR Part 11)
   ├─ S3 Object Lock     — finalized evidence packages (WORM)
-  └─ Bedrock + Guardrails — in-account inference, PHI detection
+  └─ Bedrock + Guardrails — private-connectivity inference via PrivateLink, PHI detection
 ```
 
 ## Connector notes

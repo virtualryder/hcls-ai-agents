@@ -59,7 +59,7 @@
 
 ### "Our clinical and submission data cannot leave our environment."
 
-**Respond:** It does not. The deployment topology is in-account: all Bedrock inference, all data storage (DynamoDB, S3), and all gateway authorization run inside the customer's own AWS account. PHI is masked before it enters any LLM prompt, and Bedrock is accessed via a VPC Interface Endpoint — traffic does not traverse the public internet. AWS provides a Business Associate Agreement covering Bedrock, DynamoDB, S3, KMS, Cognito, and CloudWatch within this topology. The customer's data never leaves their network perimeter.
+**Respond:** It never touches the public internet or an external AI API. All data storage (DynamoDB, S3) and all gateway authorization run inside the customer's own AWS account; inference runs on HIPAA-eligible Amazon Bedrock — a regional AWS service reached via a VPC Interface Endpoint (AWS PrivateLink), so traffic to Bedrock stays on AWS private networking. PHI is masked before it enters any LLM prompt. AWS provides a Business Associate Agreement covering Bedrock, DynamoDB, S3, KMS, Cognito, and CloudWatch within this topology. There is no data egress to any external AI API.
 
 ---
 

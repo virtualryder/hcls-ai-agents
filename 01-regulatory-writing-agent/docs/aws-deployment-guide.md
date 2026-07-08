@@ -57,7 +57,7 @@ Data (private subnets):
   ├─ Aurora PostgreSQL  — drafts, workflow state
   ├─ DynamoDB           — append-only audit trail
   ├─ S3 Object Lock     — finalized submission drafts (WORM)
-  └─ Bedrock + Guardrails — in-account inference (no content egress)
+  └─ Bedrock + Guardrails — private-connectivity inference via PrivateLink (no content egress to external AI APIs)
 ```
 
 Each customer gets an isolated deployment; no shared infrastructure between tenants.

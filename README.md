@@ -37,6 +37,31 @@ Every agent and platform component is positioned honestly against four levels:
 
 **All nine agents are built to flagship depth** — a full LangGraph workflow, governed tool access, deterministic fixtures, flagship-level test suites, a Streamlit dashboard, a four-document doc set, and a matching **AWS-native rebuild** (Strands + Step Functions with a `waitForTaskToken` human gate). Agent 02 (Pharmacovigilance) additionally ships a **live path**: real Amazon Bedrock inference and a real HTTP system-of-record connector, exercised end-to-end (see `02-pharmacovigilance-agent/demo/`). The suite sits at **Demonstrated + Deploy-validated**: 519 automated tests pass with no API key; **all nine golden paths were deployed into a clean AWS account, ran the full governed workflow (human gate + bound separation-of-duties approval + immutable audit) to `SUCCEEDED`, and were torn down** (see `docs/GOLDEN-PATH-DEPLOY-NOTES.md`); production-readiness (CSV/CSA, live system integration, penetration test) remains the engagement. (A tenth agent, 10 Scientific Intelligence & Target Discovery, is at roadmap/Documented maturity — cited deck + design spec.)
 
+## Capability maturity matrix
+
+✅ = evidence in this repo (code + tests, or the documented live AWS validation) · ◻ = not done here / engagement work.
+Live-AWS cells reflect the 2026-06-29/30 clean-account run: all 9 golden paths (stacks `hcls-01…09-dev`) deployed, ran the full governed workflow (human gate → bound SoD approval → Finalize) to `SUCCEEDED`, and were torn down — see [`docs/GOLDEN-PATH-DEPLOY-NOTES.md`](docs/GOLDEN-PATH-DEPLOY-NOTES.md) and [`SUITE-STATUS.md`](SUITE-STATUS.md).
+
+| Capability | Designed | Implemented (offline/tested) | Deployed on AWS (validated) | Integration-tested on AWS | Production-ready | Owner (Repo/Customer) |
+|---|:--:|:--:|:--:|:--:|:--:|---|
+| Identity / authN | ✅ | ✅ | ✅ | ◻ | ◻ | Repo (authenticated-authorizer-only identity deployed; federated IdP login not proven — Customer) |
+| MCP / tool authorization gateway | ✅ | ✅ | ✅ | ✅ | ◻ | Repo (portable gateway is the supported default; AgentCore mode experimental) |
+| Policy enforcement (deny-by-default) | ✅ | ✅ | ✅ | ✅ | ◻ | Repo |
+| Human approval (SoD, single-use) | ✅ | ✅ | ✅ | ✅ | ◻ | Repo (bound, single-use, SoD approval exercised live to `SUCCEEDED`) |
+| PII/PHI masking | ✅ | ✅ | ◻ | ◻ | ◻ | Repo (unit-tested; not runtime-verified on AWS) |
+| Audit (append-only + WORM) | ✅ | ✅ | ✅ | ✅ | ◻ | Repo (immutable `INTENT → COMMITTED` audit written live; WORM retention configuration: Customer) |
+| Bedrock + Guardrails | ✅ | ✅ | ◻ | ◻ | ◻ | Repo (Agent 02 real-Bedrock live path exercised locally; model invocation not asserted in the clean-account smoke) |
+| IaC deploy (golden path) | ✅ | ✅ | ✅ | ✅ | ◻ | Repo (all 9 golden paths) |
+| Live connectors | ✅ | ✅ | ◻ | ◻ | ◻ | Customer (fixtures + Agent 02 local live-HTTP reference; Veeva/Argus/QMS integration is engagement work) |
+| CI/CD | ✅ | ✅ | ◻ | ◻ | ◻ | Repo (fail-closed CI: tests · compile · deck build · cfn-lint; no cloud deploys in CI) / Customer |
+| Monitoring / alerts | ✅ | ◻ | ◻ | ◻ | ◻ | Customer (runbooks provided) |
+| DR / backup | ✅ | ◻ | ◻ | ◻ | ◻ | Customer (`runbooks/DR-RUNBOOK.md` provided) |
+| Compliance evidence | ✅ | ✅ | ◻ | ◻ | ◻ | Repo (Part 11-supporting design, TPRM packet) / Customer (CSV/CSA, HITRUST/SOC 2 evidence) |
+
+Nothing in this repository is production-certified; see [`docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md`](docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md) for the full RACI.
+
+> **Validation update (2026-07-07/08).** All nine golden-path deployments were independently re-verified against the validation account (CloudTrail, deleted-stack history). One teardown gap was found and fixed: the runs' Cognito user pools had survived stack deletion; all ten were removed on 2026-07-08 and the `destroy.sh` fix is documented in [`docs/GOLDEN-PATH-DEPLOY-NOTES.md`](docs/GOLDEN-PATH-DEPLOY-NOTES.md). Sanitized proof pack: [`evidence/CLEAN-ACCOUNT-ACCEPTANCE.md`](evidence/CLEAN-ACCOUNT-ACCEPTANCE.md).
+
 ---
 
 ## The Nine Agents
@@ -68,10 +93,20 @@ One headline figure and the cost of doing nothing per agent — every stat is so
 - **09 Manufacturing Batch-Review** — **62% of US drug shortages trace to manufacturing/quality** `[gov]` (FDA); **~$420K/yr** modeled investigation labor `[mod]`. Outcome: >50% deviation reduction at a benchmarked site `[ind]` (McKinsey).
 - **10 Scientific Intelligence & Target Discovery** *(roadmap)* — **~86% of programs entering the clinic fail** `[gov]` (Wong/Siah/Lo 2019); **~$2.6B per drug** / ~$430M preclinical `[ind]`.
 
+Monthly run-cost model (pilot vs production): [`offerings/TCO-MODEL.md`](offerings/TCO-MODEL.md)
+
 
 ---
 
 ## Shared Platform
+
+![HCLS GxP data flow — connectors to named-human e-signature to WORM audit](docs/diagrams/hcls-gxp-data-flow.png)
+
+The shared Aegis control-plane pattern — how every tool call is authenticated, authorized, human-approved, and audited, including the deny paths:
+
+![Aegis MCP gateway authorization flow — shared control plane](docs/diagrams/mcp-gateway-auth-flow.png)
+
+Editable source: the SVG in [`docs/diagrams/`](docs/diagrams/) (open in draw.io, Inkscape, or any text editor).
 
 Every agent shares the same platform stack. Controls compound: a governance improvement to the PHI masker, the grounding checker, or the audit trail benefits all nine agents simultaneously.
 
@@ -117,7 +152,7 @@ See `governance/README.md` for the full governance layer documentation.
 
 ### Canonical deployment path — the per-agent SAM golden path
 
-**The per-agent SAM golden path (`infra/golden-path-<agent>/`) is the canonical, fully-wired path for a pilot.** Deploy one agent from a single folder: `./deploy.sh` + `./smoke_test.sh` (exercises the human gate with a bound, separation-of-duties approval) + `./destroy.sh`. Index: [`infra/GOLDEN-PATHS.md`](infra/GOLDEN-PATHS.md). The shared CloudFormation quickstart below is the **multi-agent / scale-out reference** that nests the same control stacks.
+**The nine per-agent SAM golden paths (`infra/golden-path-<agent>/`) are the canonical, fully-wired deploy path — all nine live-validated in a clean AWS account.** Deploy one agent from a single folder: `./deploy.sh` + `./smoke_test.sh` (exercises the human gate with a bound, separation-of-duties approval) + `./destroy.sh`. Index: [`infra/GOLDEN-PATHS.md`](infra/GOLDEN-PATHS.md). The shared CloudFormation quickstart below is the **multi-agent / scale-out reference** that nests the same control stacks; the AgentCore gateway template (`infra/cloudformation/agentcore-gateway.yaml`) is **experimental**, and `infra/terraform/` is a parity reference. Validation evidence: [`evidence/CLEAN-ACCOUNT-ACCEPTANCE.md`](evidence/CLEAN-ACCOUNT-ACCEPTANCE.md).
 
 > **Validated live.** All nine golden paths were deployed into a clean AWS account, exercised end to
 > end, and destroyed. **Before your first deploy, read [`docs/GOLDEN-PATH-DEPLOY-NOTES.md`](docs/GOLDEN-PATH-DEPLOY-NOTES.md)**
@@ -159,6 +194,10 @@ For per-stakeholder talk tracks see [`docs/STAKEHOLDER-SECURITY-BRIEFINGS.md`](d
 ---
 
 ## AWS Deployment
+
+> **Canonical path first.** The supported deploy path is the per-agent SAM golden path above
+> ([`infra/GOLDEN-PATHS.md`](infra/GOLDEN-PATHS.md)); everything in this section is the
+> **multi-agent / scale-out reference**, not the live-validated canonical path.
 
 **New customer account → running agent in two commands.** Build the code bundles (deps
 vendored in) and deploy the master CloudFormation stack:

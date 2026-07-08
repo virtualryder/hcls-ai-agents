@@ -83,3 +83,20 @@ fires and only resumes on a bound, separation-of-duties approval; the consequent
 authorized by the human (never the agent); the immutable `INTENT → COMMITTED` audit trail and the
 durable single-use approval registry are written. Does **not** prove: federated IdP login, live
 vendor-system integration, CSV/CSA validation, or a penetration test — those remain the engagement.
+
+## Post-run finding (2026-07-08): Cognito user pools survived teardown
+
+A later account sweep found all ten Cognito user pools from the 2026-06-29/30 golden-path runs
+(`hcls-01-dev` … `hcls-09-dev`, `hcls-02-dev` x2) still live after stack deletion — user pools
+were retained on stack delete while stacks and Retain-policy DynamoDB tables had been cleaned up.
+All ten were deleted manually on 2026-07-08 (`cognito-idp delete-user-pool`); `list-user-pools`
+verified empty.
+
+**Fix for future runs:** either remove the Retain behavior on the user pool for dev golden paths,
+or add an explicit user-pool cleanup step to each `destroy.sh`:
+
+    POOL_ID=$(aws cognito-idp list-user-pools --max-results 60 \
+      --query "UserPools[?Name=='<stack-name>'].Id" --output text)
+    [ -n "$POOL_ID" ] && aws cognito-idp delete-user-pool --user-pool-id "$POOL_ID"
+
+and extend the teardown verification checklist to include `cognito-idp list-user-pools`.

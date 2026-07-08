@@ -64,7 +64,7 @@ Data (private subnets, KMS-encrypted):
   ├─ Aurora PostgreSQL  — case workflow state, HITL resume
   ├─ DynamoDB           — append-only audit trail (QLDB option for immutability)
   ├─ S3 Object Lock     — finalized ICSR case records (WORM, GVP retention)
-  └─ Bedrock + Guardrails — in-account inference + PHI filter (no content egress)
+  └─ Bedrock + Guardrails — private-connectivity inference via PrivateLink + PHI filter (no content egress to external AI APIs)
 ```
 
 Each customer gets an isolated deployment; no shared infrastructure between tenants.

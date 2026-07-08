@@ -45,7 +45,7 @@ Data (private subnets):
   ├─ Aurora PostgreSQL  — protocol drafts, workflow state
   ├─ DynamoDB           — append-only audit trail (21 CFR Part 11)
   ├─ S3 Object Lock     — finalized protocol drafts (WORM)
-  └─ Bedrock + Guardrails — in-account inference
+  └─ Bedrock + Guardrails — private-connectivity inference via PrivateLink
 ```
 
 ## Connector notes

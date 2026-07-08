@@ -6,7 +6,7 @@ All notable changes to the HCLS AI Agent Suite. The authoritative running snapsh
 ## [Unreleased]
 ### Added — External-review remediation (P0)
 Independent review (scored 58/100) flagged gaps between the control narrative and the
-*deployed* path. Triage + fixes are tracked in `docs/CHATGPT-REVIEW-REMEDIATION-PLAN.md`.
+*deployed* path. All P0 items below are closed and verified.
 - **Human-approval integrity on the deployed path** — the AWS-native `finalize` now verifies a
   **bound approval token** (signature, expiry, separation of duties, exact-args, single-use) and
   **fails closed** under `STRICT_APPROVAL=1`; the consequential submit routes through the governed
