@@ -164,11 +164,14 @@ class OpenFDASafetyConnector(SafetyConnector):
 
     # -- SafetyConnector interface --------------------------------------------
     def get_case(self, case_id: Optional[str] = None, drug: Optional[str] = None,
+                 suspect_drug: Optional[str] = None, product: Optional[str] = None,
                  serious_only: bool = True, **_: Any) -> Dict[str, Any]:
         """
         READ a real FAERS case. Priority: explicit case_id → by drug → most-recent
         serious case. Returns the ICSR record shape (superset of FixtureSafety).
+        Accepts the agent's arg aliases (suspect_drug / product) for the drug.
         """
+        drug = drug or suspect_drug or product
         if case_id:
             search = f'safetyreportid:"{case_id}"'
         elif drug:
@@ -184,14 +187,22 @@ class OpenFDASafetyConnector(SafetyConnector):
         return self._map_report(results[0])
 
     def search_duplicates(self, drug: Optional[str] = None, reaction: Optional[str] = None,
-                          exclude_case_id: Optional[str] = None, limit: int = 5,
-                          **_: Any) -> List[Dict[str, Any]]:
+                          suspect_drug: Optional[str] = None, product: Optional[str] = None,
+                          meddra_pt: Optional[str] = None, reaction_pt: Optional[str] = None,
+                          case_id: Optional[str] = None, exclude_case_id: Optional[str] = None,
+                          limit: int = 5, **_: Any) -> List[Dict[str, Any]]:
         """
         Find candidate duplicate/related ICSRs in FAERS by shared suspect drug and
         reaction term. match_score is a transparent heuristic (drug match = 0.5,
         reaction match = 0.5) — real duplicate detection is a customer-validated
         algorithm; this demonstrates the governed read against real data.
+
+        Accepts the agent's criteria keys as aliases: suspect_drug/product → drug,
+        meddra_pt/reaction_pt → reaction, case_id → exclude_case_id.
         """
+        drug = drug or suspect_drug or product
+        reaction = reaction or meddra_pt or reaction_pt
+        exclude_case_id = exclude_case_id or case_id
         if not drug and not reaction:
             return []
         clauses = []
