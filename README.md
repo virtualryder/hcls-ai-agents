@@ -176,6 +176,10 @@ and the control. The recurring principle: **controls are enforced in the gateway
 prompt cannot disable authorization, masking, approval, or audit; and the **legally consequential commit is
 withheld from every agent** — only a bound human reviewer may commit (enforced by a test).
 
+> **Auditors / GRC / TPRM reviewers:** the [`assurance/`](assurance/README.md) packet is a single
+> curated cover sheet indexing every threat-model, NIST/GxP/Part-11 control-mapping, evidence,
+> and shared-responsibility artifact under standard assurance headings.
+
 | If they ask… | Point them at |
 |---|---|
 | "What's your threat model?" | [`docs/THREAT-MODEL.md`](docs/THREAT-MODEL.md) — STRIDE threats → control → file |

@@ -204,3 +204,72 @@ graph TB
 | Network isolation | **Amazon VPC** (private subnets + NAT + security groups) | No public inbound; Bedrock via VPC endpoint; all inter-service traffic stays in VPC |
 | IaC — primary | **AWS CloudFormation** | `infra/cloudformation/quickstart.yaml` master stack |
 | IaC — parity | **Terraform** | `infra/terraform/`; identical resource topology |
+
+---
+
+## AWS HCLS-native service fit
+
+The suite is architected as a Veeva/Argus/Medidata-centric life-sciences accelerator, so the
+system-of-record connectors dominate the current build. But the same pattern maps cleanly onto
+the **AWS Healthcare & Life-Sciences (HCLS) purpose-built services** — and that fit is a first-class
+reason to run these agents *on AWS specifically*: PHI/PHI-adjacent narrative understanding
+(Comprehend Medical), FHIR-native real-world-data cohorts (HealthLake), and genomic/variant
+pipelines (HealthOmics) are managed, **HIPAA-eligible** services usable under an executed AWS BAA,
+reached over regional APIs and interface VPC endpoints (AWS PrivateLink) so PHI traffic stays on
+AWS private networking. Grounding, safety, and document intake are covered by Bedrock Knowledge
+Bases, Bedrock Guardrails, and Textract. Rather than the customer stitching together bespoke NLP,
+a clinical data lake, and a genomics stack, AWS provides them as managed, compliance-eligible
+building blocks the agents call through the same governed MCP gateway.
+
+**Maturity note (read this).** Except where stated, the mappings below are **architectural fit /
+roadmap**, not wired in this repo today. The one live implementation is in the sibling
+`healthcare_ai_agents` (payer/provider) suite, where **Amazon Comprehend Medical `DetectPHI`** is
+wired into the PHI masking path as an opt-in, fail-closed engine (`PHI_ENGINE=comprehend_medical`,
+deterministic Safe-Harbor masking always also runs). The same opt-in contract can be dropped into
+Agent 02's adverse-event narrative extraction here.
+
+| # | Agent | Natural AWS HCLS-native fit | Status |
+|---|---|---|---|
+| 01 | Regulatory Writing | Bedrock Knowledge Bases (grounded submission content) · Textract (source-doc intake) | Roadmap |
+| 02 | Pharmacovigilance / ICSR | **Amazon Comprehend Medical** (adverse-event entity + PHI extraction from case narratives) · Bedrock | Fit; live pattern exists in `healthcare_ai_agents` |
+| 03 | Clinical Trial Ops / TMF | Comprehend Medical + Textract (TMF document understanding) · HealthLake (FHIR study data) | Roadmap |
+| 04 | Site & Patient Matching | **Amazon HealthLake** (FHIR real-world-data cohorts) · HealthOmics (where genomic eligibility applies) | Roadmap |
+| 05 | Quality / CAPA | Bedrock Knowledge Bases (SOP/deviation grounding) · Textract | Roadmap |
+| 06 | Protocol Design | Bedrock + Knowledge Bases (prior-protocol grounding) · HealthLake (feasibility signals) | Roadmap |
+| 07 | RWE / HEOR | **Amazon HealthLake** (FHIR cohorts) · **HealthOmics** (variant/genomic RWD) · Bedrock | Roadmap |
+| 08 | Medical Affairs / MSL | Bedrock Knowledge Bases (evidence grounding) · Comprehend Medical (literature entity extraction) | Roadmap |
+| 09 | Manufacturing Batch-Review | Textract (batch-record intake) · Bedrock (deviation reasoning) | Roadmap |
+
+All of the above are HIPAA-eligible where they process PHI and are reached over regional APIs /
+interface VPC endpoints (AWS PrivateLink) under the customer's executed AWS BAA; PHI is processed by
+the AWS service, never sent to a non-AWS AI API. This is the concrete answer to "why does this
+belong on AWS?" — the regulated-data building blocks the agents need are managed, compliance-eligible
+AWS services, governed through one MCP authorization gateway.
+
+**Honesty / status labels.** Everything below is **architectural fit / roadmap** — the natural AWS
+service each agent *would* call in a native deployment — **not** "wired today." The one exception is
+**Amazon Comprehend Medical**, which is **wired live in the healthcare payer/provider suite**
+(`healthcare_ai_agents`, `PHI_ENGINE=comprehend_medical`, fail-closed, belt-and-suspenders with the
+deterministic Safe-Harbor masker). In *this* life-sciences suite Comprehend Medical is present only
+as an **opt-in reference stub** in Agent 02's PHI path (`platform_core/hcls_agent_platform/comprehend_medical.py`,
+mirroring the healthcare implementation and its fail-closed contract) — documented, not live-validated.
+
+| # | Agent | Primary AWS HCLS-native fit | Also | Status |
+|---|---|---|---|---|
+| 01 | Regulatory Writing | **Bedrock Knowledge Bases** (guidance/template grounding for CSR/CTD sections) | Bedrock + Guardrails (all); **Textract** (source-doc intake) | Fit / roadmap |
+| 02 | Pharmacovigilance / ICSR | **Amazon Comprehend Medical** (AE + medication/dosage entity + PHI extraction from narrative reports; RxNorm/ICD-10-CM linking upstream of MedDRA coding) | Bedrock + Guardrails; **Textract** (scanned AE forms / literature) | **Comprehend Medical wired live in `healthcare_ai_agents`; opt-in reference stub here** |
+| 03 | Clinical Trial Ops / TMF | **Amazon Textract** + **Comprehend Medical** (TMF document classification & clinical entity understanding for completeness checks) | **HealthLake** (FHIR-native trial/subject data); Bedrock Knowledge Bases | Fit / roadmap |
+| 04 | Site & Patient Matching | **AWS HealthLake** (FHIR real-world-data cohorts; eligibility querying over patient resources) | **HealthOmics** (genomic/variant eligibility where a trial has genomic inclusion criteria); Comprehend Medical (criteria extraction from protocol text) | Fit / roadmap |
+| 05 | Quality / CAPA | **Bedrock Knowledge Bases** (CAPA precedent + SOP grounding) | **Textract** (batch/deviation record intake); Bedrock + Guardrails | Fit / roadmap |
+| 06 | Protocol Design | **Bedrock Knowledge Bases** (endpoint/precedent grounding) | **HealthLake** (feasibility over RWD cohorts); Comprehend Medical (comparator protocol entity extraction) | Fit / roadmap |
+| 07 | RWE / HEOR | **AWS HealthLake** (FHIR RWD cohorts, outcomes analytics) | **HealthOmics** (genomic/variant data for stratified/precision-medicine RWE); **Comprehend Medical** (EHR-note entity extraction into structured evidence) | Fit / roadmap |
+| 08 | Medical Affairs / MSL | **Bedrock Knowledge Bases** (scientific-literature grounding for MSL responses) | Comprehend Medical (entity extraction from HCP/literature text); Bedrock + Guardrails | Fit / roadmap |
+| 09 | Manufacturing Batch-Review | **Amazon Textract** (batch-record / eBR document extraction) | Bedrock + Guardrails; Bedrock Knowledge Bases (spec/SOP grounding) | Fit / roadmap |
+
+**Cross-cutting (all agents):** **Amazon Bedrock** (Claude inference) + **Bedrock Guardrails**
+(PHI-denial, off-label/promotional, topic filters) run on every LLM call; **Bedrock Knowledge Bases**
+provide the grounding substrate; **Amazon Textract** is the common document-intake front door. These
+are already reflected in the AWS Service Mapping table above. HealthLake, HealthOmics, and (in this
+suite) Comprehend Medical are the **HCLS-purpose-built** additions this section makes explicit for an
+AWS-division audience — architectural fit today, with Comprehend Medical proven live in the sibling
+healthcare suite.

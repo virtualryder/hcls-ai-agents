@@ -74,12 +74,31 @@ def _mask_cards(text: str) -> str:
     return _CARD_RE.sub(repl, text)
 
 
+def _ml_engine_selected() -> bool:
+    """True when an optional ML NER pass should run in addition to deterministic.
+
+    Selected by ``MASK_ENGINE=ml`` (generic NER hook) or, as an OPT-IN REFERENCE,
+    ``PHI_ENGINE=comprehend_medical`` (the AWS-native Amazon Comprehend Medical
+    DetectPHI stub — mirrors the LIVE healthcare-suite implementation; documented
+    here, not live-validated in this suite).
+    """
+    if os.getenv("MASK_ENGINE", "").strip().lower() == "ml":
+        return True
+    if os.getenv("PHI_ENGINE", "").strip().lower() == "comprehend_medical":
+        return True
+    return False
+
+
 def mask(text: Optional[str]) -> str:
     """
     Mask PHI/PII identifiers in free text for safe logging and audit.
 
-    Idempotent; returns "" for None. Set MASK_ENGINE=ml to additionally run an
-    optional NER engine (not bundled — wired by the customer's privacy stack).
+    Idempotent; returns "" for None. The deterministic Safe-Harbor pass always
+    runs. Two opt-in routes layer an additional ML NER pass on top of it:
+    ``MASK_ENGINE=ml`` (generic hook) or ``PHI_ENGINE=comprehend_medical`` (the
+    AWS-native Amazon Comprehend Medical DetectPHI *reference stub* — opt-in and
+    documented, not live-validated in this suite; the LIVE wiring ships in the
+    healthcare payer/provider suite).
     """
     if not text:
         return ""
@@ -93,13 +112,29 @@ def mask(text: Optional[str]) -> str:
     out = _DATE_RE.sub("[DATE-REDACTED]", out)
     out = _LONGNUM_RE.sub("[ID-REDACTED]", out)
 
-    if os.getenv("MASK_ENGINE", "").strip().lower() == "ml":
+    if _ml_engine_selected():
         out = _ml_mask(out)
     return out
 
 
 def _ml_mask(text: str) -> str:
-    """Optional ML NER hook (Comprehend Medical / Presidio). No-op if absent."""
+    """Optional ML NER hook — FAIL-CLOSED (mirrors the healthcare suite).
+
+    ``PHI_ENGINE=comprehend_medical`` binds the AWS-native Comprehend Medical
+    ``redact`` (opt-in reference stub); otherwise the generic ``_ml_ner.redact``
+    hook is used. The deterministic Safe-Harbor pass has already run on ``text``
+    before this hook. On success the ML redaction is returned; if the engine is
+    absent (ImportError) the already-deterministically-masked text stands; if the
+    engine raises at runtime the already-masked text is returned unchanged. The
+    unmasked *input* is never returned from any path.
+    """
+    if os.getenv("PHI_ENGINE", "").strip().lower() == "comprehend_medical":
+        try:  # pragma: no cover - optional dependency path
+            from hcls_agent_platform.comprehend_medical import redact  # type: ignore
+            return redact(text)
+        except Exception:
+            # Fail closed: the already-deterministically-masked text stands.
+            return text
     try:  # pragma: no cover - optional dependency path
         from hcls_agent_platform._ml_ner import redact  # type: ignore
 
