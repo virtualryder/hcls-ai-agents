@@ -1,0 +1,29 @@
+{
+  "meta": {"disclaimer": "openFDA public data", "results": {"total": 2, "limit": 2}},
+  "results": [
+    {
+      "safetyreportid": "18424955",
+      "serious": "1",
+      "seriousnesshospitalization": "1",
+      "receivedate": "20210115",
+      "occurcountry": "US",
+      "patient": {
+        "patientonsetage": "67", "patientonsetageunit": "801", "patientsex": "2",
+        "drug": [{"medicinalproduct": "METFORMIN", "drugcharacterization": "1"}],
+        "reaction": [{"reactionmeddrapt": "Lactic acidosis", "reactionoutcome": "1"}]
+      }
+    },
+    {
+      "safetyreportid": "18500001",
+      "serious": "1",
+      "seriousnessdeath": "1",
+      "receivedate": "20210220",
+      "occurcountry": "CA",
+      "patient": {
+        "patientonsetage": "71", "patientonsetageunit": "801", "patientsex": "1",
+        "drug": [{"medicinalproduct": "METFORMIN", "drugcharacterization": "1"}],
+        "reaction": [{"reactionmeddrapt": "Lactic acidosis", "reactionoutcome": "5"}]
+      }
+    }
+  ]
+}
