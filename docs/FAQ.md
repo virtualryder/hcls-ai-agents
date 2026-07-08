@@ -47,7 +47,7 @@ is how the **503 automated tests** pass and how you demo before any account exis
 ## How does it deploy into a brand-new account?
 `make build-lambdas` (vendors deps into each zip) then `make deploy` stages to S3 and deploys the
 CloudFormation quickstart — connector Lambdas + a dual-mode MCP gateway (portable API Gateway+Cognito
-**or** managed AgentCore) + the native/container agent — in any Region. Terraform is provided as a reference skeleton (not at parity — see docs/TERRAFORM-AND-GOVCLOUD-STATUS.md).
+**or** managed AgentCore) + the native/container agent — in supported AWS Regions (where Bedrock/model/PrivateLink and, for AgentCore mode, AgentCore are available). Terraform is provided as a reference skeleton (not at parity — see docs/TERRAFORM-AND-GOVCLOUD-STATUS.md).
 Full walkthrough: `docs/DEPLOY-QUICKSTART.md`.
 
 ## Which LLM does it use? Are we locked in?

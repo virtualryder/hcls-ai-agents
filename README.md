@@ -9,7 +9,7 @@ A large systems integrator deploying AI in a pharmaceutical, biotech, medtech, o
 
 The result is a deployable accelerator — not a certified product — that gives an SI engagement team a credible, compliant starting point across nine high-value life-sciences workflows.
 
-**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **519 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + a portable MCP gateway (AgentCore mode is experimental — see `infra/cloudformation/agentcore-gateway.yaml`) + native/container agent) deployable in a new customer account in any Region · **all 9 golden paths deployed and run end-to-end in a clean AWS account (us-east-1) — full Assemble→…→human gate→bound approval→Finalize to SUCCEEDED — then torn down** · Terraform reference skeleton (not at parity — see [`docs/TERRAFORM-AND-GOVCLOUD-STATUS.md`](docs/TERRAFORM-AND-GOVCLOUD-STATUS.md)) · executive deck, 5-slide customer teaser, and one-page leave-behind included · **external-review hardening (P0):** deployed-path human-approval enforcement (bound, single-use, separation-of-duties, args-bound tokens; `STRICT_APPROVAL` fails closed), authenticated-authorizer-only identity, immutable fail-closed audit, customer IdP (SAML/OIDC) federation, VPC PrivateLink isolation, and fail-closed CI.
+**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **519 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + a portable MCP gateway (AgentCore mode is experimental — see `infra/cloudformation/agentcore-gateway.yaml`) + native/container agent) deployable in a new customer account in **supported AWS Regions** (where the required Bedrock, model, PrivateLink, and — for AgentCore mode — AgentCore services are available) · **all 9 golden paths deployed and run end-to-end in a clean AWS account (us-east-1) — full Assemble→…→human gate→bound approval→Finalize to SUCCEEDED — then torn down** · Terraform reference skeleton (not at parity — see [`docs/TERRAFORM-AND-GOVCLOUD-STATUS.md`](docs/TERRAFORM-AND-GOVCLOUD-STATUS.md)) · executive deck, 5-slide customer teaser, and one-page leave-behind included · **external-review hardening (P0):** deployed-path human-approval enforcement (bound, single-use, separation-of-duties, args-bound tokens; `STRICT_APPROVAL` fails closed), authenticated-authorizer-only identity, immutable fail-closed audit, customer IdP (SAML/OIDC) federation, VPC PrivateLink isolation, and fail-closed CI.
 
 ---
 
@@ -119,6 +119,20 @@ A single abstraction layer routes inference to **Anthropic Claude** (API) or **A
 Structured entity recognition (NER) replaces patient identifiers, dates of birth, and case-linkable fields with stable pseudonyms before any content enters a prompt or an audit record. The masking layer is stateless and runs before every gateway invocation.
 
 ### MCP Authorization Gateway
+
+### Secure MCP gateway — how every tool call is authorized
+
+Every agent tool call passes through an **authenticated gateway**; there is no un-gated path to a system of record. The same controls apply everywhere in the portfolio (the [Aegis Governance Pattern](the Aegis platform repo `docs/14-GOVERNANCE-PATTERN-VERSIONING.md`)):
+
+- **Inbound authorization — JWT or IAM.** A verified Cognito/IdP **JWT** (or SigV4/**IAM**) is required on every call; identity is taken only from the verified authorizer claim, never the request body. *"No authorization" is a development/testing mode only and is never used in production.*
+- **Deny-by-default policy.** A tool is callable only if it is **registered in the allow-list** and the caller's effective permission = **grant ∩ entitlement** (the agent can never exceed the human it acts for). Unregistered tool or out-of-scope data class → **deny**.
+- **Human approval for consequential actions.** Consequential tools are **withheld in code** and require a **bound, single-use, separation-of-duties** approval (approver ≠ requester; replay rejected).
+- **Scoped outbound authorization.** The gateway issues **short-lived, least-privilege** downstream credentials (IAM / OAuth / token-exchange / on-behalf-of), so "the agent acts only within the human's authority" holds end to end.
+- **Fail-closed masking.** PHI is masked before any model or audit write; on masker failure it **redacts rather than leaks**.
+- **Append-only audit + revocation.** Every decision (allow / deny / approval) is written to an **append-only** sink (IAM denies `UpdateItem`/`DeleteItem`) with **WORM** evidence; tools can be revoked / deny-listed at the registry.
+- **Failure modes are fail-closed.** Missing/invalid token → **401**; unregistered tool → **deny**; missing approval → **deny**; masker or audit-write failure → **deny, not proceed**.
+
+In deployment this is **Amazon Bedrock AgentCore Gateway** (managed) or the **portable API-Gateway-+-Cognito-JWT** path; the portable path is the supported default and the one live-validated (the Aegis platform repo, Run 10; this suite deploys the same portable pattern).
 The governed front door between every agent and every system of record. **No agent calls a vendor system directly.** Every tool call passes through one enforcement point implementing:
 
 1. **Identity verification** — verified IdP claims; deny on missing `sub`

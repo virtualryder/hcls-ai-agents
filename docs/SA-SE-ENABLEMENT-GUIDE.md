@@ -36,7 +36,7 @@ it points you at the right artifact for every moment of a deal.
 1. **"503 automated tests pass with no API key."** Run them on screen — it's the single best credibility move. Governance is in code, not slideware.
 2. **"Controls are enforced outside the model."** Show the red-team prompt-injection / authorization-bypass test denying.
 3. **"Every figure on the deck is cited."** Point at the source tag on-slide and `gtm/HCLS-DECK-SOURCES.md`.
-4. **"It deploys into a new account in any Region."** `make build-lambdas` + `make deploy` → CloudFormation quickstart (connectors + dual gateway + agent).
+4. **"It deploys into a new account in supported AWS Regions (where the required services are available)."** `make build-lambdas` + `make deploy` → CloudFormation quickstart (connectors + dual gateway + agent).
 5. **"The consequential decision is always human."** The HITL gate is framework-enforced and *fails closed* — show it block as `PENDING_APPROVAL`.
 
 ## What NOT to say
