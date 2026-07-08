@@ -22,3 +22,4 @@ from hcls_agent_platform.tracing import traced_node  # noqa: F401
 
 __all__ = ["get_llm", "mask", "luhn_valid", "get_secret", "traced_node"]
 __version__ = "0.1.0"
+AEGIS_GOVERNANCE_PATTERN_VERSION = "1.0"  # implements AGP 1.0 — see Aegis docs/14-GOVERNANCE-PATTERN-VERSIONING.md

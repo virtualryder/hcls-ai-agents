@@ -60,6 +60,8 @@ Live-AWS cells reflect the 2026-06-29/30 clean-account run: all 9 golden paths (
 
 Nothing in this repository is production-certified; see [`docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md`](docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md) for the full RACI.
 
+*Governance once, agents as add-ons: `platform_core` (`hcls-agent-platform` 0.1.0) **implements the Aegis Governance Pattern (AGP) v1.0** — the shared governance contract defined in the Aegis platform repo (`docs/14-GOVERNANCE-PATTERN-VERSIONING.md`). Conformance is declared in `platform_core/hcls_agent_platform/__init__.py` (`AEGIS_GOVERNANCE_PATTERN_VERSION`) and asserted by `platform_core/tests/test_agp_conformance.py`.*
+
 > **Validation update (2026-07-07/08).** All nine golden-path deployments were independently re-verified against the validation account (CloudTrail, deleted-stack history). One teardown gap was found and fixed: the runs' Cognito user pools had survived stack deletion; all ten were removed on 2026-07-08 and the `destroy.sh` fix is documented in [`docs/GOLDEN-PATH-DEPLOY-NOTES.md`](docs/GOLDEN-PATH-DEPLOY-NOTES.md). Sanitized proof pack: [`evidence/CLEAN-ACCOUNT-ACCEPTANCE.md`](evidence/CLEAN-ACCOUNT-ACCEPTANCE.md).
 
 ---
