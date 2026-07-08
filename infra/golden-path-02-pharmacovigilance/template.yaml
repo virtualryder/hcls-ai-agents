@@ -14,6 +14,12 @@ Description: >
 Parameters:
   Environment: { Type: String, Default: dev, AllowedValues: [dev, test, prod] }
   ConnectorMode: { Type: String, Default: fixture, AllowedValues: [fixture, live] }
+  # A6 — real external safety source. "openfda" makes safety.get_case /
+  # search_duplicates read live, de-identified FAERS data from api.fda.gov
+  # (read-only; writes/submission stay human-gated). Requires ConnectorMode=live
+  # AND a controlled egress path to api.fda.gov — deploy egress-openfda.yaml
+  # (AWS Network Firewall FQDN allow-list) and route the connector subnet through it.
+  SafetySource: { Type: String, Default: "", AllowedValues: ["", "openfda"], Description: "Empty = fixture/reference safety service. 'openfda' = real read-only FAERS via api.fda.gov (needs ConnectorMode=live + egress-openfda.yaml)." }
   BedrockModelId: { Type: String, Default: anthropic.claude-3-5-sonnet-20240620-v1:0 }
   TokenSecret:
     Type: String
@@ -58,6 +64,7 @@ Globals:
     Environment:
       Variables:
         CONNECTOR_MODE: !Ref ConnectorMode
+        SAFETY_SOURCE: !Ref SafetySource          # A6: "openfda" -> real FAERS read (via egress-openfda.yaml)
         AUDIT_TABLE: !Ref AuditTable
         PENDING_TABLE: !Ref PendingApprovalsTable
         AGENT_ID: 02-pharmacovigilance

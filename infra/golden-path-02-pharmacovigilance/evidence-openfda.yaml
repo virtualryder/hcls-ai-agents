@@ -1,0 +1,208 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  A7 evidence stack — proves the openFDA real connector works IN-CLOUD through a
+  locked-down egress path. Stands up a VPC with AWS Network Firewall (FQDN allow-list
+  = api.fda.gov ONLY, default-drop), and a VPC-attached Lambda running the connector's
+  stdlib get_case logic. Invoking the Lambda reads REAL FAERS data via the firewall
+  (ALLOW); invoking it against any other host is DROPPED by the firewall (DENY, logged).
+  Self-contained (no external network stack); deploy, invoke, capture, tear down.
+
+Parameters:
+  Env: { Type: String, Default: acc }
+  AllowedFqdn: { Type: String, Default: api.fda.gov }
+
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.20.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{ Key: Name, Value: !Sub "hcls-02-${Env}-openfda-vpc" }]
+  Igw:
+    Type: AWS::EC2::InternetGateway
+  IgwAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: { VpcId: !Ref Vpc, InternetGatewayId: !Ref Igw }
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.0.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+  FirewallSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.2.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+
+  Eip:
+    Type: AWS::EC2::EIP
+    Properties: { Domain: vpc }
+  Nat:
+    Type: AWS::EC2::NatGateway
+    Properties: { AllocationId: !GetAtt Eip.AllocationId, SubnetId: !Ref PublicSubnet }
+
+  # ── Network Firewall: allow api.fda.gov only, drop everything else ─────────
+  AllowRuleGroup:
+    Type: AWS::NetworkFirewall::RuleGroup
+    Properties:
+      RuleGroupName: !Sub "hcls-02-${Env}-openfda-allow"
+      Type: STATEFUL
+      Capacity: 100
+      RuleGroup:
+        StatefulRuleOptions: { RuleOrder: STRICT_ORDER }   # must match the policy's STRICT_ORDER
+        RulesSource:
+          RulesSourceList:
+            TargetTypes: [TLS_SNI, HTTP_HOST]
+            GeneratedRulesType: ALLOWLIST
+            Targets: [!Ref AllowedFqdn]
+  FwPolicy:
+    Type: AWS::NetworkFirewall::FirewallPolicy
+    Properties:
+      FirewallPolicyName: !Sub "hcls-02-${Env}-egress-policy"
+      FirewallPolicy:
+        StatelessDefaultActions: ["aws:forward_to_sfe"]
+        StatelessFragmentDefaultActions: ["aws:forward_to_sfe"]
+        StatefulEngineOptions: { RuleOrder: STRICT_ORDER, StreamExceptionPolicy: DROP }
+        StatefulDefaultActions: ["aws:drop_established", "aws:alert_established"]
+        StatefulRuleGroupReferences:
+          - { ResourceArn: !Ref AllowRuleGroup, Priority: 1 }
+  Firewall:
+    Type: AWS::NetworkFirewall::Firewall
+    Properties:
+      FirewallName: !Sub "hcls-02-${Env}-egress-fw"
+      FirewallPolicyArn: !Ref FwPolicy
+      VpcId: !Ref Vpc
+      SubnetMappings: [{ SubnetId: !Ref FirewallSubnet }]
+      DeleteProtection: false
+  FwLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/hcls-02/${Env}/egress-firewall"
+      RetentionInDays: 7
+  FwLogging:
+    Type: AWS::NetworkFirewall::LoggingConfiguration
+    Properties:
+      FirewallArn: !Ref Firewall
+      LoggingConfiguration:
+        LogDestinationConfigs:
+          - { LogType: ALERT, LogDestinationType: CloudWatchLogs, LogDestination: { logGroup: !Ref FwLogGroup } }
+
+  # ── Symmetric routing: private -> firewall -> NAT -> IGW (and return) ──────
+  PublicRt:
+    Type: AWS::EC2::RouteTable
+    Properties: { VpcId: !Ref Vpc }
+  PublicDefault:
+    Type: AWS::EC2::Route
+    DependsOn: IgwAttach
+    Properties: { RouteTableId: !Ref PublicRt, DestinationCidrBlock: 0.0.0.0/0, GatewayId: !Ref Igw }
+  # NOTE (Network Firewall + CFN quirk): !GetAtt Firewall.EndpointIds can resolve
+  # before the endpoint attachment is fully available, leaving VpcEndpointId empty
+  # (a black-hole route). DependsOn: FwLogging forces ordering after the firewall is
+  # fully ready. If the route target still comes up empty, set it once post-deploy:
+  #   aws ec2 replace-route --route-table-id <rt> --destination-cidr-block <cidr> \
+  #     --vpc-endpoint-id <firewall-endpoint-id>
+  PublicReturnToFw:
+    Type: AWS::EC2::Route
+    DependsOn: FwLogging
+    Properties:
+      RouteTableId: !Ref PublicRt
+      DestinationCidrBlock: 10.20.2.0/24            # return traffic to protected subnet -> firewall
+      VpcEndpointId: !Select [1, !Split [":", !Select [0, !GetAtt Firewall.EndpointIds]]]
+  PublicAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: { RouteTableId: !Ref PublicRt, SubnetId: !Ref PublicSubnet }
+
+  FirewallRt:
+    Type: AWS::EC2::RouteTable
+    Properties: { VpcId: !Ref Vpc }
+  FirewallDefault:
+    Type: AWS::EC2::Route
+    Properties: { RouteTableId: !Ref FirewallRt, DestinationCidrBlock: 0.0.0.0/0, NatGatewayId: !Ref Nat }
+  FirewallAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: { RouteTableId: !Ref FirewallRt, SubnetId: !Ref FirewallSubnet }
+
+  PrivateRt:
+    Type: AWS::EC2::RouteTable
+    Properties: { VpcId: !Ref Vpc }
+  PrivateDefault:
+    Type: AWS::EC2::Route
+    DependsOn: FwLogging
+    Properties:
+      RouteTableId: !Ref PrivateRt
+      DestinationCidrBlock: 0.0.0.0/0
+      VpcEndpointId: !Select [1, !Split [":", !Select [0, !GetAtt Firewall.EndpointIds]]]
+  PrivateAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: { RouteTableId: !Ref PrivateRt, SubnetId: !Ref PrivateSubnet }
+
+  # ── The connector Lambda (VPC-attached to the protected subnet) ───────────
+  LambdaSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: openFDA connector egress (443 out only)
+      VpcId: !Ref Vpc
+      SecurityGroupEgress:
+        - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0, Description: HTTPS out (constrained to api.fda.gov by the firewall) }
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  ConnectorFn:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "hcls-02-${Env}-openfda-connector"
+      Runtime: python3.12
+      Handler: index.handler
+      Timeout: 25
+      Role: !GetAtt LambdaRole.Arn
+      VpcConfig:
+        SubnetIds: [!Ref PrivateSubnet]
+        SecurityGroupIds: [!Ref LambdaSg]
+      Environment:
+        Variables: { ALLOWED_FQDN: !Ref AllowedFqdn }
+      Code:
+        ZipFile: |
+          import json, os, urllib.request
+          # Minimal stand-in for OpenFDASafetyConnector.get_case (stdlib only), so the
+          # evidence stack has no packaging step. Full connector lives in platform_core.
+          def _get(host, path):
+              url = f"https://{host}{path}"
+              req = urllib.request.Request(url, headers={"Accept": "application/json"})
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  return json.loads(r.read().decode())
+          def handler(event, ctx):
+              host = event.get("host") or os.environ["ALLOWED_FQDN"]
+              try:
+                  if host == os.environ["ALLOWED_FQDN"]:
+                      d = _get(host, "/drug/event.json?search=serious:1&limit=1")
+                      rec = d["results"][0]
+                      return {"host": host, "reachable": True, "case_id": rec.get("safetyreportid"),
+                              "serious": rec.get("serious"),
+                              "drug": (rec.get("patient", {}).get("drug", [{}])[0].get("medicinalproduct"))}
+                  else:
+                      _get(host, "/")   # non-allow-listed host -> firewall should DROP this
+                      return {"host": host, "reachable": True, "note": "UNEXPECTED: firewall did not block"}
+              except Exception as e:
+                  return {"host": host, "reachable": False, "error": type(e).__name__ + ": " + str(e)[:120]}
+
+Outputs:
+  FunctionName: { Value: !Ref ConnectorFn }
+  FirewallLogGroup: { Value: !Ref FwLogGroup }
+  AllowedFqdn: { Value: !Ref AllowedFqdn }

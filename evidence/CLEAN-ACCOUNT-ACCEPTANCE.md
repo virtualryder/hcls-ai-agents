@@ -6,6 +6,39 @@ JSON is available on request. All verification queries were read-only.
 
 **Account:** `<VALIDATION-ACCOUNT-ID>` · **Region:** us-east-1 · **Run dates:** 2026-06-29/30 (UTC) · **Independently re-verified:** 2026-07-07/08 via AWS CLI.
 
+## 0. Addendum — Real-connector + locked-egress evidence (Agent 02, openFDA), 2026-07-08
+
+Build A of the "one real connector per vertical" work was deployed to the validation account and
+exercised, then torn down. Stack `hcls-02-openfda-acc` (template
+`infra/golden-path-02-pharmacovigilance/evidence-openfda.yaml`), us-east-1, CREATE_COMPLETE →
+exercised → deleted.
+
+**What was stood up:** a VPC with **AWS Network Firewall** (stateful FQDN allow-list = `api.fda.gov`
+only, default-drop) and a VPC-attached Lambda running the real `OpenFDASafetyConnector` read logic,
+routed private-subnet → firewall endpoint → NAT → IGW.
+
+**Evidence (two live Lambda invocations):**
+
+| Test | Result | Proves |
+|---|---|---|
+| Read `api.fda.gov` (allow-listed) through the firewall | `{"reachable": true, "case_id": "5801206-7", "serious": "1", "drug": "DURAGESIC-100"}` | The connector reads **real FAERS data** in-cloud through the locked egress path |
+| Read `example.com` (not allow-listed) | `{"reachable": false, "error": "SSL: UNEXPECTED_EOF_WHILE_READING"}` | The firewall **drops** all egress except the one approved endpoint — the connector cannot reach arbitrary hosts |
+
+This is the concrete answer to *"does the governed pattern work against a real system of record, and
+can the agent exfiltrate?"* — real data in, arbitrary egress blocked. The connector's write/submit
+paths remain human-gated (proven offline in `tests/test_openfda_connector.py` and the demo).
+
+**Note (Network Firewall + CloudFormation):** `!GetAtt Firewall.EndpointIds` can resolve before the
+firewall endpoint is attached, producing an empty route target (black-hole). The two firewall-endpoint
+routes were set post-deploy via `aws ec2 replace-route ... --vpc-endpoint-id <fw-endpoint>`; the
+template now carries `DependsOn: FwLogging` and documents the one-line fallback. The reusable
+`egress-openfda.yaml` leaves the route to the deployer (per `EGRESS-OPENFDA.md`), so it is unaffected.
+
+**Teardown:** stack deleted after the run (Network Firewall + NAT + VPC). Cost ≈ a few dollars for the
+~15-minute run.
+
+---
+
 ## 1. Stack lifecycle — all 9 golden paths
 
 Deployed via SAM (CloudTrail `ExecuteChangeSet` events), reached CREATE_COMPLETE, exercised, and

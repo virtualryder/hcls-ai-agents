@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  A6 — controlled egress for the openFDA (FAERS) real connector. Provisions an AWS
+  Network Firewall whose stateful policy ALLOWS TLS/HTTPS to api.fda.gov ONLY and
+  DENIES all other egress (default deny). This is the answer to the CISO question
+  "how do you stop the agent from calling arbitrary endpoints?" — the connector can
+  reach the one approved public data source and nothing else. openFDA is public and
+  de-identified (no BAA); the same pattern (allow-list a specific FQDN) applies to
+  any approved external source.
+
+  Deploy into the same VPC as the golden-path-02 stack, place the firewall endpoint
+  in a dedicated firewall subnet, and route the connector subnet's 0.0.0.0/0 through
+  the firewall endpoint (then to NAT/IGW). See EGRESS-OPENFDA.md for the wiring.
+
+Parameters:
+  Environment: { Type: String, Default: dev, AllowedValues: [dev, test, prod] }
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC to attach the firewall to (the golden-path-02 network VPC).
+  FirewallSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Dedicated firewall subnet(s), one per AZ, for the Network Firewall endpoint(s).
+  AllowedFqdn:
+    Type: String
+    Default: api.fda.gov
+    Description: The single approved external endpoint the connector may reach.
+
+Resources:
+  # Stateful rule group: allow TLS (SNI) + HTTP(host) to the approved FQDN only.
+  OpenFdaAllowRuleGroup:
+    Type: AWS::NetworkFirewall::RuleGroup
+    Properties:
+      RuleGroupName: !Sub "hcls-02-${Environment}-openfda-allow"
+      Type: STATEFUL
+      Capacity: 100
+      RuleGroup:
+        StatefulRuleOptions: { RuleOrder: STRICT_ORDER }   # must match the policy's STRICT_ORDER
+        RulesSource:
+          RulesSourceList:
+            TargetTypes: [TLS_SNI, HTTP_HOST]
+            GeneratedRulesType: ALLOWLIST
+            Targets:
+              - !Ref AllowedFqdn
+      Tags:
+        - { Key: app, Value: hcls-02-pharmacovigilance }
+        - { Key: purpose, Value: openfda-egress-allowlist }
+
+  FirewallPolicy:
+    Type: AWS::NetworkFirewall::FirewallPolicy
+    Properties:
+      FirewallPolicyName: !Sub "hcls-02-${Environment}-egress-policy"
+      FirewallPolicy:
+        # Default-deny for stateless traffic; hand everything to the stateful engine.
+        StatelessDefaultActions: ["aws:forward_to_sfe"]
+        StatelessFragmentDefaultActions: ["aws:forward_to_sfe"]
+        # Strict-order stateful engine: anything not explicitly allowed is dropped.
+        StatefulEngineOptions:
+          RuleOrder: STRICT_ORDER
+          StreamExceptionPolicy: DROP
+        StatefulDefaultActions: ["aws:drop_established", "aws:alert_established"]
+        StatefulRuleGroupReferences:
+          - ResourceArn: !Ref OpenFdaAllowRuleGroup
+            Priority: 1
+      Tags:
+        - { Key: app, Value: hcls-02-pharmacovigilance }
+
+  Firewall:
+    Type: AWS::NetworkFirewall::Firewall
+    Properties:
+      FirewallName: !Sub "hcls-02-${Environment}-egress-fw"
+      FirewallPolicyArn: !Ref FirewallPolicy
+      VpcId: !Ref VpcId
+      SubnetMappings:
+        - SubnetId: !Select [0, !Ref FirewallSubnetIds]
+      DeleteProtection: false
+      Description: Egress firewall — allows the connector to reach api.fda.gov only.
+      Tags:
+        - { Key: app, Value: hcls-02-pharmacovigilance }
+
+  FirewallLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/hcls-02/${Environment}/egress-firewall"
+      RetentionInDays: 90
+
+  FirewallLogging:
+    Type: AWS::NetworkFirewall::LoggingConfiguration
+    Properties:
+      FirewallArn: !Ref Firewall
+      LoggingConfiguration:
+        LogDestinationConfigs:
+          - LogType: ALERT          # log every dropped (non-allow-listed) egress attempt
+            LogDestinationType: CloudWatchLogs
+            LogDestination: { logGroup: !Ref FirewallLogGroup }
+
+Outputs:
+  FirewallArn:
+    Value: !Ref Firewall
+  AllowedFqdn:
+    Value: !Ref AllowedFqdn
+    Description: The only external endpoint the connector may reach.
+  FirewallLogGroup:
+    Value: !Ref FirewallLogGroup
+    Description: ALERT logs of every denied egress attempt (proof the allow-list holds).
+  WiringNote:
+    Value: "Route the connector subnet's 0.0.0.0/0 to the firewall endpoint in FirewallSubnetIds, then that subnet to NAT/IGW. See EGRESS-OPENFDA.md."
