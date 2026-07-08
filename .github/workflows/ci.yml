@@ -57,6 +57,34 @@ jobs:
       - name: Prompt manifest drift check (model change-control)
         run: python -m governance.prompt_registry
 
+  evals:
+    # Build B — scored output-quality gate for Agent 02 (Pharmacovigilance).
+    # Runs the labeled safety benchmark against regulatory thresholds (seriousness
+    # recall, entity F1, duplicate accuracy, grounding, PHI-leak = 0, E2B
+    # completeness). Deterministic, no API key. Fails the build on regression;
+    # publishes eval-report.md as an artifact for the assurance packet.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e platform_core
+          pip install pytest
+      - name: Scored eval — Agent 02 (gate on thresholds)
+        run: PYTHONPATH=platform_core:. python -m governance.evals.score_agent02
+      - name: Scored eval tests (gate + negative controls)
+        run: PYTHONPATH=platform_core:. pytest governance/evals -q -p no:cacheprovider
+      - name: Publish eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent02-eval-report
+          path: governance/evals/eval-report.md
+          if-no-files-found: warn
+
   compile:
     runs-on: ubuntu-latest
     steps:

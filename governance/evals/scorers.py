@@ -21,11 +21,12 @@ Metrics (aggregated over the golden set), with regulatory-weighted thresholds:
 """
 from __future__ import annotations
 
+import os
 import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 _REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_REPO))
@@ -34,6 +35,16 @@ sys.path.insert(0, str(_REPO / "platform_core"))
 from governance.grounding import verify_grounding                       # noqa: E402
 from hcls_agent_platform.connectors.openfda import OpenFDASafetyConnector  # noqa: E402
 from hcls_agent_platform.phi import mask                                # noqa: E402
+
+# B2: score the REAL Agent 02 seriousness classifier (ICH E2A / GVP criteria
+# applied deterministically from the narrative), not just the raw FAERS flag.
+# Path-guarded so the eval still runs if the agent package layout changes.
+_AGENT = _REPO / "02-pharmacovigilance-agent"
+sys.path.insert(0, str(_AGENT))
+try:
+    from tools.seriousness_assessor import assess as _agent_assess     # noqa: E402
+except Exception:  # pragma: no cover
+    _agent_assess = None
 
 THRESHOLDS: Dict[str, float] = {
     "seriousness_recall": 0.95,
@@ -72,11 +83,22 @@ class CasePrediction:
 
 
 def predict(faers_record: Dict[str, Any]) -> CasePrediction:
-    """Run the REAL connector mapping to produce the agent's extraction."""
+    """
+    Produce the agent's prediction for a case:
+      * entity extraction + narrative  -> the real openFDA connector mapping
+      * seriousness classification      -> the real Agent 02 assessor (ICH E2A),
+        run on the narrative (B2) — falls back to the FAERS flag if unavailable.
+    """
     rec = OpenFDASafetyConnector._map_report(faers_record)
+    serious = bool(rec["serious"])
+    if _agent_assess is not None:
+        try:
+            serious = bool(_agent_assess({"raw_source": rec["narrative_text"]})["is_serious"])
+        except Exception:
+            pass  # fall back to the connector flag
     return CasePrediction(
         case_id=rec["case_id"],
-        serious=bool(rec["serious"]),
+        serious=serious,
         drugs=_set(rec["suspect_drugs"]) or _set(rec["all_drugs"]),
         reactions=_set(rec["reactions"]),
         outcomes=_set(rec["outcomes"]),
@@ -86,6 +108,34 @@ def predict(faers_record: Dict[str, Any]) -> CasePrediction:
 
 
 # ── individual metric helpers ────────────────────────────────────────────────
+
+def llm_judge_grounded(narrative: str, record: Dict[str, Any]) -> Optional[bool]:
+    """
+    B3 optional richer grounding signal — behind EVAL_LLM_JUDGE=1. Asks an LLM
+    whether every clinical claim in the narrative is supported by the case facts.
+    Returns True/False when a judge ran, or None when disabled/unavailable.
+
+    This is a *supplementary* signal only — it NEVER gates the build. The
+    deterministic string/entity overlap (verify_grounding) is the CI gate, so the
+    eval stays reproducible and needs no API key. Enable the judge locally for a
+    richer read when credentials are present.
+    """
+    if os.getenv("EVAL_LLM_JUDGE", "").strip().lower() not in ("1", "true", "yes"):
+        return None
+    try:
+        from hcls_agent_platform.llm_factory import get_llm  # type: ignore
+        llm = get_llm("grounding_judge")
+        facts = {k: record.get(k) for k in ("suspect_drugs", "reactions", "outcomes",
+                                            "seriousness_criteria", "demographics", "country")}
+        prompt = ("You are a pharmacovigilance QC reviewer. Answer strictly YES or NO: "
+                  "is EVERY clinical claim in the NARRATIVE supported by the FACTS?\n"
+                  f"FACTS: {facts}\nNARRATIVE: {narrative}\nAnswer:")
+        resp = llm.invoke(prompt) if hasattr(llm, "invoke") else llm(prompt)
+        text = getattr(resp, "content", str(resp)).strip().lower()
+        return text.startswith("yes")
+    except Exception:
+        return None  # judge unavailable -> supplementary signal absent, gate unaffected
+
 
 def _prf(tp: int, fp: int, fn: int) -> Tuple[float, float, float]:
     p = tp / (tp + fp) if (tp + fp) else 1.0
@@ -143,8 +193,10 @@ def score_dataset(cases: List[Dict[str, Any]]) -> Dict[str, Any]:
         present = sum(1 for f in _E2B_REQUIRED if pred.record.get(f) not in (None, "", [], {}))
         completeness_scores.append(present / len(_E2B_REQUIRED))
 
+        judge = llm_judge_grounded(pred.narrative, pred.record)  # B3: optional, non-gating
         detail.append({"id": c["id"], "serious_gold": gs, "serious_pred": ps,
-                       "grounded": is_grounded, "phi_leak": leaked})
+                       "grounded": is_grounded, "phi_leak": leaked,
+                       **({"llm_judge_grounded": judge} if judge is not None else {})})
 
     # duplicate detection: gold cases carry is_duplicate + dup_of; predict by
     # shared suspect drug + reaction between the case and its referenced pair.
