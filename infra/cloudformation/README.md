@@ -67,4 +67,4 @@ network/security/data/connectors/gateway stacks are reused.
   also pass `CallbackUrl` + `UserPoolDomainPrefix`).
 - **Network isolation:** `network.yaml` keeps in-account AWS-service traffic on VPC
   endpoints (configurable, on by default); see the README "Network isolation" section.
-- Terraform parity lives in `../terraform`.
+- Terraform reference skeleton (not at parity — see ../../docs/TERRAFORM-AND-GOVCLOUD-STATUS.md) lives in `../terraform`.

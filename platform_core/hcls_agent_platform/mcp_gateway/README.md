@@ -45,11 +45,13 @@ from hcls_agent_platform.mcp_gateway import MCPGateway
 
 gw = MCPGateway()
 res = gw.invoke(
-    user_claims={"sub": "u-123", "custom:hcls_role": "PV_MEDICAL_REVIEWER"},
+    user_claims={"sub": "u-123", "custom:hcls_role": "PV_ANALYST"},
     agent_id="02-pharmacovigilance",
     tool="safety.submit_report",
     args={"case_id": "ICSR-DRAFT-0001"},
-    approval={"approved": True, "reviewer": {"sub": "u-123"}},  # required: high-risk
+    # Separation of duties: the reviewer MUST be a different person than the
+    # requester. A self-approval (reviewer sub == user sub) is rejected.
+    approval={"approved": True, "reviewer": {"sub": "u-456", "custom:hcls_role": "PV_MEDICAL_REVIEWER"}},  # required: high-risk
 )
 assert res.decision == "ALLOW"
 ```

@@ -1,3 +1,7 @@
+# ⚠️ REFERENCE SKELETON — NOT at parity with the CloudFormation golden paths.
+# CloudFormation/SAM is the canonical, validated IaC. See docs/TERRAFORM-AND-GOVCLOUD-STATUS.md
+# for the coverage matrix and gaps before relying on this.
+
 # HCLS Agent Suite — dev environment root module (parity with CloudFormation).
 terraform {
   required_version = ">= 1.6"

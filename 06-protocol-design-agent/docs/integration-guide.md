@@ -75,7 +75,7 @@ path and swap connector/LLM by configuration — no agent code changes:
 ## AWS deployment
 
 - **Quick deploy:** `../../infra/cloudformation/` (nested-stack quickstart) — see
-  `../../infra/cloudformation/README.md`; Terraform parity in `../../infra/terraform/`.
+  `../../infra/cloudformation/README.md`; Terraform reference skeleton (see docs/TERRAFORM-AND-GOVCLOUD-STATUS.md) in `../../infra/terraform/`.
 - **AWS-native rebuild for this agent:** `../../aws-native-reference/06-protocol-design/`
   (Strands + Step Functions with a `waitForTaskToken` human gate), plus the
   container-lift path on AgentCore Runtime via `../../aws-native-reference/_shared/runtime`.

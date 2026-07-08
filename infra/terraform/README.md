@@ -1,4 +1,6 @@
-# Terraform (parity reference)
+# Terraform — reference skeleton (NOT parity)
+
+> **Status:** reference skeleton, **not** at parity with CloudFormation. See [`../../docs/TERRAFORM-AND-GOVCLOUD-STATUS.md`](../../docs/TERRAFORM-AND-GOVCLOUD-STATUS.md).
 
 CloudFormation in `../cloudformation` is the **headline** quick-deploy path for
 this suite. This Terraform tree is maintained for parity for customers standardized

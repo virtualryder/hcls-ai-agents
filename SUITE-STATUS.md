@@ -12,7 +12,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 | Automated tests passing | **519** (platform 50 · governance 7 · agents 277 · native 185), verified in one command via `make test`; **all 9 golden paths also deployed + run end-to-end in a clean AWS account** |
 | LLM | Anthropic Claude / in-account Amazon Bedrock + Guardrails / deterministic demo |
 | MCP layer | Portable gateway (API Gateway + Cognito JWT) is the **supported default**; a **managed Bedrock AgentCore Gateway** path is **experimental** (each target additionally requires a ToolSchema — `agentcore-gateway.yaml`). Both front shared connector Lambdas (reference logic in `platform_core`) |
-| IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in any Region (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform parity |
+| IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in any Region (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform reference skeleton (not at parity — see docs/TERRAFORM-AND-GOVCLOUD-STATUS.md) |
 | Live reference path | Agent 02 — real Bedrock + real HTTP connector, end-to-end |
 | GTM collateral | **Cited, generated AWS-style deck system: 8 per-agent decks + executive overview + CIO/CISO board deck** (`decks/`, `make decks`), each with PDF leave-behind (`make decks-pdf`); GTM citation spine (`gtm/HCLS-DECK-SOURCES.md`, `DECK-CONTENT-SPEC.md`, `DEMO-STORYBOARD.md`) + SA-fillable ROI calculator (`gtm/roi-calculator/`, `make roi`); plus the original executive deck, 5-slide teaser, and one-page leave-behind |
 | Enablement | `docs/SA-SE-ENABLEMENT-GUIDE.md`, `docs/FAQ.md`, `docs/CREATE-A-NEW-AGENT.md`; CI in `.github/workflows/ci.yml` (tests · compile · deck build · cfn-lint) |
@@ -88,7 +88,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 - **AWS-native rebuild for Agent 02** added (registry now complete for all 8).
 - **Flagship Agents 01 & 02**, shared `platform_core`, governance + eval framework, MCP
   authorization gateway (AgentCore Gateway + Identity reference), CloudFormation quick-deploy
-  + Terraform parity, GTM/offerings/runbooks, and top-level docs.
+  + Terraform reference skeleton (see docs/TERRAFORM-AND-GOVCLOUD-STATUS.md), GTM/offerings/runbooks, and top-level docs.
 
 ## Verify
 

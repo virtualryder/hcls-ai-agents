@@ -278,3 +278,6 @@ Calculated:
 ---
 
 > **Note for SA teams:** The Excel/XLSX version of this model is available from the SI's internal delivery toolkit. This Markdown version is the source of record — the XLSX is a formatted export. If you need to update assumptions, update this file first.
+
+---
+**Value side:** see [ROI-CASE-STUDY.md](ROI-CASE-STUDY.md) for a fully worked, illustrative ROI example with totals.

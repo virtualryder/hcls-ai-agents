@@ -40,7 +40,7 @@ finalize) executes against deterministic data.
 | `governance/` | Grounding, prompt registry, eval harness, HITL-gate tests, red team, fairness |
 | `aws-native-reference/` | Per-agent AWS-native rebuild (Strands + Step Functions) + shared AgentCore runtime |
 | `infra/cloudformation/` | Quick-deploy nested stacks (primary IaC) |
-| `infra/terraform/` | Terraform parity |
+| `infra/terraform/` | Terraform reference skeleton (see docs/TERRAFORM-AND-GOVCLOUD-STATUS.md) |
 | `docs/` | Suite architecture + stakeholder security briefings |
 | `offerings/` , `runbooks/` | GTM packaging + operational runbooks |
 | `*.pptx`, `HCLS-One-Pager.pdf` | Field-enablement collateral |

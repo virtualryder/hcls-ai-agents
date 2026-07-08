@@ -9,7 +9,7 @@ A large systems integrator deploying AI in a pharmaceutical, biotech, medtech, o
 
 The result is a deployable accelerator — not a certified product — that gives an SI engagement team a credible, compliant starting point across nine high-value life-sciences workflows.
 
-**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **519 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + a portable MCP gateway (AgentCore mode is experimental — see `infra/cloudformation/agentcore-gateway.yaml`) + native/container agent) deployable in a new customer account in any Region · **all 9 golden paths deployed and run end-to-end in a clean AWS account (us-east-1) — full Assemble→…→human gate→bound approval→Finalize to SUCCEEDED — then torn down** · Terraform parity · executive deck, 5-slide customer teaser, and one-page leave-behind included · **external-review hardening (P0):** deployed-path human-approval enforcement (bound, single-use, separation-of-duties, args-bound tokens; `STRICT_APPROVAL` fails closed), authenticated-authorizer-only identity, immutable fail-closed audit, customer IdP (SAML/OIDC) federation, VPC PrivateLink isolation, and fail-closed CI.
+**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **519 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + a portable MCP gateway (AgentCore mode is experimental — see `infra/cloudformation/agentcore-gateway.yaml`) + native/container agent) deployable in a new customer account in any Region · **all 9 golden paths deployed and run end-to-end in a clean AWS account (us-east-1) — full Assemble→…→human gate→bound approval→Finalize to SUCCEEDED — then torn down** · Terraform reference skeleton (not at parity — see [`docs/TERRAFORM-AND-GOVCLOUD-STATUS.md`](docs/TERRAFORM-AND-GOVCLOUD-STATUS.md)) · executive deck, 5-slide customer teaser, and one-page leave-behind included · **external-review hardening (P0):** deployed-path human-approval enforcement (bound, single-use, separation-of-duties, args-bound tokens; `STRICT_APPROVAL` fails closed), authenticated-authorizer-only identity, immutable fail-closed audit, customer IdP (SAML/OIDC) federation, VPC PrivateLink isolation, and fail-closed CI.
 
 ---
 
@@ -412,7 +412,7 @@ hcls-ai-agents/
 │
 ├── infra/
 │   ├── cloudformation/                 # CloudFormation quick-deploy (connectors + 2 gateway modes + agent)
-│   └── terraform/                      # Terraform parity
+│   └── terraform/                      # Terraform reference skeleton (not parity)
 │
 ├── docs/
 │   ├── DEPLOY-QUICKSTART.md            # Copy-paste: empty account -> running agent (start here)

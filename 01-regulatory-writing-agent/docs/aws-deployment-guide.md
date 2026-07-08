@@ -39,7 +39,7 @@ aws cloudformation deploy \
 This provisions: VPC + private subnets, ECS Fargate (UI + agent worker), the
 AgentCore Gateway + Identity wiring, Bedrock Guardrail, Aurora PostgreSQL
 (durable state), DynamoDB (append-only audit), S3 Object Lock (WORM submission
-drafts), Secrets Manager, KMS, and CloudWatch alarms. Terraform parity lives in
+drafts), Secrets Manager, KMS, and CloudWatch alarms. Terraform reference skeleton (not at parity — see docs/TERRAFORM-AND-GOVCLOUD-STATUS.md) lives in
 `infra/terraform`.
 
 ## Reference data architecture
