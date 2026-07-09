@@ -1,0 +1,64 @@
+# MATURITY.yaml — machine-readable single source of truth for this repo's maturity claims.
+# Every status number/word in README, SUITE-STATUS, decks, and GTM should agree with this
+# file. When they drift, THIS FILE governs. Regenerate the test count with `make test`.
+# Companion taxonomy: docs/CONNECTOR-MATURITY.md   ·   Boundaries: NOT-CLAIMS.md
+schema_version: 1
+repo: hcls-ai-agents
+display_name: HCLS AI Agents (Healthcare & Life Sciences)
+governance_pattern: "Aegis Governance Pattern (AGP) v1.0"   # conforms-to
+positioning: reference-accelerator            # not an AWS service; not certified — see NOT-CLAIMS.md
+updated: 2026-07-09
+
+tests:
+  offline_total: 536                          # was mis-stated as 519/503/452 before 2026-07-09
+  suites: 20
+  reproduce: "make test   # scripts/run_all_tests.sh — per-process, no API key, no AWS"
+  last_verified: 2026-07-09
+  note: "Grew from 503 -> 536 with the openFDA live-connector, scored evals, and the auth walkthrough."
+
+clean_account_deploy:
+  status: all-golden-paths-validated          # strongest evidence tier in the portfolio
+  detail: "All 9 golden paths deployed to a clean AWS account (us-east-1), ran the full governed
+           workflow (human gate -> bound SoD approval -> Finalize) to SUCCEEDED, then torn down."
+  evidence: evidence/CLEAN-ACCOUNT-ACCEPTANCE.md
+
+hero_agent: 02-pharmacovigilance
+maturity_scale: [documented, demonstrated, deployable, deploy-validated, production-ready]
+
+agents:
+  - id: 02-pharmacovigilance
+    name: Pharmacovigilance ICSR Intake
+    hero: true
+    maturity: deploy-validated
+    clean_account_evidence: true
+    scored_eval: true                         # governance/evals/score_agent02 (PHI-leak gate = 0)
+    connectors:
+      - {kind: safety, source: "openFDA/FAERS (public)", tier: 3-live-reference, access: read-only}
+      - {kind: safety, source: "local HTTP reference (demo/demo_live.py)", tier: 2-local-http-standin}
+      - {kind: safety, source: "Argus / Veeva Safety (customer)", tier: 4-not-done}
+  - {id: 01-regulatory-writing, name: Regulatory Writing, maturity: deploy-validated, clean_account_evidence: true, connectors_tier: 1-fixture}
+  - {id: 03-clinical-trial-ops, name: Clinical Trial Ops, maturity: deploy-validated, clean_account_evidence: true, connectors_tier: 1-fixture}
+  - {id: 04-site-patient-matching, name: Site & Patient Matching, maturity: deploy-validated, clean_account_evidence: true, connectors_tier: 1-fixture}
+  - {id: 05-quality-capa, name: Quality / CAPA, maturity: deploy-validated, clean_account_evidence: true, connectors_tier: 1-fixture}
+  - {id: 06-protocol-design, name: Protocol Design, maturity: deploy-validated, clean_account_evidence: true, connectors_tier: 1-fixture}
+  - {id: 07-rwe-heor, name: RWE / HEOR, maturity: deploy-validated, clean_account_evidence: true, connectors_tier: 1-fixture}
+  - {id: 08-medical-affairs-msl, name: Medical Affairs / MSL, maturity: deploy-validated, clean_account_evidence: true, connectors_tier: 1-fixture}
+  - {id: 09-manufacturing-batch-review, name: Manufacturing Batch Review, maturity: deploy-validated, clean_account_evidence: true, connectors_tier: 1-fixture}
+  - {id: 10-scientific-intelligence, name: Scientific Intelligence & Target Discovery, maturity: documented, clean_account_evidence: false, connectors_tier: none, note: "roadmap only"}
+
+controls:                                     # repo/customer ownership per control
+  identity_authn: {designed: true, implemented: true, deployed: true, integration_tested: false, owner: "Repo (authorizer deployed; federated IdP login = Customer)"}
+  mcp_authorization_gateway: {designed: true, implemented: true, deployed: true, integration_tested: true, owner: Repo}
+  deny_by_default_policy: {designed: true, implemented: true, deployed: true, integration_tested: true, owner: Repo}
+  human_approval_sod: {designed: true, implemented: true, deployed: true, integration_tested: true, owner: Repo}
+  phi_pii_masking: {designed: true, implemented: true, deployed: false, integration_tested: false, owner: "Repo (unit-tested; not runtime-verified on AWS)"}
+  append_only_audit_worm: {designed: true, implemented: true, deployed: true, integration_tested: true, owner: "Repo (WORM retention config = Customer)"}
+  bedrock_guardrails: {designed: true, implemented: true, deployed: false, owner: "Repo (Agent 02 real-Bedrock path exercised locally)"}
+  live_connectors: {designed: true, implemented: true, deployed: false, owner: "Customer (fixtures + Agent 02 tier-3 openFDA; tier-4 = engagement)"}
+
+references:
+  readme: README.md
+  suite_status: SUITE-STATUS.md
+  connector_taxonomy: docs/CONNECTOR-MATURITY.md
+  not_claims: NOT-CLAIMS.md
+  clean_account_evidence: evidence/CLEAN-ACCOUNT-ACCEPTANCE.md

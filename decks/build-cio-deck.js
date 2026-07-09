@@ -100,7 +100,7 @@ async function slideBLUF() {
   s.addText("BOTTOM LINE UP FRONT", { x: 0.7, y: 0.5, w: 10, h: 0.4, fontFace: "Calibri", fontSize: 13, bold: true, color: TEAL, charSpacing: 2, margin: 0 });
   s.addText("Adopt it as a governed accelerator — not a finished product", { x: 0.7, y: 0.86, w: 12, h: 0.8, fontFace: "Cambria", fontSize: 29, bold: true, color: WHITE, margin: 0 });
   const cards = [
-    { ic: Fa.FaCheckCircle, col: TEAL, h: "What you are buying", b: "A governance spine in code + 452 tests, AWS deployment runbooks, and a reference architecture (dual MCP gateway, private-connectivity Bedrock, HITL, audit). It hands an SI a compliant, auditable starting point across 8 life-sciences workflows." },
+    { ic: Fa.FaCheckCircle, col: TEAL, h: "What you are buying", b: "A governance spine in code + 536 tests, AWS deployment runbooks, and a reference architecture (dual MCP gateway, private-connectivity Bedrock, HITL, audit). It hands an SI a compliant, auditable starting point across 8 life-sciences workflows." },
     { ic: Fa.FaTools, col: AMBER, h: "What you still build", b: "Live Veeva / Argus / Medidata / QMS connectors, the reviewer UI, IdP federation, computer-system validation (CSV/CSA), and a penetration test. This is an engagement, not an install." },
     { ic: Fa.FaBalanceScale, col: ICE, h: "Why that is the right buy", b: "It moves the hard, slow, risky part — governed access, HITL, audit, PHI masking, grounding — off your critical path. You compress months of SI build while keeping GxP / 21 CFR Part 11 accountability where it belongs: with you." },
   ];
@@ -126,7 +126,7 @@ async function slideMaturity() {
   lightHeader(s, "What it actually is", "The maturity ladder — positioned honestly", 3);
   const rungs = [
     { lvl: "Documented", col: SLATE2, txt: "Architecture, workflow & compliance design written and reviewed", reached: true },
-    { lvl: "Demonstrated", col: TEAL, txt: "Runs end-to-end in demo mode — deterministic fixtures, no API key (452 tests green)", reached: true },
+    { lvl: "Demonstrated", col: TEAL, txt: "Runs end-to-end in demo mode — deterministic fixtures, no API key (536 tests green)", reached: true },
     { lvl: "Deployable", col: NAVY, txt: "CloudFormation + Terraform + container contract pass CI; needs your AWS account + Bedrock", reached: true },
     { lvl: "Production-ready", col: AMBER, txt: "CSV/CSA validation, IdP, live connectors, pen test — the engagement", reached: false },
   ];
@@ -148,7 +148,7 @@ async function slideMaturity() {
   await iconCircle(s, Fa.FaCheckCircle, rx + 0.26, 1.78, 0.6, TEAL, WHITE);
   s.addText("Real today", { x: rx + 1.0, y: 1.83, w: rwc - 1.2, h: 0.5, fontFace: "Cambria", fontSize: 16, bold: true, color: NAVY, margin: 0 });
   s.addText([
-    { text: "Governance spine in code + 452 passing tests (gateway intersection, HITL, PHI masking, grounding, red-team) — no API key", options: { bullet: true, breakLine: true } },
+    { text: "Governance spine in code + 536 passing tests (gateway intersection, HITL, PHI masking, grounding, red-team) — no API key", options: { bullet: true, breakLine: true } },
     { text: "Empty-account-to-running CloudFormation quick-deploy: connector Lambdas + dual MCP gateway + native/container agent; Terraform parity", options: { bullet: true, breakLine: true } },
     { text: "Live reference path (Agent 02): real Bedrock + real HTTP connector, end-to-end; Strands + Step Functions waitForTaskToken HITL", options: { bullet: true } },
   ], { x: rx + 0.28, y: 2.42, w: rwc - 0.55, h: 1.5, fontFace: "Calibri", fontSize: 10.3, color: SLATE, margin: 0, paraSpaceAfter: 5, lineSpacingMultiple: 0.98 });
@@ -161,7 +161,7 @@ async function slideMaturity() {
     { text: "No computer-system validation (CSV/CSA) package of its own, no SOC 2 / 3rd-party cert, no pen-tested production surface yet", options: { bullet: true } },
   ], { x: rx + 0.28, y: 5.0, w: rwc - 0.55, h: 1.5, fontFace: "Calibri", fontSize: 10.3, color: SLATE, margin: 0, paraSpaceAfter: 5, lineSpacingMultiple: 0.98 });
   footer(s);
-  s.addNotes("Use the ladder to set honest expectations. The suite is genuinely at Demonstrated and Deployable-by-design: code runs, 452 tests pass with no API key, IaC validates. The bright line is rung 4 — Production-ready — explicitly the engagement (CSV/CSA validation, live connectors, pen test), not a day-one deliverable. The 452 passing tests are your strongest credibility point: governance is in code and tested, not slideware.");
+  s.addNotes("Use the ladder to set honest expectations. The suite is genuinely at Demonstrated and Deployable-by-design: code runs, 536 tests pass with no API key, IaC validates. The bright line is rung 4 — Production-ready — explicitly the engagement (CSV/CSA validation, live connectors, pen test), not a day-one deliverable. The 536 passing tests are your strongest credibility point: governance is in code and tested, not slideware.");
 }
 
 // SLIDE 4 — WHY A CISO CAN SAY YES

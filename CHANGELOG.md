@@ -29,7 +29,7 @@ Independent review (scored 58/100) flagged gaps between the control narrative an
   **SAM golden path is declared canonical**.
 - **CI fail-closed (F9)** — removed `|| true` on native tests + prompt-drift; cfn-lint uses
   `--non-zero-exit-code error`.
-- **Tests:** suite **492 → 503** (+7 finalize approval-integrity, +4 connector identity).
+- **Tests:** suite **492 → 536** (+7 finalize approval-integrity, +4 connector identity).
 
 ### Added — Security & deployability deepening (SLG-parity pass)
 - **CISO/CIO security answer kit:** `SECURITY.md`, `docs/THREAT-MODEL.md`,
@@ -40,7 +40,7 @@ Independent review (scored 58/100) flagged gaps between the control narrative an
   `mes.record_disposition`) **withheld from every agent grant** (`policy.CONSEQUENTIAL_COMMITS`),
   enforced by `test_consequential_actions_withheld_from_agents`; bound human-approval tokens
   (`mcp_gateway/approvals.py`: single-use, separation-of-duties, args-bound; `STRICT_APPROVAL` for prod).
-- **One-command test harness:** `make test` / `scripts/run_all_tests.sh` runs all **503** tests across
+- **One-command test harness:** `make test` / `scripts/run_all_tests.sh` runs all **536** tests across
   20 suites in one go; root `conftest.py` + `pytest.ini` for the shared suite.
 - **Edge layer in IaC:** `infra/cloudformation/edge.yaml` (CloudFront + WAF + ACM) closes the
   previously-flagged "edge not in IaC" gap.

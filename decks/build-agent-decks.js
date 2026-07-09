@@ -1174,9 +1174,9 @@ function buildOverview(P) {
       s.addText(r.t, { x: x + 0.22, y: y + 0.25, w: bw - 0.4, h: 0.7, fontFace: F_BOLD, fontSize: 17, bold: true, color: WHITE, align: "left", valign: "top", lineSpacingMultiple: 0.98, margin: 0 });
       s.addText(r.b, { x: x + 0.24, y: y + 1.1, w: bw - 0.45, h: bh - 1.3, fontFace: F_REG, fontSize: 12, color: "F2F6F8", align: "left", valign: "top", lineSpacingMultiple: 1.05, margin: 0 });
     });
-    s.addText("The suite sits at Demonstrated + Deployable-by-design — 452 tests pass with no API key; production-readiness is the engagement.", { x: 0.78, y: 5.6, w: 11.8, h: 0.5, fontFace: F_REG, fontSize: 14, italic: true, color: INK, align: "left", valign: "middle", margin: 0 });
+    s.addText("The suite sits at Demonstrated + Deployable-by-design — 536 tests pass with no API key; production-readiness is the engagement.", { x: 0.78, y: 5.6, w: 11.8, h: 0.5, fontFace: F_REG, fontSize: 14, italic: true, color: INK, align: "left", valign: "middle", margin: 0 });
     footer(P, s, null, false);
-    s.addNotes("[04:00] The maturity ladder is the honesty slide. We position every agent against four levels: Documented, Demonstrated, Deployable, Production-ready. The suite is Demonstrated + Deployable-by-design today — 452 automated tests pass with no API key. Production-readiness (CSV/CSA, live integration, pen-test) is the engagement, not a day-one claim.");
+    s.addNotes("[04:00] The maturity ladder is the honesty slide. We position every agent against four levels: Documented, Demonstrated, Deployable, Production-ready. The suite is Demonstrated + Deployable-by-design today — 536 automated tests pass with no API key. Production-readiness (CSV/CSA, live integration, pen-test) is the engagement, not a day-one claim.");
   }
   // 8 DEPLOYMENT
   {
