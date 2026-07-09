@@ -134,6 +134,15 @@ Connector: [`../platform_core/hcls_agent_platform/connectors/openfda.py`](../pla
 locked egress: [`../infra/golden-path-02-pharmacovigilance/EGRESS-OPENFDA.md`](../infra/golden-path-02-pharmacovigilance/EGRESS-OPENFDA.md) ·
 scored benchmark: `make eval-agent02` → [`../governance/evals/eval-report.md`](../governance/evals/eval-report.md).
 
+### Reviewer & pilot pack (hero agent)
+
+Everything a CISO / architect / auditor needs, and how to run a scoped pilot:
+
+- **[`ASSURANCE-PACKET.md`](ASSURANCE-PACKET.md)** — one consolidated packet: architecture + trust boundaries, control matrix, deployment evidence, negative-test results, known limitations, shared-responsibility RACI.
+- **[`PILOT-SOW.md`](PILOT-SOW.md)** — a scoped 6–10 week pilot SOW (prerequisites, one connector, one workflow, success metrics, security gates, go/no-go).
+- **What the platform refuses:** `make neg-demo` → [`demo/negative_demo.py`](demo/negative_demo.py) proves **10/10** deny cases (no/bad JWT, wrong role, unregistered tool, self-approval, replay, tampered args, masking failure, audit-write failure, budget exceeded), CI-gated by [`../governance/tests/test_negative_demo.py`](../governance/tests/test_negative_demo.py).
+- **How auth works end to end:** `make auth-demo` → [`demo/DEMO-AUTH-TRANSCRIPT.md`](demo/DEMO-AUTH-TRANSCRIPT.md).
+
 openFDA is public, de-identified data (**no BAA**); the PHI-under-BAA variant is AWS HealthLake FHIR.
 
 ## Live path (Bedrock + real connector)

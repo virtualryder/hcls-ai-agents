@@ -98,3 +98,7 @@ eval-agent02:  ## Scored eval for Agent 02 (Pharmacovigilance) - gates on regula
 auth-demo:  ## End-to-end auth walkthrough: IdP federation -> token exchange -> intersection -> SoD -> audit
 	PYTHONPATH=platform_core:. python demo/demo_auth.py
 	PYTHONPATH=platform_core:. python -m pytest governance/tests/test_auth_walkthrough.py -q
+
+neg-demo:  ## The 10 things the platform REFUSES (Agent 02 negative demo) + CI gate
+	PYTHONPATH=platform_core:. python 02-pharmacovigilance-agent/demo/negative_demo.py
+	PYTHONPATH=platform_core:. python -m pytest governance/tests/test_negative_demo.py platform_core/tests/test_budget.py -q
