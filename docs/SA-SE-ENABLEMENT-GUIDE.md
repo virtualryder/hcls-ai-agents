@@ -14,7 +14,7 @@ it points you at the right artifact for every moment of a deal.
 |---|---|---|---|
 | **CIO** | "Is this another point tool?" | One control plane, nine workloads; the platform is the asset. | `decks/HCLS-Agentic-AI-Suite-Executive-Overview.pptx` |
 | **CSO / CISO** | "Can a prompt turn the controls off?" | No — controls live in the gateway, outside the model. | `decks/HCLS-CIO-Adoption-Review.pptx` (slide 4) + red-team demo |
-| **Director of Architecture** | "Is it actually deployable?" | CloudFormation dual-gateway, in-VPC Bedrock, Step Functions HITL — and the gaps are scoped. | per-agent architecture slide + `docs/SUITE-ARCHITECTURE.md` |
+| **Director of Architecture** | "Is it actually deployable?" | CloudFormation dual-gateway, private-connectivity Bedrock, Step Functions HITL — and the gaps are scoped. | per-agent architecture slide + `docs/SUITE-ARCHITECTURE.md` |
 | **VP Quality / Reg Affairs** | "Who owns the regulated decision?" | A named human, every time — enforced in the framework. | the bright-line callout on every agent deck |
 | **CFO / procurement** | "What does inaction cost?" | The cited cost-of-doing-nothing, modeled to their volumes. | `gtm/roi-calculator/` |
 
@@ -50,7 +50,7 @@ it points you at the right artifact for every moment of a deal.
 | Objection | Response |
 |---|---|
 | "It's not finished." | Correct — and that's normal for governed AI on regulated GxP records. The gaps are named on the shortfalls slide and scoped on the backlog slide. |
-| "Why not just use a vendor SaaS?" | A SaaS can't take your GxP / Part 11 accountability, and your data shouldn't leave your VPC. Here Bedrock runs in-account and PHI is masked before any model call. |
+| "Why not just use a vendor SaaS?" | A SaaS can't take your GxP / Part 11 accountability, and it sends your data to a third-party service. Here Bedrock is a regional AWS service reached only over AWS PrivateLink under your BAA, and PHI is masked before any model call — no egress to external AI APIs. |
 | "Bedrock vs. best model of the week?" | The LLM factory abstracts the model — swap without re-architecting. VPC-private inference + IAM governance won the trade. |
 | "This is a lot of work." | It's the same list for *any* governed AI build — the difference is here it's written down and scoped, not discovered mid-project. |
 

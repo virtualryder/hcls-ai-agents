@@ -8,7 +8,7 @@ AgentCore Runtime expects an HTTP server on port 8080 exposing:
 
 This handler resolves the target agent's compiled LangGraph (by AGENT_MODULE env,
 e.g. "agent.graph:build_regulatory_writing_graph"), invokes it, and returns the
-final state. Inference runs in-account via Bedrock when LLM_PROVIDER=bedrock.
+final state. Inference is served by Bedrock (reached over PrivateLink) when LLM_PROVIDER=bedrock.
 
 The same image works for all agents — only AGENT_MODULE and the copied agent code
 differ. This is the "keep LangGraph, add AWS-native deployment" path.

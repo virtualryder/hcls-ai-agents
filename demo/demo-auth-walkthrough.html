@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!--
+  Self-service walkthrough — Aegis MCP gateway end-to-end authorization.
+  Single file, no deps, no network. Every result below is the actual captured output of
+  `python demo/demo_auth.py`, driven entirely by the shipping gateway modules. Companion to
+  demo-walkthrough.html (the openFDA real-connector demo).
+  Reference accelerator — not an AWS service or certification.
+-->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aegis MCP gateway — end-to-end authorization</title>
+<style>
+  :root{--ink:#232F3E;--panel:#1b2530;--line:#33414f;--bg:#141c25;--orange:#FF9900;
+        --teal:#01A88D;--red:#DD344C;--purple:#8C4FFF;--grey:#B0B8C0;--white:#eef2f5;}
+  *{box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--white)}
+  header{background:var(--ink);border-bottom:2px solid var(--orange);padding:16px 22px}
+  header .sub{color:var(--grey);font-size:13px;margin-top:3px}
+  .badge{display:inline-block;background:var(--orange);color:var(--ink);font-weight:700;font-size:11px;padding:2px 8px;border-radius:10px;margin-right:8px}
+  .disc{background:#3a2a10;color:#ffd48a;font-size:11.5px;padding:7px 22px;border-bottom:1px solid var(--line)}
+  .wrap{max-width:920px;margin:0 auto;padding:18px}
+  .lead{color:var(--grey);font-size:14px;line-height:1.5;margin:8px 0 16px}
+  .chain{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0 4px;font-size:12.5px;color:var(--white)}
+  .chain b{color:var(--orange)}
+  .beat{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;padding:14px 16px;margin:12px 0}
+  .beat.core{border-left-color:var(--purple)} .beat.gate{border-left-color:var(--orange)}
+  .beat h3{margin:0 0 4px;font-size:14px} .beat .why{color:var(--grey);font-size:12.5px;margin:0 0 8px}
+  pre{background:#0d141b;border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow:auto;
+      font-family:Consolas,monospace;font-size:12px;color:#cdd6df;white-space:pre-wrap;margin:0}
+  .tag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:9px;margin-right:2px}
+  .allow{background:rgba(1,168,141,.16);color:var(--teal)} .deny{background:rgba(221,52,76,.16);color:var(--red)}
+  .gate{background:rgba(255,153,0,.16);color:var(--orange)}
+  h2{font-size:15px;border-bottom:1px solid var(--line);padding-bottom:6px;margin-top:26px}
+  .run{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:10px}
+  code{background:#0d141b;padding:1px 6px;border-radius:4px;font-family:Consolas,monospace;font-size:12px}
+  a{color:var(--orange)} .foot{color:var(--grey);font-size:11px;padding:14px 22px}
+</style></head><body>
+<header>
+  <div><span class="badge">AEGIS</span><span class="badge" style="background:var(--purple);color:#fff">SECURITY</span>
+  <span style="font-size:19px;font-weight:700">MCP gateway — end-to-end authorization walkthrough</span></div>
+  <div class="sub">"Show me the auth." How a request gets authorized — and what stops an agent from doing more than it should. Every result is actual captured output of the shipping gateway.</div>
+</header>
+<div class="disc">Reference accelerator — not an AWS service, not a compliance certification. Dev signer shown; production uses AgentCore Identity / Cognito + STS, IdP JWKS, a DynamoDB single-use table, and an append-only audit sink.</div>
+
+<div class="wrap">
+  <p class="lead">This is the security reviewer's demo. The four questions a CISO or director of architecture always asks — <em>where do identities come from, what does the agent actually carry, can it exceed its user, and who can perform the irreversible act</em> — answered with real, reproducible output. Nothing here is mocked.</p>
+  <div class="chain"><b>IdP federation</b> → <b>token exchange</b> → <b>least-privilege intersection</b> → <b>human-authority commit (SoD)</b> → <b>append-only audit</b> &nbsp;— deny-by-default at every hop.</div>
+
+  <h2>The walkthrough — 5 beats (real captured output)</h2>
+
+  <div class="beat"><h3>1 · IdP federation — OIDC identity → verified, role-bearing claims</h3>
+    <p class="why">The platform manages no user accounts. Identity federates from the customer IdP; groups map to app roles. Verification is fail-closed (no subject → deny). RS256 is real crypto when the JWT libs are present.</p>
+<pre>federation: [real] RS256 ID token minted + verified offline (sig+aud+exp)
+subject=u-pat-001  groups=['GRP-PV-PROCESSORS']  ->  role(s): ['PV_PROCESSOR']</pre></div>
+
+  <div class="beat"><h3>2 · Token exchange — verified identity → short-lived, tool-scoped token</h3>
+    <p class="why">The agent never holds a standing credential. Each authorized call mints a token scoped to exactly one tool (~60s). Three abuse paths are rejected outright.</p>
+<pre>minted: jti=ed6c912b  scope=['safety.get_case']  ttl=60s  (no standing service account)
+  <span class="tag deny">DENY</span> confused-deputy (token for tool A replayed at tool B): token tool scope mismatch
+  <span class="tag deny">DENY</span> expired token: token expired
+  <span class="tag deny">DENY</span> tampered signature: bad token signature</pre></div>
+
+  <div class="beat core"><h3>3 · Least-privilege intersection — the core idea</h3>
+    <p class="why">The money shot. <code>permitted ⇔ tool ∈ agent_grant ∩ user_entitlement</code>. The <b>same</b> tool, three identities: an agent can never exceed the human it acts for, and a human can't act through an agent that wasn't granted the tool.</p>
+<pre><span class="tag allow">ALLOW</span> safety.get_case   processor via PV agent
+<span class="tag deny">DENY</span>  safety.get_case   MSL user — the agent is granted it, but the human is NOT
+                  ("an agent may never exceed the user's own permissions")
+<span class="tag deny">DENY</span>  safety.get_case   reviewer via 07-rwe agent — agent over-reach denied</pre></div>
+
+  <div class="beat gate"><h3>4 · Human-authority commit + separation of duties — the irreversible act</h3>
+    <p class="why">The regulated, irreversible commit (submit an ICSR) is withheld from <b>every</b> agent grant. It needs a bound, single-use approval where the approver is not the requestor. Self-approval and replay are both refused.</p>
+<pre><span class="tag gate">PEND</span> safety.submit_report   human approval required
+<span class="tag deny">DENY</span> self-approval refused at mint: separation of duties
+<span class="tag allow">ALLOW</span> safety.submit_report   bound approval, approver commits (SoD satisfied)
+<span class="tag deny">DENY</span> safety.submit_report   replay rejected: approval token already used → commit withheld</pre></div>
+
+  <div class="beat"><h3>5 · Append-only audit — prove it later</h3>
+    <p class="why">Every decision is recorded, PHI-masked, with lineage and the approver identity. In production the sink is append-only (QLDB / S3 Object Lock) — the 21 CFR Part 11 audit-trail control.</p>
+<pre>6 records: ALLOW=2, DENY=2, PENDING_APPROVAL=2
+  ALLOW  safety.get_case  user=u-pat-001
+  DENY   safety.get_case  user=u-sam-003     (unentitled human)
+  DENY   safety.get_case  user=u-mona-002    (agent over-reach)
+  ALLOW  safety.submit_report  user=u-mona-002  approved_by=u-mona-002</pre></div>
+
+  <h2>Run it yourself</h2>
+  <div class="run">
+<pre>cd hcls-ai-agents
+PYTHONPATH=platform_core:. python demo/demo_auth.py                              # the walkthrough
+PYTHONPATH=platform_core:. pytest governance/tests/test_auth_walkthrough.py -q   # the CI gate</pre>
+  </div>
+  <p class="lead" style="margin-top:14px">Deterministic, no network, no API key. Real RS256 when <code>PyJWT</code>+<code>cryptography</code> are installed; else the gateway's dev pre-verified-claims path.
+  Code: <a href="../platform_core/hcls_agent_platform/mcp_gateway/policy.py">policy.py</a> (intersection) ·
+  <a href="../platform_core/hcls_agent_platform/mcp_gateway/tokens.py">tokens.py</a> ·
+  <a href="../platform_core/hcls_agent_platform/mcp_gateway/approvals.py">approvals.py</a> ·
+  <a href="../platform_core/hcls_agent_platform/mcp_gateway/gateway.py">gateway.py</a> ·
+  <a href="../platform_core/hcls_agent_platform/auth.py">auth.py</a>.</p>
+  <p class="lead"><b>Production mapping:</b> AgentCore Identity / Cognito + STS (tokens) · IdP JWKS (OIDC) · DynamoDB atomic single-use table (approvals) · QLDB / S3 Object Lock (audit).</p>
+</div>
+<div class="foot">Aegis MCP gateway · end-to-end authorization · reference accelerator, not an AWS service. Built on AWS; not affiliated with or endorsed by Amazon Web Services.</div>
+</body></html>

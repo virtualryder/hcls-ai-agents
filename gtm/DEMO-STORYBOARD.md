@@ -12,7 +12,7 @@
 |---|---|
 | **CIO** | One governed control plane carries all nine workloads; this compresses an SI build rather than adding shadow AI. |
 | **CISO / CSO** | Controls are enforced in the gateway, outside the model — a prompt cannot disable deny-by-default, the HITL gate, PHI masking, or the audit trail. |
-| **Director of Architecture** | The AWS reference is real and deployable (CloudFormation, dual MCP gateway, in-VPC Bedrock, Step Functions HITL), and the gaps are scoped honestly. |
+| **Director of Architecture** | The AWS reference is real and deployable (CloudFormation, dual MCP gateway, private-connectivity Bedrock, Step Functions HITL), and the gaps are scoped honestly. |
 | **VP Quality / Head of Regulatory** | Every consequential decision stays human; everything is traceable and 21 CFR Part 11 / GxP-defensible. |
 
 ## Pre-flight (the day before)
@@ -28,7 +28,7 @@
 Open on "Everyone's moving, few are governed." Land the McKinsey value ($60–110B/yr), the ~5% who've realized it, and the FDA Jan-2025 AI guidance. **Message:** the gap between adoption and governance is the opportunity, and in a workflow where a hallucinated number is a data-integrity defect, governance is the product.
 
 ### 2 · The shared control plane — 4 min  *(Executive Overview, slide 3 — architecture)*
-Trace the eight numbered flow steps once. Emphasize: per-customer VPC + dedicated validated account; Cognito federation; the **MCP authorization gateway** as the single governed front door; in-VPC Bedrock + Guardrails (PHI masked first); S3 Object Lock + DynamoDB append-only audit. **Message:** every agent inherits this — improve a control once, all nine benefit.
+Trace the eight numbered flow steps once. Emphasize: per-customer VPC + dedicated validated account; Cognito federation; the **MCP authorization gateway** as the single governed front door; private-connectivity Bedrock + Guardrails (PHI masked first); S3 Object Lock + DynamoDB append-only audit. **Message:** every agent inherits this — improve a control once, all nine benefit.
 
 ### 3 · Live governed run — 8 min  *(Agent 02 — Pharmacovigilance)*
 The flagship live segment. Walk an inbound adverse-event case through the pipeline:

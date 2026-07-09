@@ -12,7 +12,7 @@
       │                                                            MCP AUTHORIZATION GATEWAY  ← trust boundary
       │                                                                      │
       └──── (approval) ── Reviewer ──────────────────────────────  Connectors → Veeva/Argus/Medidata/QMS/MES/LIMS
-                                                                     Bedrock (in-VPC) + Guardrails
+                                                                     Bedrock (via PrivateLink) + Guardrails
                                                                      DynamoDB audit (append-only) + S3 WORM
 ```
 **Key boundary:** the **MCP gateway**. Nothing reaches a system of record or the model except through it.

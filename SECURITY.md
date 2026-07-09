@@ -46,6 +46,14 @@ appreciated.
 8. **Grounding verification** — every regulated figure/entity in an output must trace to the source corpus,
    or the step fails closed (`governance/grounding.py`).
 
+> **See the whole chain run (reproducible, no network).** `make auth-demo` executes
+> [`demo/demo_auth.py`](demo/demo_auth.py) — IdP federation → token exchange → least-privilege
+> intersection → human-authority commit with separation of duties → append-only audit — driven end
+> to end by the shipping gateway modules, and gated in CI by
+> [`governance/tests/test_auth_walkthrough.py`](governance/tests/test_auth_walkthrough.py). Captured
+> output and a shareable page: [`demo/DEMO-AUTH-TRANSCRIPT.md`](demo/DEMO-AUTH-TRANSCRIPT.md) ·
+> [`demo/demo-auth-walkthrough.html`](demo/demo-auth-walkthrough.html).
+
 Full threat model: `docs/THREAT-MODEL.md`. Control-to-NIST mapping: `docs/NIST-800-53-CONTROL-MATRIX.md`.
 OWASP-LLM / MITRE ATLAS mapping: `docs/OWASP-LLM-ATLAS-MAPPING.md`. IR & key management:
 `docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md`.

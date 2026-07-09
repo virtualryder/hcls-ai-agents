@@ -1,4 +1,6 @@
 # HCLS AI Agent Suite
+
+> ⚠️ **Before you cite anything here:** read [**What we will *not* claim**](NOT-CLAIMS.md) — this is an independent reference accelerator that runs on AWS. It is **not** an AWS service, **not** AWS-supported, **not** an official AWS solution, and **not** a compliance certification. That page governs if any wording elsewhere reads stronger.
 ### Governed AI Agents for Life Sciences — Built on AWS
 
 [![CI](https://github.com/virtualryder/hcls-ai-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/virtualryder/hcls-ai-agents/actions/workflows/ci.yml)
@@ -143,6 +145,8 @@ The governed front door between every agent and every system of record. **No age
 
 Reference logic: `platform_core/hcls_agent_platform/mcp_gateway/` — this is the testable Python model of **Amazon Bedrock AgentCore Gateway + AgentCore Identity**. Tool names (`connector_kind.operation`) map 1:1 to AgentCore Gateway targets. See `infra/cloudformation/agentcore-gateway.yaml` for the deployable registration.
 
+> **See the whole chain run (60 seconds, no network):** `make auth-demo` executes [`demo/demo_auth.py`](demo/demo_auth.py) — IdP federation → token exchange → least-privilege intersection → human-authority commit with separation of duties → append-only audit — all five hops driven by the shipping gateway, with the deny paths (confused-deputy token, agent over-reach, self-approval, replay) shown live. CI-gated by [`governance/tests/test_auth_walkthrough.py`](governance/tests/test_auth_walkthrough.py). Captured output + shareable page: [`demo/DEMO-AUTH-TRANSCRIPT.md`](demo/DEMO-AUTH-TRANSCRIPT.md) · [`demo/demo-auth-walkthrough.html`](demo/demo-auth-walkthrough.html).
+
 **New to positioning this layer with a customer?** `docs/WHY-THE-MCP-LAYER.md` is a plain-English explainer (with a talk track and objection handling) for why agents that *automate* systems need a governed access layer and why to fund it in Phase 1.
 
 **Multi-agent / A2A?** The orchestration stance is recorded as ADR-001 in `ENTERPRISE-PLATFORM.md` (§5): in-process LangGraph today; A2A-through-AgentCore when multi-agent is needed. A runnable, governed reference hop is in `platform_core/hcls_agent_platform/a2a/`.
@@ -203,7 +207,7 @@ withheld from every agent** — only a bound human reviewer may commit (enforced
 | "What about prompt injection / OWASP-LLM?" | [`docs/OWASP-LLM-ATLAS-MAPPING.md`](docs/OWASP-LLM-ATLAS-MAPPING.md) — OWASP LLM Top-10 + MITRE ATLAS |
 | "Can the AI take an irreversible action?" | No — `policy.CONSEQUENTIAL_COMMITS` is withheld from every agent grant; a bound human reviewer commits ([`SECURITY.md`](SECURITY.md) §3) |
 | "How is human approval tamper-proof?" | Bound tokens: single-use, separation-of-duties, args-bound (`mcp_gateway/approvals.py`); `STRICT_APPROVAL=1` in prod |
-| "Does PHI leave our account?" | Masked before any model/audit write; in-VPC Bedrock; in-account AWS traffic kept on VPC endpoints (PrivateLink/gateway), **configurable, on by default** in the customer-VPC deployment ([`docs/THREAT-MODEL.md`](docs/THREAT-MODEL.md) T4, `infra/cloudformation/network.yaml`) |
+| "Does PHI leave our account?" | Masked before any model/audit write; Bedrock reached only over AWS PrivateLink (a regional AWS service, not in-VPC hosting); in-account AWS traffic kept on VPC endpoints, **configurable, on by default** in the customer-VPC deployment — no egress to external AI APIs ([`docs/THREAT-MODEL.md`](docs/THREAT-MODEL.md) T4, `infra/cloudformation/network.yaml`) |
 | "What's your incident response / key management?" | [`docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md`](docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md) |
 | "What's reference vs. what we must finish?" | [`docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md`](docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md) |
 | "How do we report a vulnerability?" | [`SECURITY.md`](SECURITY.md) |
@@ -356,7 +360,7 @@ The deck system is built around the buyer in the room — lead with the one sent
 
 - **CIO** — *"One governed control plane carries all nine workloads; this compresses an SI-led build instead of adding ungoverned shadow AI."* The platform is the asset; the agents are interchangeable, regulated workloads on top of it. Open with `Executive-Overview`, land on the maturity ladder and land-and-expand path.
 - **CSO / CISO** — *"The controls are enforced in the gateway, outside the model — a prompt cannot disable deny-by-default, the HITL gate, PHI masking, or the audit trail."* Use the `CIO-Adoption-Review` "Why a CISO can say yes" slide and the red-team demo; the bright line (causality, reportability, what's submitted, what reaches an HCP) is never decided by the agent.
-- **Director of Architecture** — *"The AWS reference is real and deployable — CloudFormation dual-gateway, in-VPC Bedrock + Guardrails, Step Functions `waitForTaskToken` HITL — and the gaps are scoped honestly."* Drive the per-agent **architecture & traffic-flow** slide, `docs/SUITE-ARCHITECTURE.md`, `docs/WELL-ARCHITECTED-REVIEW.md`, and the shared-responsibility matrix, then a `docs/DEPLOY-QUICKSTART.md` walkthrough.
+- **Director of Architecture** — *"The AWS reference is real and deployable — CloudFormation dual-gateway, private-connectivity Bedrock + Guardrails, Step Functions `waitForTaskToken` HITL — and the gaps are scoped honestly."* Drive the per-agent **architecture & traffic-flow** slide, `docs/SUITE-ARCHITECTURE.md`, `docs/WELL-ARCHITECTED-REVIEW.md`, and the shared-responsibility matrix, then a `docs/DEPLOY-QUICKSTART.md` walkthrough.
 
 For the full run of show, see **`gtm/DEMO-STORYBOARD.md`**.
 

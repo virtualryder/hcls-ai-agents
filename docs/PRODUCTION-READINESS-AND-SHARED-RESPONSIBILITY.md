@@ -12,7 +12,7 @@ Production-readiness is the engagement.
 ## What's reference-implemented (in this repo)
 - Deny-by-default authorization, least-privilege intersection, **consequential commits withheld from agents**.
 - Bound human-approval tokens (single-use, separation-of-duties, args-bound); `STRICT_APPROVAL` for prod.
-- PHI masking before model/audit; in-VPC Bedrock + Guardrails; grounding verification; prompt hash-pinning.
+- PHI masking before model/audit; private-connectivity Bedrock + Guardrails; grounding verification; prompt hash-pinning.
 - Append-only audit + S3 Object Lock (WORM); scoped short-lived tokens; KMS CMK per data class.
 - CloudFormation (network, edge, security, data, connectors, dual gateway, agent) + per-agent SAM golden paths + Terraform.
 - 503 automated tests (incl. governance + red-team + the withholding test), run in one command via `make test`.

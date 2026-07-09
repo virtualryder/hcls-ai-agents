@@ -10,7 +10,7 @@ lives in [`_shared/`](./_shared/); the headline IaC is CloudFormation in
 1. **Container lift** (all 9) — containerize the agent's compiled LangGraph and run
    it on **Amazon Bedrock AgentCore Runtime** (or ECS Fargate), implementing the
    AgentCore container contract (`/invocations`, `/ping`, port 8080, ARM64).
-   Inference runs in-account via **Bedrock + Guardrails**. Fastest; code unchanged.
+   Inference is served by **Bedrock + Guardrails**, reached over **AWS PrivateLink** (regional service, not in-VPC hosting). Fastest; code unchanged.
 2. **Native rebuild** — deterministic core in Lambdas + **Strands Agents SDK**
    drafting on Bedrock + **Step Functions** orchestration with a `waitForTaskToken`
    HITL gate. Highest fidelity to the managed, serverless target.

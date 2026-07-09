@@ -247,7 +247,7 @@ The platform's subprocessors are: AWS (Bedrock, DynamoDB, S3, KMS, Cognito, Clou
 **EU AI Act (deployer obligations)**
 For EU-based customers, the CPO/DPO should be involved in the EU AI Act deployer assessment under Article 16. The platform's documentation (context of use per agent, technical controls, human oversight mechanism, audit logs) provides the technical input for that assessment.
 
-**Key message**: "PHI never leaves your AWS account. The platform processes pseudonymized data in the LLM layer. Humans make every consequential decision — the platform does not meet the GDPR Article 22 automated-decision-making threshold for the functions it supports."
+**Key message**: "PHI stays within your AWS account, and Bedrock is reached only over AWS PrivateLink (no egress to external AI APIs). The platform processes pseudonymized data in the LLM layer. Humans make every consequential decision — the platform does not meet the GDPR Article 22 automated-decision-making threshold for the functions it supports."
 
 ---
 

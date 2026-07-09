@@ -5,7 +5,7 @@ Plain answers to the questions customers, AWS account teams, and SI architects a
 ## What is this, exactly?
 A governed, AWS-native **accelerator** — not a certified product. It is nine reference AI
 agents for life-sciences workflows that share one governed control plane (MCP authorization
-gateway, in-VPC Bedrock + Guardrails, PHI masking, grounding verification, framework-enforced
+gateway, private-connectivity Bedrock + Guardrails, PHI masking, grounding verification, framework-enforced
 human-in-the-loop, and a 21 CFR Part 11 append-only audit trail). It gives an SI engagement a
 compliant, auditable starting point.
 

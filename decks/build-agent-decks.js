@@ -331,7 +331,7 @@ const AGENTS = [
       { t: "S3 Object Lock", s: "WORM submissions", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 writer sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT — no credentials in AWS)   3 authenticated session to authoring console   4 RIM/DMS + guidance read over private connectivity   5 demand scales the agent workers   6 model calls stay in-VPC via Bedrock + Guardrails endpoint   7 every draft, source, and e-signature persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
+    legend: "1 writer sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT — no credentials in AWS)   3 authenticated session to authoring console   4 RIM/DMS + guidance read over private connectivity   5 demand scales the agent workers   6 model calls reach Bedrock + Guardrails only over the private VPC endpoint (PrivateLink)   7 every draft, source, and e-signature persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
   },
   proofStats: [
     { big: "~55%", label: "first-draft CSR hours cut, 50% fewer errors (Merck)", tag: "[vendor — Merck]" },
@@ -406,7 +406,7 @@ const AGENTS = [
       { t: "S3 Object Lock", s: "WORM case records", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 safety-ops sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to case console   4 safety DB + dictionary reads over private connectivity   5 case volume scales the agent workers   6 model calls stay in-VPC via Bedrock + Guardrails (PHI masked first)   7 every triage/coding/causality decision persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
+    legend: "1 safety-ops sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to case console   4 safety DB + dictionary reads over private connectivity   5 case volume scales the agent workers   6 model calls reach Bedrock + Guardrails only over the private VPC endpoint (PrivateLink) (PHI masked first)   7 every triage/coding/causality decision persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
   },
   proofStats: [
     { big: "40–70%", label: "manual data-entry time cut (Pfizer pilot)", tag: "[gov/peer-reviewed — Schmider]" },
@@ -481,7 +481,7 @@ const AGENTS = [
       { t: "S3 Object Lock", s: "WORM TMF records", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 user sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to trial-ops console   4 eTMF/EDC/CTMS reads over private connectivity   5 EventBridge schedules continuous completeness checks   6 model calls stay in-VPC via Bedrock + Guardrails   7 every gap, query, and disposition persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
+    legend: "1 user sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to trial-ops console   4 eTMF/EDC/CTMS reads over private connectivity   5 EventBridge schedules continuous completeness checks   6 model calls reach Bedrock + Guardrails only over the private VPC endpoint (PrivateLink)   7 every gap, query, and disposition persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
   },
   proofStats: [
     { big: "~$800K/day", label: "delay cost the agent works to compress", tag: "[gov/peer-reviewed — Tufts]" },
@@ -556,7 +556,7 @@ const AGENTS = [
       { t: "S3 Object Lock", s: "WORM rationale", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 user sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to feasibility console   4 CTMS + de-identified RWD reads over private connectivity   5 demand scales the agent workers   6 model calls stay in-VPC via Bedrock + Guardrails   7 ranking rationale + data lineage persisted to append-only audit   8 connectors reachable only through the governed MCP gateway (de-identification enforced)",
+    legend: "1 user sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to feasibility console   4 CTMS + de-identified RWD reads over private connectivity   5 demand scales the agent workers   6 model calls reach Bedrock + Guardrails only over the private VPC endpoint (PrivateLink)   7 ranking rationale + data lineage persisted to append-only audit   8 connectors reachable only through the governed MCP gateway (de-identification enforced)",
   },
   proofStats: [
     { big: "~$24M", label: "modeled recovery per launch from a 30-day pull-in", tag: "[modeled]" },
@@ -631,7 +631,7 @@ const AGENTS = [
       { t: "S3 Object Lock", s: "WORM quality records", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 user sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to quality console   4 QMS + complaint-DB reads over private connectivity   5 demand scales the agent workers   6 model calls stay in-VPC via Bedrock + Guardrails   7 every classification, RCA, and closure persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
+    legend: "1 user sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to quality console   4 QMS + complaint-DB reads over private connectivity   5 demand scales the agent workers   6 model calls reach Bedrock + Guardrails only over the private VPC endpoint (PrivateLink)   7 every classification, RCA, and closure persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
   },
   proofStats: [
     { big: "consistency", label: "structured RCA vs. variable manual root-cause", tag: "[design property]" },
@@ -706,7 +706,7 @@ const AGENTS = [
       { t: "S3 Object Lock", s: "WORM drafts", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 user sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to protocol console   4 guidance + historical/RWD reads over private connectivity   5 demand scales the agent workers   6 model calls stay in-VPC via Bedrock + Guardrails   7 every draft and source persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
+    legend: "1 user sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to protocol console   4 guidance + historical/RWD reads over private connectivity   5 demand scales the agent workers   6 model calls reach Bedrock + Guardrails only over the private VPC endpoint (PrivateLink)   7 every draft and source persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
   },
   proofStats: [
     { big: "~45%", label: "of substantial amendments are avoidable — the target", tag: "[industry-research — Tufts]" },
@@ -781,7 +781,7 @@ const AGENTS = [
       { t: "S3 Object Lock", s: "WORM study records", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 analyst sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to analysis console   4 de-identified RWD reads over private connectivity   5 demand scales the agent workers   6 model calls stay in-VPC via Bedrock + Guardrails   7 full data lineage + decisions persisted to append-only audit   8 connectors reachable only through the governed MCP gateway (de-identification enforced)",
+    legend: "1 analyst sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to analysis console   4 de-identified RWD reads over private connectivity   5 demand scales the agent workers   6 model calls reach Bedrock + Guardrails only over the private VPC endpoint (PrivateLink)   7 full data lineage + decisions persisted to append-only audit   8 connectors reachable only through the governed MCP gateway (de-identification enforced)",
   },
   proofStats: [
     { big: "~45%→90%", label: "analyst time shifted from prep toward analysis", tag: "[design target vs. Anaconda baseline]" },
@@ -856,7 +856,7 @@ const AGENTS = [
       { t: "S3 Object Lock", s: "WORM responses", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 MSL sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to MSL console   4 CRM/DMS + label reads over private connectivity   5 demand scales the agent workers   6 model calls stay in-VPC via Bedrock + Guardrails (off-label filters mandatory)   7 every response and MLR approval persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
+    legend: "1 MSL sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to MSL console   4 CRM/DMS + label reads over private connectivity   5 demand scales the agent workers   6 model calls reach Bedrock + Guardrails only over the private VPC endpoint (PrivateLink) (off-label filters mandatory)   7 every response and MLR approval persisted to append-only audit   8 connectors reachable only through the governed MCP gateway",
   },
   proofStats: [
     { big: "50–70%", label: "potential MLR time-to-deliver reduction", tag: "[industry-research — McKinsey]" },
@@ -941,7 +941,7 @@ const EXPANSION = [
       { t: "S3 Object Lock", s: "WORM disposition", color: C_STORAGE },
       { t: "Secrets Manager", s: "scoped tokens", color: C_STORAGE },
     ],
-    legend: "1 QA sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to review console   4 MES/EBR + LIMS reads over private connectivity   5 EventBridge triggers review on batch completion   6 model calls stay in-VPC via Bedrock + Guardrails   7 every flag, exception, and release decision persisted to append-only audit (21 CFR Part 11)   8 connectors reachable only through the governed MCP gateway",
+    legend: "1 QA sign-in   2 SAML federation (MFA at IdP; Cognito issues JWT)   3 authenticated session to review console   4 MES/EBR + LIMS reads over private connectivity   5 EventBridge triggers review on batch completion   6 model calls reach Bedrock + Guardrails only over the private VPC endpoint (PrivateLink)   7 every flag, exception, and release decision persisted to append-only audit (21 CFR Part 11)   8 connectors reachable only through the governed MCP gateway",
   },
   proofStats: [
     { big: "~80%", label: "batch-release time cut with review by exception", tag: "[sector-press/estimate]" },

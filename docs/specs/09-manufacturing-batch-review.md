@@ -31,7 +31,7 @@ release/reject decision and signs it** — the agent never releases a batch.
 - **Systems of record (new connectors):** MES / electronic batch records (e.g. Körber, Tulip,
   Rockwell, AVEVA), LIMS (QC results). Add the connector kind(s) to `infra/cloudformation/connectors.yaml`.
 - **Runtime:** event-driven worker (EventBridge) triggered on batch completion; review/exception agent.
-- **Model layer:** in-VPC Bedrock + Guardrails; anomaly/limit checks are deterministic where possible.
+- **Model layer:** private-connectivity Bedrock + Guardrails; anomaly/limit checks are deterministic where possible.
 - **Data tier:** Aurora/DynamoDB state; DynamoDB append-only audit; S3 Object Lock (WORM) for the
   signed disposition; Secrets Manager scoped tokens.
 - **Governance:** grounding = every flagged exception traces to a record value; HITL = QA release

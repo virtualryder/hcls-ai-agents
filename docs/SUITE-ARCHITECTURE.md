@@ -92,7 +92,7 @@ The retrieval substrate that grounds agent outputs:
 
 ## Layer 5 — Models and Deterministic Services
 
-- **Amazon Bedrock (Claude models)**: primary inference endpoint; runs in-account; Bedrock API never carries PHI outside the customer's VPC after PHI masking
+- **Amazon Bedrock (Claude models)**: primary inference; a regional AWS service the customer VPC reaches only over AWS PrivateLink (not in-VPC hosting); PHI is masked before any Bedrock call, so requests carry masked content and there is no egress to external AI APIs
 - **Bedrock Guardrails**: configured at the stack level (`infra/cloudformation/security.yaml`); enforces PHI denial policies, off-label and promotional content blocking, and topic filters appropriate to the deployment context; runs on every LLM call automatically
 - **Deterministic services**: not everything needs an LLM. MedDRA coding, grounding verification, structural completeness checks, and prohibited-language detection are implemented as deterministic Python functions — they are fast, testable, and produce consistent outputs that can be included in validation evidence
 

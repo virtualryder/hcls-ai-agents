@@ -8,8 +8,8 @@ Two paths, both documented suite-wide. Pick based on how managed you want it.
 ## Path A — Container lift onto Bedrock AgentCore Runtime (fastest)
 
 Keep the LangGraph agent; containerize it and run on **Amazon Bedrock AgentCore
-Runtime** (ARM64, `/invocations` + `/ping`, port 8080). Inference runs in-account
-via **Amazon Bedrock + Guardrails** — critical for ICSR source records that contain
+Runtime** (ARM64, `/invocations` + `/ping`, port 8080). Inference is served by **Amazon Bedrock + Guardrails**, reached
+from the account VPC over **AWS PrivateLink** (a regional service reached privately, not in-VPC hosting) — critical for ICSR source records that contain
 patient PII; no content leaves the AWS account.
 
 1. Build the ARM64 image from `aws-native-reference/_shared/runtime` (wraps the

@@ -30,7 +30,7 @@ agent never decides what to pursue. Provenance-by-design is the answer to the re
 ## AWS architecture (reuses the shared control plane)
 - **Systems of record (new connectors):** ELN (e.g. Benchling), internal data lake; external
   literature (PubMed/Europe PMC), omics, and patent sources. Add connector kinds to `connectors.yaml`.
-- **Model layer:** in-VPC Bedrock + Guardrails; Bedrock Knowledge Base over the approved corpus (RAG).
+- **Model layer:** private-connectivity Bedrock + Guardrails; Bedrock Knowledge Base over the approved corpus (RAG).
 - **Data tier:** Aurora/Redshift for evidence + ranking state; DynamoDB append-only audit; S3 Object
   Lock for ranked-target rationale; Secrets Manager scoped tokens.
 - **Governance:** grounding = every claim links to a source (reproducibility by design); HITL =

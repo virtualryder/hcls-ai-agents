@@ -92,5 +92,9 @@ clean-handbooks:
 	rm -f HCLS-Deployment-Handbook.pdf $(AGENTS)/*.pdf \
 	      $(CONSOLE)/.figures.stamp $(AGENTS)/.agents.stamp
 
-eval-agent02:  ## Scored eval for Agent 02 (Pharmacovigilance) — gates on regulatory thresholds
+eval-agent02:  ## Scored eval for Agent 02 (Pharmacovigilance) - gates on regulatory thresholds
 	PYTHONPATH=.:platform_core python -m governance.evals.score_agent02
+
+auth-demo:  ## End-to-end auth walkthrough: IdP federation -> token exchange -> intersection -> SoD -> audit
+	PYTHONPATH=platform_core:. python demo/demo_auth.py
+	PYTHONPATH=platform_core:. python -m pytest governance/tests/test_auth_walkthrough.py -q
