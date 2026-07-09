@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!--
+  Self-service demo walkthrough — Agent 02 (Pharmacovigilance), HCLS hero.
+  Single file, no dependencies, no network. Shows the REAL captured output of the
+  governed real-connector demo (openFDA/FAERS) + the scored eval, so a prospect
+  sees exactly what happens without a live environment. Every result below is the
+  actual output of `python demo/demo_openfda.py` and `make eval-agent02`.
+  Reference accelerator — not an AWS service or certification.
+-->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pharmacovigilance Agent — governed real-connector demo</title>
+<style>
+  :root{--ink:#232F3E;--panel:#1b2530;--line:#33414f;--bg:#141c25;--orange:#FF9900;
+        --teal:#01A88D;--red:#DD344C;--purple:#8C4FFF;--grey:#B0B8C0;--white:#eef2f5;}
+  *{box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--white)}
+  header{background:var(--ink);border-bottom:2px solid var(--orange);padding:16px 22px}
+  header h1{margin:0;font-size:19px} header .sub{color:var(--grey);font-size:13px;margin-top:3px}
+  .badge{display:inline-block;background:var(--orange);color:var(--ink);font-weight:700;font-size:11px;padding:2px 8px;border-radius:10px;margin-right:8px}
+  .disc{background:#3a2a10;color:#ffd48a;font-size:11.5px;padding:7px 22px;border-bottom:1px solid var(--line)}
+  .wrap{max-width:900px;margin:0 auto;padding:18px}
+  .lead{color:var(--grey);font-size:14px;line-height:1.5;margin:8px 0 18px}
+  .beat{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;padding:14px 16px;margin:12px 0}
+  .beat.deny{border-left-color:var(--red)} .beat.gate{border-left-color:var(--orange)}
+  .beat h3{margin:0 0 4px;font-size:14px} .beat .why{color:var(--grey);font-size:12.5px;margin:0 0 8px}
+  pre{background:#0d141b;border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow:auto;
+      font-family:Consolas,monospace;font-size:12px;color:#cdd6df;white-space:pre-wrap;margin:0}
+  .tag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:9px}
+  .allow{background:rgba(1,168,141,.16);color:var(--teal)} .deny{background:rgba(221,52,76,.16);color:var(--red)}
+  .gate{background:rgba(255,153,0,.16);color:var(--orange)}
+  h2{font-size:15px;border-bottom:1px solid var(--line);padding-bottom:6px;margin-top:26px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+  th,td{text-align:left;padding:6px;border-bottom:1px solid var(--line)} th{color:var(--grey);font-size:11px}
+  .pass{color:var(--teal);font-weight:700}
+  .run{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:10px}
+  code{background:#0d141b;padding:1px 6px;border-radius:4px;font-family:Consolas,monospace;font-size:12px}
+  a{color:var(--orange)} .foot{color:var(--grey);font-size:11px;padding:14px 22px}
+</style></head><body>
+<header>
+  <div><span class="badge">HCLS</span><span class="badge" style="background:var(--teal);color:#04231d">HERO</span>
+  <span style="font-size:19px;font-weight:700">Pharmacovigilance ICSR Agent — governed real-connector demo</span></div>
+  <div class="sub">The agent reads a <b>real</b> adverse-event case through the governed gateway, masks fail-closed, and cannot act on its own. Every result below is actual captured output.</div>
+</header>
+<div class="disc">Reference accelerator — not an AWS service, not AWS-supported software, not a compliance certification. openFDA is public, de-identified data (no BAA). The PHI-under-BAA variant is AWS HealthLake FHIR.</div>
+
+<div class="wrap">
+  <p class="lead">This is the answer to the two questions every reviewer asks: <b>does the governed pattern work against a real system of record?</b> and <b>how do you know the output is good?</b> The four beats below are the live demo; the scoreboard is the CI-gated quality benchmark. Nothing here is mocked.</p>
+
+  <h2>The demo — 4 governed beats (real captured output)</h2>
+
+  <div class="beat"><h3><span class="tag allow">ALLOW</span> &nbsp;1 · Governed read of a REAL FAERS case</h3>
+    <p class="why">A registered read tool, a valid processor identity → allowed, scoped token, audited. The data is real openFDA/FAERS.</p>
+<pre>decision=ALLOW  audit_id=4c0fee60  token_scope=['safety.get_case']
+REAL case 18424955 — serious=True ['Hospitalization']
+  suspect drug(s): ['METFORMIN']   reactions: ['Lactic acidosis', 'Acute kidney injury']
+  demographics   : {'age': '67 year', 'sex': 'Female'}   country: US</pre></div>
+
+  <div class="beat"><h3>2 · Fail-closed PHI masking on ingested text</h3>
+    <p class="why">The masker runs even on de-identified data — the control is exercised, not assumed. An injected SSN/email is redacted.</p>
+<pre>masked narrative: A female patient, age 67 year, reported from US experienced a
+SERIOUS adverse event (Hospitalization) following administration of METFORMIN...
+PHI-leak check  : PASS (identifiers redacted, fail-closed)</pre></div>
+
+  <div class="beat"><h3><span class="tag allow">ALLOW</span> &nbsp;3 · Governed duplicate search (real data)</h3>
+<pre>decision=ALLOW  audit_id=f4fff6db  candidates=[]</pre></div>
+
+  <div class="beat gate"><h3><span class="tag gate">PENDING_APPROVAL</span> <span class="tag deny">DENY</span> &nbsp;4 · The human authority boundary — the trust anchor</h3>
+    <p class="why">The money shot. The agent can draft, but a consequential write needs a human approval, and the irreversible ICSR submission is withheld from the agent entirely.</p>
+<pre>safety.write_case_draft (no approval) -> PENDING_APPROVAL (requires_approval=True)
+safety.submit_report                  -> DENY  (PV_PROCESSOR not entitled to commit 'safety.submit_report')</pre></div>
+
+  <p class="lead">Every call above was deny-by-default authorized, minted a short-lived scoped token, and wrote an append-only masked audit record. The connector can reach <b>api.fda.gov and nothing else</b> — proven in-cloud behind an AWS Network Firewall FQDN allow-list (a non-allowed host is dropped). See <a href="../../evidence/CLEAN-ACCOUNT-ACCEPTANCE.md">the evidence pack</a>.</p>
+
+  <h2>How do you know the output is good? — scored safety benchmark</h2>
+  <p class="lead"><code>make eval-agent02</code> runs a labeled benchmark against regulatory thresholds on every push. Latest run:</p>
+  <table>
+    <tr><th>Metric</th><th>Value</th><th>Threshold</th><th>Status</th></tr>
+    <tr><td>Seriousness recall <span style="color:var(--grey)">(missing a serious case is the harm)</span></td><td>1.0</td><td>≥ 0.95</td><td class="pass">PASS</td></tr>
+    <tr><td>Seriousness precision</td><td>1.0</td><td>≥ 0.80</td><td class="pass">PASS</td></tr>
+    <tr><td>Entity F1 (drug / reaction / outcome)</td><td>1.0</td><td>≥ 0.85</td><td class="pass">PASS</td></tr>
+    <tr><td>Duplicate detection accuracy</td><td>1.0</td><td>≥ 0.90</td><td class="pass">PASS</td></tr>
+    <tr><td>Narrative grounding</td><td>1.0</td><td>≥ 0.90</td><td class="pass">PASS</td></tr>
+    <tr><td><b>PHI-leak rate (hard gate)</b></td><td><b>0.0</b></td><td>= 0</td><td class="pass">PASS</td></tr>
+    <tr><td>E2B completeness</td><td>1.0</td><td>≥ 0.95</td><td class="pass">PASS</td></tr>
+  </table>
+  <p class="lead" style="margin-top:8px">The seriousness metric scores the agent's real ICH E2A classifier (not the raw flag); grounding and PHI-leak have negative-control tests proving the gate catches bad data. Full report: <a href="../../governance/evals/eval-report.md">eval-report.md</a>.</p>
+
+  <h2>Run it yourself</h2>
+  <div class="run">
+    <p style="margin:0 0 8px;color:var(--grey);font-size:13px">Offline (no network, no API key — deterministic):</p>
+<pre>cd 02-pharmacovigilance-agent
+PYTHONPATH=.:../platform_core:.. OPENFDA_OFFLINE=1 python demo/demo_openfda.py</pre>
+    <p style="margin:12px 0 8px;color:var(--grey);font-size:13px">Live against the real openFDA API:</p>
+<pre>PYTHONPATH=.:../platform_core:.. python demo/demo_openfda.py     # hits api.fda.gov
+make eval-agent02                                              # the scored benchmark</pre>
+  </div>
+  <p class="lead" style="margin-top:14px">Connector: <a href="../../platform_core/hcls_agent_platform/connectors/openfda.py">openfda.py</a> ·
+  Locked egress (Network Firewall): <a href="../../infra/golden-path-02-pharmacovigilance/EGRESS-OPENFDA.md">EGRESS-OPENFDA.md</a> ·
+  Governed round-trip tests: <a href="../tests/test_openfda_connector.py">test_openfda_connector.py</a></p>
+</div>
+<div class="foot">Agent 02 (Pharmacovigilance) · governed real-connector + scored eval · reference accelerator, not an AWS service. Built on AWS; not affiliated with or endorsed by Amazon Web Services.</div>
+</body></html>

@@ -114,6 +114,28 @@ EXTRACT_MODE=demo pytest tests/ -q
 
 Three sample AE cases are included: a non-serious recovered event, a serious hospitalization, and a fatal event with a 7-day expedited clock.
 
+### See it in 60 seconds — governed read of a *real* safety record
+
+This is the hero demo. The agent reads a **real** FDA adverse-event case through the deny-by-default
+gateway, masks fail-closed, and is **denied** the authority to submit — proving the governed pattern
+works against a real system of record, not a mock.
+
+```bash
+# deterministic, no network, no API key
+PYTHONPATH=.:../platform_core:.. OPENFDA_OFFLINE=1 python demo/demo_openfda.py
+```
+
+Prefer not to run anything? The captured output and a shareable visual walkthrough are checked in:
+
+- [`demo/DEMO-TRANSCRIPT.md`](demo/DEMO-TRANSCRIPT.md) — the actual recorded run, beat-by-beat, with what each proves to a CIO/CISO/auditor.
+- [`demo/demo-walkthrough.html`](demo/demo-walkthrough.html) — a single-file, self-service page (AWS palette) showing the real results, the human-authority boundary, and the CI-gated safety scoreboard (PHI-leak rate = 0).
+
+Connector: [`../platform_core/hcls_agent_platform/connectors/openfda.py`](../platform_core/hcls_agent_platform/connectors/openfda.py) ·
+locked egress: [`../infra/golden-path-02-pharmacovigilance/EGRESS-OPENFDA.md`](../infra/golden-path-02-pharmacovigilance/EGRESS-OPENFDA.md) ·
+scored benchmark: `make eval-agent02` → [`../governance/evals/eval-report.md`](../governance/evals/eval-report.md).
+
+openFDA is public, de-identified data (**no BAA**); the PHI-under-BAA variant is AWS HealthLake FHIR.
+
 ## Live path (Bedrock + real connector)
 
 This agent has a customer-ready live path: real Amazon Bedrock inference and a real HTTP safety-system connector, exercised end-to-end against a bundled local reference service. Swap one URL to point at the customer's Argus / Veeva Safety gateway.
