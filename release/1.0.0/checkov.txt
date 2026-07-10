@@ -1,0 +1,1 @@
+bash: line 1: checkov: command not found

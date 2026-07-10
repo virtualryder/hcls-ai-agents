@@ -49,4 +49,4 @@ Independent review (scored 58/100) flagged gaps between the control narrative an
 
 ## [0.9.0] — prior
 - Nine agents built to flagship depth (incl. 09 Manufacturing Batch-Review + a live path on 02), AWS-native
-  rebuilds, cited AWS-style deck system + CIO board deck, ROI calculator, Dave's Cheat Sheet. See `SUITE-STATUS.md`.
+  rebuilds, cited professional deck system + CIO board deck, ROI calculator, Dave's Cheat Sheet. See `SUITE-STATUS.md`.

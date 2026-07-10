@@ -100,5 +100,5 @@ auth-demo:  ## End-to-end auth walkthrough: IdP federation -> token exchange -> 
 	PYTHONPATH=platform_core:. python -m pytest governance/tests/test_auth_walkthrough.py -q
 
 neg-demo:  ## The 10 things the platform REFUSES (Agent 02 negative demo) + CI gate
-	PYTHONPATH=platform_core:. python 02-pharmacovigilance-agent/demo/negative_demo.py
+	PYTHONPATH=platform_core:. python demo/negative_demo.py
 	PYTHONPATH=platform_core:. python -m pytest governance/tests/test_negative_demo.py platform_core/tests/test_budget.py -q

@@ -5,6 +5,12 @@
 > 📊 **Honest status, one source of truth:** per-agent maturity, clean-account evidence, connector tiers, and the test count live in machine-readable [`MATURITY.yaml`](MATURITY.yaml); the four connector-maturity terms are defined in [`docs/CONNECTOR-MATURITY.md`](docs/CONNECTOR-MATURITY.md). Prose defers to `MATURITY.yaml`; a portfolio drift-checker (`tools/check_maturity.py`) keeps them aligned.
 
 > 🔗 **Conforms to the Aegis Governance Pattern (AGP) v1.0.** The 8 required controls (identity, deny-by-default gateway, least-privilege intersection, bound SoD approval, fail-closed masking, append-only+WORM audit, token budgets, model gateway+grounding) are mapped to their implementing module and proving test in [`AGP-CONFORMANCE.md`](AGP-CONFORMANCE.md).
+
+> ™ **Brand & trademark:** collateral follows two tracks — an **internal-AWS** track (approved templates only) and a **customer-safe public** track (neutral branding, plain-text "Built on AWS", no AWS logo). Rules in [`BRAND-AND-TRADEMARK.md`](BRAND-AND-TRADEMARK.md). Nothing here implies AWS sponsorship or endorsement.
+
+> 🧭 **Part of the governed-agent portfolio.** This pack conforms to the **Aegis Governance Pattern (AGP v1.0)**; **Aegis** (`aegis-ai-governance-platform-aws`) is the hub — see its `PORTFOLIO-START-HERE.md` (how the packs flow together) and `DEPLOY-EVERYTHING.md` (deploy everything end-to-end). Hero reviewer pack: [`02-pharmacovigilance-agent/ASSURANCE-PACKET.md`](02-pharmacovigilance-agent/ASSURANCE-PACKET.md) · [`PILOT-SOW`](02-pharmacovigilance-agent/PILOT-SOW.md).
+
+> 📚 **Governance & readiness docs (this repo):** [`NOT-CLAIMS`](NOT-CLAIMS.md) · [`MATURITY.yaml`](MATURITY.yaml) · [`Connector maturity`](docs/CONNECTOR-MATURITY.md) · [`AGP conformance`](AGP-CONFORMANCE.md) · [`Operating model`](OPERATING-MODEL.md) · [`Release packet`](RELEASE-PACKET.md) · [`AWS run-cost`](AWS-RUN-COST.md) · [`Brand & trademark`](BRAND-AND-TRADEMARK.md)
 ### Governed AI Agents for Life Sciences — Built on AWS
 
 [![CI](https://github.com/virtualryder/hcls-ai-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/virtualryder/hcls-ai-agents/actions/workflows/ci.yml)
@@ -345,7 +351,7 @@ Ready-to-use GTM material lives at the repository root:
 
 | Artifact | Use |
 |---|---|
-| `decks/HCLS-01..10-*.pptx` | **Per-agent AWS-style decks** (9 built agents + 1 roadmap; 6-slide: issue → cost of doing nothing → governed pipeline → AWS architecture & traffic flow → proof/deploy). Every stat cited and source-class-tagged; speaker notes on every slide. |
+| `decks/HCLS-01..10-*.pptx` | **Per-agent professional decks** (9 built agents + 1 roadmap; 6-slide: issue → cost of doing nothing → governed pipeline → AWS architecture & traffic flow → proof/deploy). Every stat cited and source-class-tagged; speaker notes on every slide. |
 | `decks/HCLS-Agentic-AI-Suite-Executive-Overview.pptx` | ~11-slide suite overview: thesis, shared architecture, 8-agent portfolio, governance spine, maturity ladder, land-and-expand, cost-of-inaction. |
 | `decks/HCLS-CIO-Adoption-Review.pptx` | **Board-ready CIO / CISO / Director of Architecture deck** — honest-broker verdict, six gateway controls, shortfalls, shared-responsibility matrix, phased path, go/no-go. |
 | `HCLS-Agentic-AI-Suite-Executive-Overview.pptx` | Original 16-slide executive deck (root) for sales, SAs, and delivery |
@@ -407,7 +413,7 @@ hcls-ai-agents/
 ├── 08-medical-affairs-msl-agent/       # Medical Affairs / MSL Copilot
 │
 ├── decks/                              # GTM decks + generators (8 agent + overview + CIO/CISO board deck)
-│   ├── build-agent-decks.js           # pptxgenjs: 8 AWS-style agent decks + executive overview
+│   ├── build-agent-decks.js           # pptxgenjs: 8 professional agent decks + executive overview
 │   └── build-cio-deck.js              # pptxgenjs: CIO / CISO / Architecture adoption-review deck
 │
 ├── gtm/                                # Citation spine + demo + ROI

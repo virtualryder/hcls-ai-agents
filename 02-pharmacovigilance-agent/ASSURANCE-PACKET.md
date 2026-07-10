@@ -85,7 +85,7 @@ locked behind an AWS Network Firewall FQDN allow-list (`api.fda.gov` only):
 
 ## 6. Negative-test results (what the platform refuses)
 
-`make neg-demo` → [`demo/negative_demo.py`](demo/../../demo/negative_demo.py), CI-gated by
+`make neg-demo` → [`../demo/negative_demo.py`](../demo/negative_demo.py), CI-gated by
 [`governance/tests/test_negative_demo.py`](../governance/tests/test_negative_demo.py). Latest: **10/10 enforced**.
 
 | # | Attempt | Result |

@@ -1,0 +1,3 @@
+W3011 Both 'UpdateReplacePolicy' and 'DeletionPolicy' are needed to protect resource from deletion
+infra\cloudformation\data.yaml:40:3
+

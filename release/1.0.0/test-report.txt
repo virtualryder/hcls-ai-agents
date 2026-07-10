@@ -1,0 +1,22 @@
+  platform_core/tests                            57 passed in 0.11s ==============================
+  governance/tests                               23 passed in 0.09s
+  01-regulatory-writing-agent/tests              5 passed
+  02-pharmacovigilance-agent/tests               54 passed
+  03-clinical-trial-ops-agent/tests              36 passed
+  04-site-patient-matching-agent/tests           37 passed
+  05-quality-capa-agent/tests                    34 passed
+  06-protocol-design-agent/tests                 41 passed
+  07-rwe-heor-agent/tests                        33 passed
+  08-medical-affairs-msl-agent/tests             33 passed
+  09-manufacturing-batch-review-agent/tests      14 passed
+  aws-native-reference/01-regulatory-writing/tests 4 passed in 0.05s
+  aws-native-reference/02-pharmacovigilance/tests 55 passed in 0.11s
+  aws-native-reference/03-clinical-trial-ops/tests 32 passed in 0.07s
+  aws-native-reference/04-site-patient-matching/tests 30 passed in 0.07s
+  aws-native-reference/05-quality-capa/tests     13 passed in 0.06s
+  aws-native-reference/06-protocol-design/tests  11 passed in 0.05s
+  aws-native-reference/07-rwe-heor/tests         9 passed in 0.05s
+  aws-native-reference/08-medical-affairs-msl/tests 9 passed in 0.05s
+  aws-native-reference/09-manufacturing-batch-review/tests 22 passed in 0.06s
+------------------------------------------------------------
+✅ ALL GREEN — 552 tests passed across 20 suites (no API key, no AWS).

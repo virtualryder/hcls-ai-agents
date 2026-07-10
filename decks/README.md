@@ -4,7 +4,7 @@ Twelve PowerPoint decks (each with a matching PDF leave-behind) for the **HCLS A
 **built** governed AI agents (incl. 09 Manufacturing Batch-Review) plus **one roadmap agent** (10) for life-sciences
 organizations, a suite executive overview, and a board-level CIO/CISO adoption review. The agent decks and the overview are generated from a single
 `pptxgenjs` generator ([`build-agent-decks.js`](build-agent-decks.js)) so they share one
-AWS-standard layout, palette, and fonts; only the per-agent content object changes. The
+consistent professional layout, palette, and fonts; only the per-agent content object changes. The
 adoption review is built by [`build-cio-deck.js`](build-cio-deck.js).
 
 Audience: **CIO / CISO (CSO) / Director of Architecture / VP Quality / Head of Regulatory.**
@@ -41,7 +41,7 @@ Board-defensible metrics, an explicit cost of doing nothing, and source-class ta
 ## Per-agent deck — 6-slide executive narrative
 
 Every agent deck follows the order **ISSUE → COST OF DOING NOTHING → HOW WE SOLVE IT →
-ARCHITECTURE → PROOF**, replicating the AWS-standard reference layout:
+ARCHITECTURE → PROOF**, using a consistent professional layout:
 
 1. **Title** *(navy)* — agent name; orange subtitle "A Governed Agentic AI Reference
    Architecture for Life Sciences"; footer "HCLS AI Agent Suite · Built on AWS · June 2026".
@@ -90,7 +90,7 @@ navy/teal/amber visual language with `react-icons`.
 
 ## Design system (AWS standard)
 
-- **Palette:** Squid Ink navy `#232F3E` (dark slides, titles); AWS Orange `#FF9900` (accents, big
+- **Palette:** deep navy `#232F3E` (dark slides, titles); amber `#FF9900` (accents, big
   stat numbers, the thin left-edge brand bar on every slide, step numbers); teal/green `#16A085`
   (secondary / positive flow boxes); red `#C0392B` (reserved for the HUMAN-GATE box only); light
   gray `#F2F3F4` content backgrounds; white cards. The architecture diagram uses AWS category
