@@ -10,11 +10,11 @@ positioning: reference-accelerator            # not an AWS service; not certifie
 updated: 2026-07-09
 
 tests:
-  offline_total: 536                          # was mis-stated as 519/503/452 before 2026-07-09
+  offline_total: 576                          # collected-test count; verified by tools/check_maturity.py
   suites: 20
   reproduce: "make test   # scripts/run_all_tests.sh — per-process, no API key, no AWS"
-  last_verified: 2026-07-09
-  note: "Grew from 503 -> 536 with the openFDA live-connector, scored evals, and the auth walkthrough."
+  last_verified: 2026-07-10
+  note: "576 collected across 20 suites (575 pass offline; the openFDA live-connector test skips without RUN_LIVE_OPENFDA=1). Prior stale counts: 452/503/519/536."
 
 clean_account_deploy:
   status: all-golden-paths-validated          # strongest evidence tier in the portfolio

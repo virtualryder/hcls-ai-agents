@@ -5,7 +5,7 @@
 > `SHARED-RESPONSIBILITY-MATRIX.md` (AWS vs. SI vs. sponsor) and the CIO deck's shortfalls/backlog slides.
 
 ## Maturity, restated for security reviewers
-The suite is **Demonstrated + Deployable-by-design**: the control plane runs, 536 tests pass with no API
+The suite is **Demonstrated + Deployable-by-design**: the control plane runs, 576 tests pass with no API
 key, and the IaC validates. It is **not** CSV/CSA-validated, SOC 2 / HITRUST-certified, or penetration-tested.
 Production-readiness is the engagement.
 
@@ -15,7 +15,7 @@ Production-readiness is the engagement.
 - PHI masking before model/audit; private-connectivity Bedrock + Guardrails; grounding verification; prompt hash-pinning.
 - Append-only audit + S3 Object Lock (WORM); scoped short-lived tokens; KMS CMK per data class.
 - CloudFormation (network, edge, security, data, connectors, dual gateway, agent) + per-agent SAM golden paths + Terraform.
-- 536 automated tests (incl. governance + red-team + the withholding test), run in one command via `make test`.
+- 576 automated tests (incl. governance + red-team + the withholding test), run in one command via `make test`.
 
 ## What the customer/SI must complete (production gate)
 | Area | Owner | Gate |

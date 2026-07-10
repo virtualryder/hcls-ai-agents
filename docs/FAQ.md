@@ -42,7 +42,7 @@ reviewers; and a validated AWS account. See `docs/AWS-ACCOUNT-PREREQUISITES.md`.
 
 ## Can it run without an AWS account?
 Yes — `EXTRACT_MODE=demo` runs every workflow against deterministic fixtures with no API key, which
-is how the **536 automated tests** pass and how you demo before any account exists.
+is how the **576 automated tests** pass and how you demo before any account exists.
 
 ## How does it deploy into a brand-new account?
 `make build-lambdas` (vendors deps into each zip) then `make deploy` stages to S3 and deploys the

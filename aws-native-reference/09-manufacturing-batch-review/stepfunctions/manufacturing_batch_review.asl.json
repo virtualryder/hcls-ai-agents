@@ -1,16 +1,21 @@
 {
-  "Comment": "Pharmacovigilance ICSR pipeline — AWS-native rebuild. Step Functions orchestrates deterministic Lambdas; Strands/Bedrock only drafts the narrative; the QA reviewer gate uses waitForTaskToken (framework-enforced HITL). critical exceptions force ESCALATE; clean drafts route to QA review; Finalize records the disposition only after approval.",
+  "Comment": "Pharmacovigilance ICSR pipeline \u2014 AWS-native rebuild. Step Functions orchestrates deterministic Lambdas; Strands/Bedrock only drafts the narrative; the QA reviewer gate uses waitForTaskToken (framework-enforced HITL). critical exceptions force ESCALATE; clean drafts route to QA review; Finalize records the disposition only after approval.",
   "StartAt": "Assemble",
   "States": {
     "Assemble": {
       "Type": "Task",
       "Resource": "${AssembleFunctionArn}",
-      "ResultSelector": { "body.$": "States.StringToJson($.body)" },
+      "ResultSelector": {
+        "body.$": "States.StringToJson($.body)"
+      },
       "ResultPath": "$",
       "Next": "Draft",
       "Retry": [
         {
-          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException"
+          ],
           "IntervalSeconds": 2,
           "MaxAttempts": 3,
           "BackoffRate": 2
@@ -18,7 +23,9 @@
       ],
       "Catch": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "Next": "PipelineFailed",
           "ResultPath": "$.error"
         }
@@ -27,12 +34,17 @@
     "Draft": {
       "Type": "Task",
       "Resource": "${DraftFunctionArn}",
-      "ResultSelector": { "body.$": "States.StringToJson($.body)" },
+      "ResultSelector": {
+        "body.$": "States.StringToJson($.body)"
+      },
       "ResultPath": "$",
       "Next": "Check",
       "Retry": [
         {
-          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException"
+          ],
           "IntervalSeconds": 2,
           "MaxAttempts": 3,
           "BackoffRate": 2
@@ -40,7 +52,9 @@
       ],
       "Catch": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "Next": "PipelineFailed",
           "ResultPath": "$.error"
         }
@@ -49,12 +63,17 @@
     "Check": {
       "Type": "Task",
       "Resource": "${CheckFunctionArn}",
-      "ResultSelector": { "body.$": "States.StringToJson($.body)" },
+      "ResultSelector": {
+        "body.$": "States.StringToJson($.body)"
+      },
       "ResultPath": "$",
       "Next": "RouteChoice",
       "Retry": [
         {
-          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException"
+          ],
           "IntervalSeconds": 2,
           "MaxAttempts": 3,
           "BackoffRate": 2
@@ -62,7 +81,9 @@
       ],
       "Catch": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "Next": "PipelineFailed",
           "ResultPath": "$.error"
         }
@@ -96,16 +117,20 @@
       },
       "ResultPath": "$.review",
       "TimeoutSeconds": 1209600,
-      "HeartbeatSeconds": 3600,
       "Next": "Finalize",
       "Catch": [
         {
-          "ErrorEquals": ["States.HeartbeatTimeout", "States.Timeout"],
+          "ErrorEquals": [
+            "States.HeartbeatTimeout",
+            "States.Timeout"
+          ],
           "Next": "ReviewTimeout",
           "ResultPath": "$.error"
         },
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "Next": "PipelineFailed",
           "ResultPath": "$.error"
         }
@@ -118,12 +143,17 @@
         "body.$": "$.body",
         "review.$": "$.review"
       },
-      "ResultSelector": { "body.$": "States.StringToJson($.body)" },
+      "ResultSelector": {
+        "body.$": "States.StringToJson($.body)"
+      },
       "ResultPath": "$",
       "End": true,
       "Retry": [
         {
-          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException"
+          ],
           "IntervalSeconds": 2,
           "MaxAttempts": 2,
           "BackoffRate": 2
@@ -131,7 +161,9 @@
       ],
       "Catch": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "Next": "PipelineFailed",
           "ResultPath": "$.error"
         }

@@ -20,7 +20,7 @@
 1. `make build-lambdas` then `make deploy` into a sandbox account **(optional — only for the live segment)**, or run everything in `EXTRACT_MODE=demo` locally with no API key.
 2. Open the decks: `HCLS-Agentic-AI-Suite-Executive-Overview.pptx`, `HCLS-02-Pharmacovigilance.pptx`, and `HCLS-CIO-Adoption-Review.pptx`.
 3. Have `docs/SUITE-ARCHITECTURE.md` and `docs/DEPLOY-QUICKSTART.md` open in a second window.
-4. Run the test suite once on screen as a credibility opener: **536 tests, no API key.**
+4. Run the test suite once on screen as a credibility opener: **576 tests, no API key.**
 
 ## Run of show (~25 min)
 

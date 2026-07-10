@@ -1,0 +1,351 @@
+altair==6.2.2
+    # via streamlit
+annotated-types==0.7.0
+    # via pydantic
+anthropic==0.116.0
+    # via langchain-anthropic
+anyio==4.14.1
+    # via
+    #   anthropic
+    #   httpx
+    #   langsmith
+    #   mcp
+    #   sse-starlette
+    #   starlette
+    #   streamlit
+attrs==26.1.0
+    # via
+    #   jsonschema
+    #   referencing
+blinker==1.9.0
+    # via streamlit
+boto3==1.43.45
+    # via
+    #   -r /tmp/hcls-req.in
+    #   strands-agents
+botocore==1.43.45
+    # via
+    #   boto3
+    #   s3transfer
+    #   strands-agents
+brotli==1.2.0
+    # via fonttools
+cachetools==7.1.4
+    # via streamlit
+cairocffi==1.7.1
+    # via cairosvg
+cairosvg==2.9.0
+    # via -r /tmp/hcls-req.in
+certifi==2026.6.17
+    # via
+    #   httpcore
+    #   httpx
+    #   requests
+cffi==2.1.0
+    # via
+    #   cairocffi
+    #   cryptography
+    #   weasyprint
+charset-normalizer==3.4.9
+    # via requests
+click==8.4.2
+    # via
+    #   streamlit
+    #   uvicorn
+cryptography==49.0.0
+    # via pyjwt
+cssselect2==0.9.0
+    # via
+    #   cairosvg
+    #   weasyprint
+defusedxml==0.7.1
+    # via cairosvg
+distro==1.9.0
+    # via
+    #   anthropic
+    #   langsmith
+docstring-parser==0.18.0
+    # via
+    #   anthropic
+    #   strands-agents
+fonttools==4.63.0
+    # via weasyprint
+gitdb==4.0.12
+    # via gitpython
+gitpython==3.1.50
+    # via streamlit
+h11==0.16.0
+    # via
+    #   httpcore
+    #   uvicorn
+httpcore==1.0.9
+    # via httpx
+httptools==0.8.0
+    # via streamlit
+httpx==0.28.1
+    # via
+    #   anthropic
+    #   langgraph-sdk
+    #   langsmith
+    #   mcp
+httpx-sse==0.4.3
+    # via mcp
+idna==3.18
+    # via
+    #   anyio
+    #   httpx
+    #   requests
+itsdangerous==2.2.0
+    # via streamlit
+jinja2==3.1.6
+    # via
+    #   altair
+    #   pydeck
+jiter==0.16.0
+    # via anthropic
+jmespath==1.1.0
+    # via
+    #   boto3
+    #   botocore
+jsonpatch==1.33
+    # via langchain-core
+jsonpointer==3.1.1
+    # via jsonpatch
+jsonschema==4.26.0
+    # via
+    #   altair
+    #   mcp
+    #   strands-agents
+jsonschema-specifications==2025.9.1
+    # via jsonschema
+langchain-anthropic==1.4.8
+    # via -r /tmp/hcls-req.in
+langchain-core==1.4.9
+    # via
+    #   -r /tmp/hcls-req.in
+    #   langchain-anthropic
+    #   langgraph
+    #   langgraph-checkpoint
+    #   langgraph-prebuilt
+    #   langgraph-sdk
+langchain-protocol==0.0.18
+    # via
+    #   langchain-core
+    #   langgraph-sdk
+langgraph==1.2.9
+    # via -r /tmp/hcls-req.in
+langgraph-checkpoint==4.1.1
+    # via
+    #   langgraph
+    #   langgraph-prebuilt
+langgraph-prebuilt==1.1.0
+    # via langgraph
+langgraph-sdk==0.4.2
+    # via langgraph
+langsmith==0.10.2
+    # via langchain-core
+markdown==3.10.2
+    # via -r /tmp/hcls-req.in
+markupsafe==3.0.3
+    # via jinja2
+mcp==1.28.1
+    # via strands-agents
+narwhals==2.23.0
+    # via altair
+numpy==2.4.6
+    # via
+    #   pandas
+    #   pydeck
+    #   streamlit
+opentelemetry-api==1.43.0
+    # via
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-threading
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+    #   strands-agents
+opentelemetry-instrumentation==0.64b0
+    # via opentelemetry-instrumentation-threading
+opentelemetry-instrumentation-threading==0.64b0
+    # via strands-agents
+opentelemetry-sdk==1.43.0
+    # via strands-agents
+opentelemetry-semantic-conventions==0.64b0
+    # via
+    #   opentelemetry-instrumentation
+    #   opentelemetry-sdk
+orjson==3.11.9
+    # via
+    #   langgraph-sdk
+    #   langsmith
+ormsgpack==1.12.2
+    # via langgraph-checkpoint
+packaging==26.2
+    # via
+    #   altair
+    #   langchain-core
+    #   langsmith
+    #   opentelemetry-instrumentation
+    #   streamlit
+pandas==3.0.3
+    # via streamlit
+pillow==12.3.0
+    # via
+    #   cairosvg
+    #   streamlit
+    #   weasyprint
+protobuf==7.35.1
+    # via streamlit
+pyarrow==25.0.0
+    # via streamlit
+pycparser==3.0
+    # via cffi
+pydantic==2.13.4
+    # via
+    #   anthropic
+    #   langchain-anthropic
+    #   langchain-core
+    #   langgraph
+    #   langsmith
+    #   mcp
+    #   pydantic-settings
+    #   strands-agents
+pydantic-core==2.46.4
+    # via pydantic
+pydantic-settings==2.14.2
+    # via mcp
+pydeck==0.9.3
+    # via streamlit
+pydyf==0.12.1
+    # via weasyprint
+pyjwt==2.13.0
+    # via mcp
+pyphen==0.17.2
+    # via weasyprint
+python-dateutil==2.9.0.post0
+    # via
+    #   botocore
+    #   pandas
+python-dotenv==1.2.2
+    # via pydantic-settings
+python-multipart==0.0.32
+    # via
+    #   mcp
+    #   streamlit
+pyyaml==6.0.3
+    # via
+    #   langchain-core
+    #   strands-agents
+referencing==0.37.0
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
+requests==2.34.2
+    # via
+    #   langsmith
+    #   requests-toolbelt
+    #   streamlit
+requests-toolbelt==1.0.0
+    # via langsmith
+rpds-py==2026.6.3
+    # via
+    #   jsonschema
+    #   referencing
+s3transfer==0.19.0
+    # via boto3
+six==1.17.0
+    # via python-dateutil
+smmap==5.0.3
+    # via gitdb
+sniffio==1.3.1
+    # via
+    #   anthropic
+    #   langsmith
+sse-starlette==3.4.5
+    # via mcp
+starlette==1.3.1
+    # via
+    #   mcp
+    #   sse-starlette
+    #   streamlit
+strands-agents==1.47.0 ; python_version >= "3.11"
+    # via -r /tmp/hcls-req.in
+streamlit==1.59.1
+    # via -r /tmp/hcls-req.in
+tenacity==9.1.4
+    # via
+    #   langchain-core
+    #   streamlit
+tinycss2==1.5.1
+    # via
+    #   cairosvg
+    #   cssselect2
+    #   weasyprint
+tinyhtml5==2.1.0
+    # via weasyprint
+toml==0.10.2
+    # via streamlit
+typing-extensions==4.16.0
+    # via
+    #   altair
+    #   anthropic
+    #   anyio
+    #   langchain-core
+    #   langchain-protocol
+    #   langsmith
+    #   mcp
+    #   opentelemetry-api
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+    #   pydantic
+    #   pydantic-core
+    #   referencing
+    #   starlette
+    #   strands-agents
+    #   streamlit
+    #   typing-inspection
+typing-inspection==0.4.2
+    # via
+    #   mcp
+    #   pydantic
+    #   pydantic-settings
+urllib3==2.7.0
+    # via
+    #   botocore
+    #   requests
+uuid-utils==0.17.0
+    # via
+    #   langchain-core
+    #   langsmith
+uvicorn==0.51.0
+    # via
+    #   mcp
+    #   streamlit
+watchdog==6.0.0
+    # via
+    #   strands-agents
+    #   streamlit
+weasyprint==69.0
+    # via -r /tmp/hcls-req.in
+webencodings==0.5.1
+    # via
+    #   cssselect2
+    #   tinycss2
+    #   tinyhtml5
+websockets==15.0.1
+    # via
+    #   langgraph-sdk
+    #   langsmith
+    #   streamlit
+wrapt==2.2.2
+    # via
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-threading
+xxhash==3.8.1
+    # via
+    #   langgraph
+    #   langsmith
+zopfli==0.4.3
+    # via fonttools
+zstandard==0.25.0
+    # via langsmith

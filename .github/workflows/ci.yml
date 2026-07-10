@@ -144,10 +144,12 @@ jobs:
           pip install bandit
           bandit -r platform_core governance aws-native-reference services -ll
 
-      - name: Dependency audit (pip-audit / SCA)
+      - name: Dependency audit (pip-audit / SCA) — BLOCKING
         run: |
+          set -e
           pip install pip-audit
-          pip-audit -r platform_core/requirements.txt || true   # advisory until deps are pinned with hashes
+          # Pinned lockfile is authoritative; a CVE now fails the job (was advisory).
+          pip-audit --progress-spinner off -r platform_core/requirements-lock.txt
 
       - name: IaC scan (checkov)
         run: |
@@ -175,9 +177,9 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
-          scanners: vuln,secret,misconfig
+          scanners: vuln,secret   # misconfig is covered by cfn-lint + checkov; keep this high-signal
           severity: CRITICAL,HIGH
-          exit-code: "0"   # report-only until a baseline is triaged; flip to "1" to enforce
+          exit-code: "1"   # BLOCKING: a CRITICAL/HIGH vuln or leaked secret fails the job
 
       - name: Provenance note
         run: echo "Sign release artifacts (cosign) and attach SLSA provenance at the release job — see docs."

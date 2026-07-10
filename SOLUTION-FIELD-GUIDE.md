@@ -156,7 +156,7 @@ What you can put in front of a customer today:
 - **All nine agents are built to flagship depth** and run end-to-end with no API key (`EXTRACT_MODE=demo`) — useful for live working sessions before any AWS account exists.
 - **Live proof point:** Agent 02 (Pharmacovigilance) runs on **real Amazon Bedrock inference + a real HTTP safety connector** end-to-end (`02-pharmacovigilance-agent/demo/demo_live.py`; runbook in `demo/DEMO-LIVE.md`). Swap one URL to the customer's Argus/Veeva gateway. This is the demo that answers "does it actually work against our systems?"
 - **Decks & leave-behinds (repo root):** `HCLS-Agentic-AI-Suite-Executive-Overview.pptx` (16-slide enablement deck), `HCLS-Customer-Teaser-5slide.pptx` (customer teaser), `HCLS-One-Pager.pdf` (one-page leave-behind).
-- **Proof of rigor:** 536 automated tests pass across platform, governance, agents, and AWS-native rebuilds — cite this when Quality or Security asks "how do we know it behaves?"
+- **Proof of rigor:** 576 automated tests pass across platform, governance, agents, and AWS-native rebuilds — cite this when Quality or Security asks "how do we know it behaves?"
 
 ---
 

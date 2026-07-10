@@ -5,28 +5,116 @@
     "Assemble": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": {"FunctionName": "${AssembleFunctionArn}", "Payload.$": "$"},
+      "Parameters": {
+        "FunctionName": "${AssembleFunctionArn}",
+        "Payload.$": "$"
+      },
       "OutputPath": "$.Payload",
-      "Next": "Draft"
+      "Next": "Draft",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException",
+            "States.TaskFailed",
+            "States.Timeout"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "PipelineFailed"
+        }
+      ],
+      "TimeoutSeconds": 300
     },
     "Draft": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": {"FunctionName": "${DraftFunctionArn}", "Payload.$": "$"},
+      "Parameters": {
+        "FunctionName": "${DraftFunctionArn}",
+        "Payload.$": "$"
+      },
       "OutputPath": "$.Payload",
-      "Next": "Check"
+      "Next": "Check",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException",
+            "States.TaskFailed",
+            "States.Timeout"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "PipelineFailed"
+        }
+      ],
+      "TimeoutSeconds": 300
     },
     "Check": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": {"FunctionName": "${CheckFunctionArn}", "Payload.$": "$"},
+      "Parameters": {
+        "FunctionName": "${CheckFunctionArn}",
+        "Payload.$": "$"
+      },
       "OutputPath": "$.Payload",
-      "Next": "RouteChoice"
+      "Next": "RouteChoice",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException",
+            "States.TaskFailed",
+            "States.Timeout"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "PipelineFailed"
+        }
+      ],
+      "TimeoutSeconds": 300
     },
     "RouteChoice": {
       "Type": "Choice",
       "Choices": [
-        {"Variable": "$.routing.next", "StringEquals": "Draft", "Next": "Draft"}
+        {
+          "Variable": "$.routing.next",
+          "StringEquals": "Draft",
+          "Next": "Draft"
+        }
       ],
       "Default": "HumanReviewGate"
     },
@@ -35,18 +123,76 @@
       "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
       "Parameters": {
         "FunctionName": "${HitlNotifyFunctionArn}",
-        "Payload": {"input.$": "$", "task_token.$": "$$.Task.Token"}
+        "Payload": {
+          "input.$": "$",
+          "task_token.$": "$$.Task.Token"
+        }
       },
       "ResultPath": "$.review",
       "TimeoutSeconds": 1209600,
-      "Next": "Finalize"
+      "Next": "Finalize",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "PipelineFailed"
+        }
+      ]
     },
     "Finalize": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": {"FunctionName": "${FinalizeFunctionArn}", "Payload.$": "$"},
+      "Parameters": {
+        "FunctionName": "${FinalizeFunctionArn}",
+        "Payload.$": "$"
+      },
       "OutputPath": "$.Payload",
-      "End": true
+      "End": true,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException",
+            "States.TaskFailed",
+            "States.Timeout"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "PipelineFailed"
+        }
+      ],
+      "TimeoutSeconds": 300
+    },
+    "PipelineFailed": {
+      "Type": "Fail",
+      "Error": "PipelineFailed",
+      "Cause": "A workflow task failed after retries; execution terminated deterministically. See execution history and the audit trail."
     }
   }
 }
