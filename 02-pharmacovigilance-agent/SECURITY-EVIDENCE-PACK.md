@@ -84,7 +84,7 @@ These are produced by `tools/collect_runtime_evidence.sh` against a deployed sta
 | Bedrock Guardrails blocking a real invoke | ☐ pending | guardrail config + blocked-invoke screenshot |
 | Locked egress (NFW allow + drop) | ☐ pending | `--log-group` NFW alert logs |
 | IAM Access Analyzer findings | ☐ pending | `accessanalyzer list-findings` |
-| CloudWatch security alarms + dashboard | ☐ pending | `describe-alarms` + dashboard export |
+| CloudWatch security alarms + dashboard | ☐ template ready | deploy `infra/cloudformation/security-alarms.yaml` (10 signals: denials, JWT, self-approval, replay, injection, masking, guardrail, audit-fail, egress, budget) then `describe-alarms` + dashboard export |
 | WORM overwrite denied (Object Lock) | ☐ pending | `--audit-bucket` overwrite probe |
 | Step Functions paused at the human gate | ☐ pending | execution screenshot |
 | Teardown — zero residual resources | ☐ pending | `destroy.sh` output |
