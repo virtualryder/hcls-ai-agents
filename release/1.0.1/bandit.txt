@@ -1,0 +1,909 @@
+[main]	INFO	profile include tests: None
+[main]	INFO	profile exclude tests: None
+[main]	INFO	cli include tests: None
+[main]	INFO	cli exclude tests: None
+[main]	INFO	running on Python 3.11.15
+Run started:2026-07-10 23:18:56.864119+00:00
+
+Test results:
+>> Issue: [B107:hardcoded_password_default] Possible hardcoded password: ''
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b107_hardcoded_password_default.html
+   Location: platform_core/hcls_agent_platform/connectors/live.py:52:0
+51	
+52	def _safety_request(
+53	    method: str,
+54	    path: str,
+55	    body: Any = None,
+56	    base_url: str = "",
+57	    token: str = "",
+58	) -> Any:
+59	    """Stdlib-only HTTP helper. Raises on non-2xx status. Returns parsed JSON."""
+60	    url = f"{base_url.rstrip('/')}/{path.lstrip('/')}"
+61	    data = json.dumps(body).encode("utf-8") if body is not None else None
+62	    headers: Dict[str, str] = {
+63	        "Content-Type": "application/json",
+64	        "Accept": "application/json",
+65	    }
+66	    if token:
+67	        headers["Authorization"] = f"Bearer {token}"
+68	
+69	    req = _urllib_request.Request(url, data=data, headers=headers, method=method)
+70	    try:
+71	        with _urllib_request.urlopen(req, timeout=15) as resp:
+72	            raw = resp.read().decode("utf-8")
+73	            try:
+74	                return json.loads(raw)
+75	            except json.JSONDecodeError:
+76	                return {"raw": raw}
+77	    except URLError as exc:
+78	        raise RuntimeError(
+79	            f"Safety API call failed [{method} {url}]: {exc}"
+80	        ) from exc
+81	
+
+--------------------------------------------------
+>> Issue: [B310:blacklist] Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+   Severity: Medium   Confidence: High
+   CWE: CWE-22 (https://cwe.mitre.org/data/definitions/22.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b310-urllib-urlopen
+   Location: platform_core/hcls_agent_platform/connectors/live.py:71:13
+70	    try:
+71	        with _urllib_request.urlopen(req, timeout=15) as resp:
+72	            raw = resp.read().decode("utf-8")
+
+--------------------------------------------------
+>> Issue: [B107:hardcoded_password_default] Possible hardcoded password: ''
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b107_hardcoded_password_default.html
+   Location: platform_core/hcls_agent_platform/connectors/live.py:96:4
+95	
+96	    def __init__(self, base_url: str = "", token: str = "") -> None:
+97	        self._base_url = base_url or os.getenv("SAFETY_BASE_URL", "")
+98	        self._token = token  # empty -> resolved lazily per-call
+99	
+
+--------------------------------------------------
+>> Issue: [B310:blacklist] Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+   Severity: Medium   Confidence: High
+   CWE: CWE-22 (https://cwe.mitre.org/data/definitions/22.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b310-urllib-urlopen
+   Location: platform_core/hcls_agent_platform/connectors/openfda.py:94:17
+93	        try:
+94	            with _urllib_request.urlopen(req, timeout=_TIMEOUT) as resp:
+95	                return json.loads(resp.read().decode("utf-8"))
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_a2a.py:18:4
+17	                                  args={"case_id": "ICSR-1"}, task="triage"))
+18	    assert res.gateway.decision == "ALLOW"
+19	    # A2A dispatch was recorded with the supervisor as on_behalf_of (lineage only).
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_a2a.py:21:4
+20	    disp = [r for r in sup.audit_records() if r.get("decision") == "A2A_DISPATCH"]
+21	    assert disp and disp[-1]["on_behalf_of"] == "orchestrator"
+22	    assert disp[-1]["agent_id"] == "02-pharmacovigilance"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_a2a.py:22:4
+21	    assert disp and disp[-1]["on_behalf_of"] == "orchestrator"
+22	    assert disp[-1]["agent_id"] == "02-pharmacovigilance"
+23	    assert disp[-1]["session_id"] == res.session_id
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_a2a.py:23:4
+22	    assert disp[-1]["agent_id"] == "02-pharmacovigilance"
+23	    assert disp[-1]["session_id"] == res.session_id
+24	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_a2a.py:32:4
+31	                                  user_claims=PV_PROCESSOR, tool="safety.submit_report"))
+32	    assert res.gateway.decision == "DENY"
+33	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_a2a.py:41:4
+40	                                      args={"case_id": "ICSR-1"}))
+41	    assert pending.gateway.decision == "PENDING_APPROVAL"
+42	    # With a verified human approval bound, it proceeds.
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_a2a.py:47:4
+46	                                 approval={"approved": True, "reviewer": {"sub": "u-md-7"}}))
+47	    assert ok.gateway.decision == "ALLOW"
+48	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_a2a.py:56:4
+55	                                  tool="safety.get_case"))
+56	    assert res.gateway.decision == "DENY"
+57	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_a2a.py:66:4
+65	                                  tool="rim.create_submission_draft"))
+66	    assert res.gateway.decision == "DENY"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_agp_conformance.py:11:4
+10	def test_declares_agp_version():
+11	    assert m.AEGIS_GOVERNANCE_PATTERN_VERSION == "1.0"
+12	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_agp_conformance.py:15:4
+14	def test_declares_impl_version():
+15	    assert isinstance(m.__version__, str) and m.__version__.count(".") >= 2
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_budget.py:11:4
+10	    d = m.preflight(500)
+11	    assert d.allowed is False and "budget_exceeded" in d.reason
+12	    # preflight does not mutate the meter
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_budget.py:13:4
+12	    # preflight does not mutate the meter
+13	    assert m.used == 900
+14	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_budget.py:18:4
+17	    m = BudgetMeter("a", "d", monthly_token_cap=1000)
+18	    assert m.preflight(100).allowed is True
+19	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_budget.py:25:4
+24	    d = m.preflight(50)
+25	    assert d.allowed is True and d.throttled is True
+26	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_budget.py:30:4
+29	    m = BudgetMeter("a", "d", monthly_token_cap=100, alert_thresholds=[0.6, 0.85, 1.0])
+30	    assert 0.6 in m.commit(60)
+31	    assert 0.6 not in m.commit(10)      # already fired
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_budget.py:31:4
+30	    assert 0.6 in m.commit(60)
+31	    assert 0.6 not in m.commit(10)      # already fired
+32	    assert 0.85 in _flatten(m, 20)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_budget.py:32:4
+31	    assert 0.6 not in m.commit(10)      # already fired
+32	    assert 0.85 in _flatten(m, 20)
+33	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_audit.py:67:4
+66	    resp = handler_mod.handler(_consequential_event())
+67	    assert resp["decision"] == "ALLOW"
+68	    statuses = [r["status"] for r in captured]
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_audit.py:69:4
+68	    statuses = [r["status"] for r in captured]
+69	    assert statuses == ["INTENT", "COMMITTED"]        # ordering = transaction boundary
+70	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_audit.py:78:8
+77	                  "prompt_version", "approval_jti", "approver", "lineage", "sor_response"):
+78	        assert field in outcome, f"missing evidence field: {field}"
+79	    assert outcome["user_sub"] == REQ
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_audit.py:79:4
+78	        assert field in outcome, f"missing evidence field: {field}"
+79	    assert outcome["user_sub"] == REQ
+80	    assert outcome["approver"] == APP
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_audit.py:80:4
+79	    assert outcome["user_sub"] == REQ
+80	    assert outcome["approver"] == APP
+81	    assert outcome["model_version"] == "anthropic.claude-x"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_audit.py:81:4
+80	    assert outcome["approver"] == APP
+81	    assert outcome["model_version"] == "anthropic.claude-x"
+82	    assert outcome["approval_jti"]                      # non-empty bound-token jti
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_audit.py:82:4
+81	    assert outcome["model_version"] == "anthropic.claude-x"
+82	    assert outcome["approval_jti"]                      # non-empty bound-token jti
+83	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_audit.py:88:4
+87	    keys = {r["idempotency_key"] for r in captured}
+88	    assert len(keys) == 1                               # intent + outcome share one key
+89	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_audit.py:115:4
+114	    orphans = reconcile.find_orphans(items)
+115	    assert len(orphans) == 1 and orphans[0]["idempotency_key"] == "B"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_identity.py:45:4
+44	    claims = handler._claims(AUTHZ_EVENT)
+45	    assert claims.get("custom:hcls_role") == "PV_PROCESSOR"  # authorizer wins
+46	    assert claims.get("sub") == "u-real"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_identity.py:46:4
+45	    assert claims.get("custom:hcls_role") == "PV_PROCESSOR"  # authorizer wins
+46	    assert claims.get("sub") == "u-real"
+47	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_identity.py:57:4
+56	                              "identity": {"custom:hcls_role": "QUALIFIED_PERSON"}})
+57	    assert claims == {}
+58	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_identity.py:66:4
+65	                              "identity": {"sub": "pv-physician-1", "custom:hcls_role": "PV_MEDICAL_REVIEWER"}})
+66	    assert claims.get("sub") == "pv-physician-1"
+67	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_identity.py:73:4
+72	                              "identity": {"custom:hcls_role": "PV_PROCESSOR"}})
+73	    assert claims.get("custom:hcls_role") == "PV_PROCESSOR"
+74	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_identity.py:80:4
+79	    src = _HANDLER.read_text()
+80	    assert "attribute_not_exists(audit_id)" in src
+81	    assert "ConditionalCheckFailedException" in src
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_identity.py:81:4
+80	    assert "attribute_not_exists(audit_id)" in src
+81	    assert "ConditionalCheckFailedException" in src
+82	    block = src.split("def _put_immutable")[1][:900]
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connector_identity.py:83:4
+82	    block = src.split("def _put_immutable")[1][:900]
+83	    assert "raise" in block
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connectors.py:12:4
+11	    conn = get_connector("safety", mode="fixture")
+12	    assert conn.get_case(case_id="ICSR-1")["valid"] is True
+13	    dups = conn.search_duplicates(case_id="ICSR-1")
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connectors.py:14:4
+13	    dups = conn.search_duplicates(case_id="ICSR-1")
+14	    assert isinstance(dups, list)
+15	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connectors.py:20:4
+19	    out = conn.code_term(term="nausea")
+20	    assert out["pt"] == "Nausea" and out["pt_code"]
+21	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connectors.py:27:8
+26	        conn = get_connector(kind, mode="fixture")
+27	        assert getattr(conn, method)()
+28	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connectors.py:34:8
+33	        conn.get_case(case_id="x")
+34	        assert False, "expected NotImplementedError"
+35	    except NotImplementedError:
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_connectors.py:42:8
+41	        get_connector("nope", mode="fixture")
+42	        assert False
+43	    except ValueError:
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:20:4
+19	    res = gw.invoke(user_claims={}, agent_id="01-regulatory-writing", tool="rim.get_obligations")
+20	    assert res.decision == "DENY" and not res.allowed
+21	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:26:4
+25	    res = gw.invoke(user_claims=AUTHOR, agent_id="01-regulatory-writing", tool="rim.get_obligations")
+26	    assert res.decision == "ALLOW" and res.result
+27	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:33:4
+32	    res = gw.invoke(user_claims=APPROVER, agent_id="02-pharmacovigilance", tool="rim.create_submission_draft")
+33	    assert res.decision == "DENY"
+34	    assert "not granted" in res.reason
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:34:4
+33	    assert res.decision == "DENY"
+34	    assert "not granted" in res.reason
+35	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:41:4
+40	    res = gw.invoke(user_claims=AUTHOR, agent_id="01-regulatory-writing", tool="rim.create_submission_draft")
+41	    assert res.decision == "DENY"
+42	    assert "not entitled" in res.reason
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:42:4
+41	    assert res.decision == "DENY"
+42	    assert "not entitled" in res.reason
+43	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:50:4
+49	                        args={"case_id": "ICSR-DRAFT-0001"})
+50	    assert pending.decision == "PENDING_APPROVAL" and pending.requires_approval
+51	    # With a verified reviewer approval -> ALLOW
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:55:4
+54	                   approval={"approved": True, "reviewer": {"sub": "u-md"}})
+55	    assert ok.decision == "ALLOW"
+56	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:62:4
+61	    res = gw.invoke(user_claims=PV_PROC, agent_id="02-pharmacovigilance", tool="safety.submit_report")
+62	    assert res.decision == "DENY"
+63	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:68:12
+67	        for tool in grants:
+68	            assert tool in policy.TOOL_REGISTRY, f"{agent} grants unregistered tool {tool}"
+69	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:76:4
+75	    last = gw.audit.records[-1]
+76	    assert last["decision"] in ("ALLOW", "DENY")
+77	    if last["decision"] == "ALLOW":
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:78:8
+77	    if last["decision"] == "ALLOW":
+78	        assert "123-45-6789" not in str(last["args"])
+79	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:92:8
+91	    for agent_id, tool in withheld.items():
+92	        assert tool not in P.AGENT_TOOL_GRANTS[agent_id], (agent_id, tool)
+93	        # but the human role IS still entitled (a person can commit; the agent cannot)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:94:4
+93	        # but the human role IS still entitled (a person can commit; the agent cannot)
+94	    assert "safety.submit_report" in P.user_entitlements(["PV_MEDICAL_REVIEWER"])
+95	    assert "qms.close_capa" in P.user_entitlements(["QUALIFIED_PERSON"])
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:95:4
+94	    assert "safety.submit_report" in P.user_entitlements(["PV_MEDICAL_REVIEWER"])
+95	    assert "qms.close_capa" in P.user_entitlements(["QUALIFIED_PERSON"])
+96	    assert "mes.record_disposition" in P.user_entitlements(["QA_RELEASE"])
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:96:4
+95	    assert "qms.close_capa" in P.user_entitlements(["QUALIFIED_PERSON"])
+96	    assert "mes.record_disposition" in P.user_entitlements(["QA_RELEASE"])
+97	    # and every CONSEQUENTIAL_COMMIT is absent from every agent grant
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:99:8
+98	    for agent, grants in P.AGENT_TOOL_GRANTS.items():
+99	        assert not (P.CONSEQUENTIAL_COMMITS & grants), (agent, P.CONSEQUENTIAL_COMMITS & grants)
+100	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_mcp_gateway.py:147:4
+146	        approval={"token": tok})
+147	    assert r.decision == "ALLOW"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:15:4
+14	    out = mask(text)
+15	    assert "123-45-6789" not in out
+16	    assert "jane@acme.com" not in out
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:16:4
+15	    assert "123-45-6789" not in out
+16	    assert "jane@acme.com" not in out
+17	    assert "SUBJ-00123" not in out
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:17:4
+16	    assert "jane@acme.com" not in out
+17	    assert "SUBJ-00123" not in out
+18	    assert "2026-01-04" not in out
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:18:4
+17	    assert "SUBJ-00123" not in out
+18	    assert "2026-01-04" not in out
+19	    assert "998877665" not in out
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:19:4
+18	    assert "2026-01-04" not in out
+19	    assert "998877665" not in out
+20	    assert "[SSN-REDACTED]" in out
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:20:4
+19	    assert "998877665" not in out
+20	    assert "[SSN-REDACTED]" in out
+21	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:24:4
+23	def test_mask_idempotent_and_none_safe():
+24	    assert mask(None) == ""
+25	    once = mask("SSN 123-45-6789")
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:26:4
+25	    once = mask("SSN 123-45-6789")
+26	    assert mask(once) == once
+27	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:30:4
+29	def test_luhn_valid_card_detection():
+30	    assert luhn_valid("4111111111111111")  # test Visa
+31	    assert not luhn_valid("4111111111111112")
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:31:4
+30	    assert luhn_valid("4111111111111111")  # test Visa
+31	    assert not luhn_valid("4111111111111112")
+32	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:35:4
+34	def test_card_masked_only_when_luhn_valid():
+35	    assert "[CARD-REDACTED]" in mask("card 4111 1111 1111 1111")
+36	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:41:4
+40	    monkeypatch.setenv("DISABLE_SECRETS_MANAGER", "1")
+41	    assert get_secret("my_token") == "abc"
+42	    assert get_secret("missing", default="d") == "d"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:42:4
+41	    assert get_secret("my_token") == "abc"
+42	    assert get_secret("missing", default="d") == "d"
+43	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:48:8
+47	        auth.verify_jwt({"name": "no sub"})
+48	        assert False, "expected AuthError"
+49	    except auth.AuthError:
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:52:4
+51	    claims = auth.verify_jwt({"sub": "u1", "custom:hcls_role": "PV_PROCESSOR"})
+52	    assert claims["sub"] == "u1"
+53	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:57:4
+56	    claims = {"sub": "u1", "custom:hcls_role": ["PV_MEDICAL_REVIEWER"]}
+57	    assert auth.require_role(claims, ["PV_MEDICAL_REVIEWER"]) == "PV_MEDICAL_REVIEWER"
+58	    rec = auth.record_reviewer_identity(claims, "approve", "Approved SAE causality assessment")
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:59:4
+58	    rec = auth.record_reviewer_identity(claims, "approve", "Approved SAE causality assessment")
+59	    assert rec["approved"] is True and rec["reviewer"]["sub"] == "u1"
+60	    assert rec["signature_meaning"].startswith("Approved")
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:60:4
+59	    assert rec["approved"] is True and rec["reviewer"]["sub"] == "u1"
+60	    assert rec["signature_meaning"].startswith("Approved")
+61	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_platform.py:67:4
+66	        return x * 2
+67	    assert f(21) == 42
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'tok-123'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: platform_core/tests/test_reviewer_service.py:29:11
+28	           "tool": "safety.submit_report", "args": {"case_id": "ICSR-1"}}
+29	PENDING = {"task_token": "tok-123", "approval_binding": BINDING}
+30	REVIEWER = {"sub": "pv-physician-9", "custom:hcls_role": "PV_MEDICAL_REVIEWER"}
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_reviewer_service.py:35:4
+34	    out = app.build_review_decision(REVIEWER, PENDING, "approved")
+35	    assert out["approved"] and out["task_token"] == "tok-123"
+36	    tok = out["output"]["approval_token"]
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_reviewer_service.py:41:4
+40	        tool=BINDING["tool"], args=BINDING["args"])
+41	    assert payload["approver"] == REVIEWER["sub"]
+42	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: platform_core/tests/test_reviewer_service.py:62:4
+61	    out = app.build_review_decision(REVIEWER, PENDING, "rejected")
+62	    assert out["approved"] is False and "approval_token" not in out["output"]
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 2394
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 84
+		Medium: 2
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 3
+		High: 83
+Files skipped (0):
