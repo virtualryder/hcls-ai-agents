@@ -10,7 +10,7 @@
 |---|---|---|---|
 | **LLM01** | Prompt Injection | Authorization/approval/masking live **outside** the model (gateway); deny-by-default; Guardrails; consequential commits withheld from agents | `governance/redteam/` (injection denied), `policy.py` |
 | **LLM02** | Sensitive Information Disclosure | PHI masking **before** any model call or audit write; private-connectivity Bedrock via VPC endpoint (PrivateOnly = no NAT route); Guardrails PII filters | `phi.py`, `tests/.../test_pii*`, `llm_factory.py` |
-| **LLM03** | Supply Chain | Pinned deps vendored deterministically into Lambda zips; CI compile + 536 tests gate every change | `scripts/build_lambdas.sh`, CI |
+| **LLM03** | Supply Chain | Pinned deps vendored deterministically into Lambda zips; CI compile + 575 tests gate every change | `scripts/build_lambdas.sh`, CI |
 | **LLM04** | Data & Model Poisoning | Grounding verification rejects ungrounded claims; approved-corpus RAG; prompt hash-pinning | `governance/grounding.py`, `prompt_registry.py` |
 | **LLM05** | Improper Output Handling | Outputs are decision-support drafts; a human gate + grounding/quality checks precede any consequential use | per-agent `quality_checker.py`, HITL gate |
 | **LLM06** | Excessive Agency | Least-privilege intersection; **consequential commits withheld from agents**; bound human approval on writes | `policy.py::CONSEQUENTIAL_COMMITS`, `approvals.py` |
