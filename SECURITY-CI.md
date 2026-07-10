@@ -5,15 +5,25 @@ SAST), **pip-audit** (dependency CVEs), **detect-secrets** (secret scan), **Semg
 **Checkov** (IaC), and a **CycloneDX SBOM**. Aligns with AGP conformance ([`AGP-CONFORMANCE.md`](AGP-CONFORMANCE.md))
 and the release packet ([`RELEASE-PACKET.md`](RELEASE-PACKET.md)).*
 
-## Current policy: report-only (adopt first, enforce after triage)
+## Current policy
 
-Scanners run on every push/PR but **do not block the build yet**. This is deliberate: flipping a
-scanner to blocking *before* triaging its pre-existing findings red-lines CI and creates pressure to
-suppress rather than fix. The EDU repo (`edu-ai-agents/.github/workflows/security.yml`) is the
-**enforcing reference** — bandit/pip-audit/detect-secrets are blocking there against committed
-baselines. Bring this repo to the same end-state with the steps below.
+| Scanner | Status | Basis |
+|---|---|---|
+| **Bandit** (SAST) | **BLOCKING** | vs committed `.bandit-baseline.json` — a NEW medium+ finding fails CI; baselined findings don't |
+| **detect-secrets** | **BLOCKING** | vs committed `.secrets.baseline` — a NEW unbaselined secret fails CI |
+| **pip-audit** (deps) | report-only | flips to blocking once deps are hash-pinned in `platform_core/requirements-lock.txt` |
+| **Semgrep** (SAST rulesets) | report-only | flips to blocking once a ruleset (e.g. `p/ci`) is pinned + triaged |
+| **Checkov** (IaC) | soft-fail | pre-existing reference-template findings surfaced, not blocking (harden templates, then remove `--soft-fail`) |
+| **CycloneDX SBOM** | artifact | published every run |
 
-## How to enforce (per scanner)
+The committed baselines record the CURRENT findings (audit `.secrets.baseline` with
+`detect-secrets audit` to confirm the entries are false positives). New findings block the build.
+EDU's `security.yml` is the enforcing reference; HCLS additionally runs a broader report-only
+supply-chain job in `ci.yml` (gitleaks, Trivy, Terraform validate) — `security.yml` is the blocking gate.
+
+### Bringing the last two to blocking
+
+### How to enforce the remaining scanners
 
 | Scanner | Make it blocking |
 |---|---|

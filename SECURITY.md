@@ -41,8 +41,9 @@ appreciated.
 6. **Append-only audit + WORM** — DynamoDB append-only + S3 Object Lock (`infra/cloudformation/data.yaml`);
    every ALLOW/DENY/PENDING_APPROVAL/ERROR recorded with lineage (21 CFR Part 11 evidence).
 7. **Fail-closed PHI/PII masking** (`phi.py`) **before** any model call or audit write; **Bedrock Guardrails**
-   on input and output; **private-connectivity inference** via VPC endpoint (AWS PrivateLink) — no patient-data
-   egress to external AI APIs; traffic to the regional Bedrock service stays on AWS private networking.
+   on input and output; **private connectivity to regional Amazon Bedrock through AWS PrivateLink where
+   configured** — no egress to external non-AWS AI APIs. Endpoint policies, logging, and compliance controls
+   remain customer-owned (the default interface-endpoint policy allows full access and must be customized).
 8. **Grounding verification** — every regulated figure/entity in an output must trace to the source corpus,
    or the step fails closed (`governance/grounding.py`).
 

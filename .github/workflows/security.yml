@@ -1,10 +1,9 @@
 name: security
 
 # Standardized security harness — SAST, dependency CVEs, secret scan, IaC scan, SBOM.
-# REPORT-ONLY by default (does not block the build) so it can be adopted without red-lining
-# CI on pre-existing findings. Recommended end-state is BLOCKING against a committed baseline
-# (see SECURITY-CI.md for the exact enforce steps; the EDU repo's security.yml is the enforcing
-# reference). Flip each scanner to blocking after triaging + baselining its findings.
+# Bandit + detect-secrets are BLOCKING against committed baselines (.bandit-baseline.json /
+# .secrets.baseline) — a NEW finding fails CI, baselined ones do not. pip-audit + Semgrep are
+# report-only pending a hash-pinned lockfile / a triaged ruleset; Checkov is soft-fail. See SECURITY-CI.md.
 
 on:
   push:
@@ -26,8 +25,8 @@ jobs:
       # REPORT-ONLY. ENFORCE: generate `.bandit-baseline.json` (see SECURITY-CI.md) and run
       #   bandit -r . --severity-level medium --confidence-level medium --skip B101 -b .bandit-baseline.json
       # (drop the `|| true`).
-      - name: Bandit (report-only until baselined)
-        run: bandit -r . --severity-level medium --confidence-level medium --skip B101 -x ./node_modules,./.git || true
+      - name: Bandit (BLOCKING vs committed .bandit-baseline.json)
+        run: bandit -r . --severity-level medium --confidence-level medium --skip B101 -x ./node_modules,./.git,./venv -b .bandit-baseline.json
 
   pip-audit:
     name: pip-audit (dependency CVEs)
@@ -52,8 +51,11 @@ jobs:
       - run: pip install detect-secrets
       # REPORT-ONLY. ENFORCE: commit a reviewed `.secrets.baseline` (see SECURITY-CI.md) and run
       #   detect-secrets scan --baseline .secrets.baseline  (drop the `|| true`).
-      - name: detect-secrets (report-only until baselined)
-        run: detect-secrets scan --exclude-files 'node_modules/.*' --exclude-files '.*\.(png|jpg|jpeg|pdf|pptx|xlsx)$' > /dev/null || true
+      - name: detect-secrets (BLOCKING vs committed .secrets.baseline)
+        run: |
+          cp .secrets.baseline .secrets.baseline.orig
+          detect-secrets scan --baseline .secrets.baseline --exclude-files 'node_modules/.*' --exclude-files '.*\.(png|jpg|jpeg|pdf|pptx|xlsx)$'
+          diff -q .secrets.baseline.orig .secrets.baseline || { echo 'New secrets not in baseline — audit .secrets.baseline'; exit 1; }
 
   semgrep:
     name: Semgrep (SAST rulesets)

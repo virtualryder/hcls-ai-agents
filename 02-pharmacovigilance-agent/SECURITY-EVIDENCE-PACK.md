@@ -24,6 +24,39 @@ Source: the pack's `mcp_gateway/policy.py`. Proven by the negative demo (#3–#7
 Every high-risk (write) tool additionally requires a **bound, single-use, separation-of-duties**
 approval before execution (`STRICT_APPROVAL=1` in production).
 
+
+## 1a. MCP authorization negative-test matrix (12 cases — proven, CI-gated)
+
+The full checklist a security reviewer expects, proven against the **shipping gateway** by
+`governance/tests/test_mcp_authz_matrix.py` (**12/12**). Framing maps to the deployed edge (401/403/deny);
+offline the gateway returns a DENY decision or the primitive raises. This is the "hard proof per repo"
+— the same 12 cases pass identically for every hero.
+
+| # | Attempt | Edge | Proven by |
+|---|---|---|---|
+| 1 | No token / unauthenticated | **401** | gateway → DENY (no authenticated subject) |
+| 2 | Bad / unverifiable token | **401** | JWT verification raises (RS256/JWKS; `none`/HS rejected) |
+| 3 | Valid token, **missing scope** | **403** | a scoped token minted for tool A is rejected at tool B |
+| 4 | Unregistered tool | deny | unknown-tool deny (allow-list) |
+| 5 | Wrong role (not entitled) | deny | least-privilege intersection deny |
+| 6 | Wrong data class | deny | data-class boundary enforced via tool entitlement (an out-of-domain tool is denied) |
+| 7 | Self-approval | deny | approver == requester refused at mint (SoD) |
+| 8 | Replayed approval | deny | single-use nonce / jti consumed |
+| 9 | Tampered approval args | deny | args / binding hash mismatch |
+| 10 | Stale / expired approval | deny | approval `exp` in the past is rejected |
+| 11 | No outbound credential | deny | no valid scoped token → the connector is unreachable (prod outbound-auth: IAM / OAuth / token-exchange / on-behalf-of) |
+| 12 | Audit write failure | deny | fail-closed — no silent success without an audit trail |
+
+```bash
+PYTHONPATH=platform_core:. pytest governance/tests/test_mcp_authz_matrix.py -q   # 12 passed
+```
+
+The literal HTTP **401/403** status codes at the deployed **API Gateway / AgentCore Gateway** edge
+(and the outbound-auth denial to the system of record) are captured at deploy time — see the runtime
+slots in §3 and [`../RUNTIME-EVIDENCE-RUNBOOK.md`](../RUNTIME-EVIDENCE-RUNBOOK.md). AWS AgentCore note:
+`AUTHENTICATE_ONLY` does not enforce authorization and "No Authorization" is not for production — this
+gateway always authorizes (deny-by-default) and mints a scoped outbound credential per call.
+
 ## 2. IAM role matrix (least privilege, per role)
 
 The golden path provisions one **scoped role per function** — no shared broad role. Exact ARNs +

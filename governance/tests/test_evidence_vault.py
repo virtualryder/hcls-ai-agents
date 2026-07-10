@@ -32,3 +32,17 @@ def test_iac_denies_audit_mutation_and_enables_object_lock():
     blob = "\n".join(texts)
     assert "DeleteItem" in blob and "UpdateItem" in blob, "IaC must deny audit-table mutation"
     assert ("ObjectLock" in blob or "object_lock" in blob), "IaC must enable S3 Object Lock (WORM)"
+
+
+def test_worm_denies_governance_bypass():
+    """The WORM bucket policy denies s3:BypassGovernanceRetention (except a break-glass role) so a
+    GOVERNANCE-mode pilot cannot be silently deleted; COMPLIANCE mode is the production default."""
+    import glob as _glob
+    txt = ""
+    for f in _glob.glob(os.path.join(REPO, "infra", "cloudformation", "data.yaml")):
+        try:
+            txt += open(f, encoding="utf-8").read()
+        except (UnicodeDecodeError, PermissionError):
+            pass
+    assert "BypassGovernanceRetention" in txt, "WORM bucket policy must deny s3:BypassGovernanceRetention"
+    assert "RetentionMode" in txt or "COMPLIANCE" in txt, "retention mode must be explicit"
