@@ -24,8 +24,8 @@ Parameters:
   TokenSecret:
     Type: String
     NoEcho: true
-    Default: dev-only-not-for-production
-    Description: "HMAC secret for gateway/approval tokens. PRODUCTION: replace with AgentCore Identity / KMS via Secrets Manager (docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md)."
+    MinLength: 32
+    Description: "HMAC secret for gateway/approval tokens. Supply a STRONG, UNIQUE per-deploy secret (>= 32 chars; e.g. generate with `python3 -c 'import secrets;print(secrets.token_hex(32))'`). No default is provided; the 27-char dev constant is intentionally rejected. PRODUCTION: replace with AgentCore Identity / KMS via Secrets Manager (docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md)."
   StrictApproval: { Type: String, Default: "1", AllowedValues: ["0", "1"], Description: "1 = require a bound approval token (single-use, SoD, args-bound). Recommended in all deployed environments." }
   ApiThrottleBurst: { Type: Number, Default: 20 }
   ApiThrottleRate: { Type: Number, Default: 10 }
