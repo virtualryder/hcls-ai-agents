@@ -325,7 +325,7 @@ if needed):
 1. **Step Functions** → **State machines** → open `hcls-dev-02-pharmacovigilance`.
 2. **Start execution.** Paste the contents of `aws-native-reference/02-pharmacovigilance/sample_input.json` as input → **Start execution**.
 3. Watch the **Graph view**: `Assemble → Draft → Check → RouteChoice → HumanReviewGate`.
-4. The execution **pauses at `HumanReviewGate`** — this is the `waitForTaskToken` HITL gate. It is *supposed* to wait. Nothing finalizes until a qualified human approves.
+4. The execution **pauses at `HumanReviewGate`** — this is the `waitForTaskToken` HITL gate. It is *supposed* to wait. Nothing finalizes until a qualified human approves. The wait is bounded by the task's **`TimeoutSeconds`** (14 days for the PV Medical Reviewer gate); if the window elapses without a decision the execution routes to the terminal `PipelineFailed` state (fails closed). The gate has **no `HeartbeatSeconds`** — nothing sends `SendTaskHeartbeat`, so a heartbeat would collapse the wait to ~1 hour; the bounded 14-day timeout is the durable mechanism.
 
 ![Figure 6 — Step Functions execution paused at HumanReviewGate (waitForTaskToken HITL gate)](assets/console/06-stepfunctions-execution.png)
 *Figure 6. Step Functions execution paused at HumanReviewGate (waitForTaskToken HITL gate) (illustrative mockup, not an actual AWS screenshot).*

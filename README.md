@@ -128,7 +128,7 @@ Every agent shares the same platform stack. Controls compound: a governance impr
 A single abstraction layer routes inference to **Anthropic Claude** (API) or **Amazon Bedrock** (in-account) depending on deployment mode. With Bedrock and the customer-VPC deployment, model traffic stays on AWS via a **`bedrock-runtime` VPC interface endpoint** (PrivateLink) rather than the public internet — see [Network isolation](#network-isolation-no-public-egress-by-default). `EXTRACT_MODE=demo` bypasses the LLM entirely for local testing.
 
 ### PHI Masking
-Structured entity recognition (NER) replaces patient identifiers, dates of birth, and case-linkable fields with stable pseudonyms before any content enters a prompt or an audit record. The masking layer is stateless and runs before every gateway invocation.
+A deterministic Safe-Harbor pass (`phi.py`) masks the structured HIPAA identifier families — SSNs, MRN/subject/case IDs, dates more specific than a year, emails, phone/fax, payment cards, DEA/NPI — before any content enters a prompt or an audit record. The masking layer is stateless and runs before every gateway invocation. Free-text **patient names** (Safe Harbor #1) are **not** caught by the regex pass; masking them requires the ML NER pass (`MASK_ENGINE=ml` / Amazon Comprehend Medical). When `ALLOW_REAL_DATA` is set, that NER pass is **mandatory and fails closed** (the masker raises rather than emit regex-only output that could leave a name in the clear).
 
 ### MCP Authorization Gateway
 

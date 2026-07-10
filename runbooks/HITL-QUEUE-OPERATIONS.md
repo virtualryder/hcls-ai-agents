@@ -130,7 +130,7 @@ SLA deadlines are written to the queue item at creation and are the basis for es
 2. Update the queue item status to `EXPIRED` (do not delete).
 3. Re-invoke the agent workflow to regenerate the draft. The new workflow will create a new Step Functions execution and a new queue item.
 4. If the workflow was for a PV expedited case: immediately notify the Head of Pharmacovigilance and check whether the regulatory deadline is at risk.
-5. Document the timeout in the incident log. Review the Step Functions timeout configuration — the `waitForTaskToken` heartbeat timeout should be set to the longest plausible review time for the workflow type.
+5. Document the timeout in the incident log. Review the Step Functions timeout configuration — the human gate is bounded by the task state's **`TimeoutSeconds`** (e.g. 14 days / `1209600` for the PV Medical Reviewer gate on Agent 02), which should be set to the longest plausible review time for the workflow type. Do **not** re-introduce a `HeartbeatSeconds` on the `waitForTaskToken` gate: nothing in the workflow calls `SendTaskHeartbeat`, so a heartbeat would expire the gate in roughly an hour regardless of the `TimeoutSeconds` value. On timeout the execution routes to the terminal `PipelineFailed` state (the gate fails closed; nothing finalizes without an approval).
 
 ### Scenario C: Queue item in PENDING_REVIEW but no active Step Functions execution
 
