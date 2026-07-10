@@ -182,7 +182,7 @@ A small, runnable worked example — a supervisor invoking a specialist via an A
 The platform design maps to the overlapping regulatory frameworks as follows:
 
 ### HIPAA (45 CFR Parts 160/164)
-- **PHI masking**: NER-based entity recognition replaces identifiers before any content enters an LLM prompt or audit record; the masking is stateless and deterministic
+- **PHI masking**: a stateless, deterministic Safe-Harbor pass masks the structured HIPAA identifier families before any content enters an LLM prompt or audit record; free-text patient names require the ML NER pass, which is mandatory and fails closed under `ALLOW_REAL_DATA` (real-data mode never falls back to regex-only)
 - **Private-connectivity inference**: Bedrock is a regional AWS service reached from the customer's VPC over AWS PrivateLink; PHI never traverses a network boundary to an external AI API
 - **Minimum necessary**: The least-privilege intersection ensures agents access only the PHI fields their tool requires, not the full patient record
 - **Audit controls**: Append-only audit satisfies the HIPAA Security Rule audit log requirement

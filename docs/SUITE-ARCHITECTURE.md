@@ -75,7 +75,7 @@ The governed front door. Every agent tool call — read or write — passes thro
 - **AgentCore Gateway** (production: `infra/cloudformation/agentcore-gateway.yaml`; reference logic: `platform_core/hcls_agent_platform/mcp_gateway/`): registers tool targets, runs the authorization decision, enforces human-approval gate for high-risk tools
 - **AgentCore Identity** (production: AgentCore Identity service; reference: `tokens.py`): mints short-lived, per-call credentials scoped to exactly the requested tool; no standing service accounts
 - **Connector framework** (`platform_core/hcls_agent_platform/connectors/`): per-system adapters (RIM, DMS, Safety, EDC, CTMS, eTMF, RWD, QMS, CRM); implements the `invoke(method, args)` interface; fixture mode in demo, live in production
-- **PHI masker** (`platform_core/hcls_agent_platform/phi_masker/`): NER-based entity recognition runs before every inbound tool result enters a prompt or audit record; stable pseudonyms allow cross-call tracing without PHI exposure
+- **PHI masker** (`platform_core/hcls_agent_platform/phi.py`): a deterministic Safe-Harbor pass masks the structured HIPAA identifier families before every inbound tool result enters a prompt or audit record; free-text patient names require the optional ML NER pass, which is mandatory and fails closed under `ALLOW_REAL_DATA`; stable redaction allows cross-call tracing without PHI exposure
 
 ---
 

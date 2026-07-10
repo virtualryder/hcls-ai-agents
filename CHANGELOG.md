@@ -3,6 +3,28 @@
 All notable changes to the HCLS AI Agent Suite. The authoritative running snapshot is
 `SUITE-STATUS.md`; this file is the released-version summary.
 
+## [Unreleased] — 2026-07-10 hardening pass
+### Changed / Fixed — landed on `main`
+- **Step Functions resilience (Agent 01 native ASL)** — the native pipeline gained `Retry` /
+  `Catch` blocks and per-state `TimeoutSeconds`, plus a terminal **`PipelineFailed`** state so
+  failures surface deterministically instead of hanging.
+- **Human-gate durability fix (02/03/04/09)** — removed the phantom `HeartbeatSeconds: 3600` from
+  the `waitForTaskToken` review gates. Nothing in the workflow calls `SendTaskHeartbeat`, so the
+  heartbeat collapsed the gate to roughly an hour; the gate is now bounded solely by
+  `TimeoutSeconds` (14 days / `1209600` for the PV Medical Reviewer gate), on timeout routing to
+  the terminal `PipelineFailed` state (fails closed).
+- **Drift-checker shipped** — `tools/check_maturity.py` now exists and drives
+  `scripts/run_all_tests.sh`, comparing the collected test count against `MATURITY.yaml`
+  `offline_total`. `MATURITY.yaml offline_total` regenerated to **576** and doc citations aligned.
+- **Real-data PHI masking (`phi.py`)** — added `ALLOW_REAL_DATA`, under which the NER /
+  Comprehend-Medical pass is **mandatory and fails closed** (raises) rather than silently falling
+  back to regex-only. The deterministic regex pass does **not** mask free-text patient names
+  (Safe Harbor #1); real-data masking now refuses to run without the NER engine. Docs softened
+  from "masks every identifier" to reflect this.
+- **Dependencies pinned + scanners blocking** — `platform_core/requirements-lock.txt` hash-pinned;
+  **pip-audit** and **Trivy** are now **blocking** (dropped `|| true` / set `exit-code: "1"`),
+  where they were previously report-only / advisory.
+
 ## [Unreleased]
 ### Added — External-review remediation (P0)
 Independent review (scored 58/100) flagged gaps between the control narrative and the
