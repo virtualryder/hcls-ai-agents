@@ -30,6 +30,22 @@ import os
 import re
 from typing import Optional
 
+_TRUTHY = {"1", "true", "yes", "on"}
+
+
+class RealDataMaskingError(RuntimeError):
+    """
+    Raised when real-data mode (ALLOW_REAL_DATA) is enabled but the mandatory NER
+    engine is not selected/available. The regex pass does NOT mask free-text
+    patient NAMES (Safe Harbor #1); masking those requires the ML engine. Real PHI
+    must not fall back to regex-only, which would leave names in the clear — so the
+    masker FAILS CLOSED here.
+    """
+
+
+def _real_data_mode() -> bool:
+    return os.getenv("ALLOW_REAL_DATA", "").strip().lower() in _TRUTHY
+
 # ── Identifier patterns (order matters: most specific first) ──────────────────
 _SSN_RE = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 _EMAIL_RE = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
@@ -102,6 +118,16 @@ def mask(text: Optional[str]) -> str:
     """
     if not text:
         return ""
+    strict = _real_data_mode()
+    # Real-data mode: the regex pass does not mask free-text patient names (Safe
+    # Harbor #1). Require an NER engine and fail closed if absent, rather than emit
+    # regex-only output that could leak a name.
+    if strict and not _ml_engine_selected():
+        raise RealDataMaskingError(
+            "ALLOW_REAL_DATA is set but no NER engine is selected "
+            "(set MASK_ENGINE=ml or PHI_ENGINE=comprehend_medical). Refusing to mask "
+            "real PHI with the regex-only pass, which does not mask free-text names."
+        )
     out = str(text)
     out = _SSN_RE.sub("[SSN-REDACTED]", out)
     out = _EMAIL_RE.sub("[EMAIL-REDACTED]", out)
@@ -113,11 +139,11 @@ def mask(text: Optional[str]) -> str:
     out = _LONGNUM_RE.sub("[ID-REDACTED]", out)
 
     if _ml_engine_selected():
-        out = _ml_mask(out)
+        out = _ml_mask(out, strict=strict)
     return out
 
 
-def _ml_mask(text: str) -> str:
+def _ml_mask(text: str, strict: bool = False) -> str:
     """Optional ML NER hook — FAIL-CLOSED (mirrors the healthcare suite).
 
     ``PHI_ENGINE=comprehend_medical`` binds the AWS-native Comprehend Medical
@@ -132,12 +158,16 @@ def _ml_mask(text: str) -> str:
         try:  # pragma: no cover - optional dependency path
             from hcls_agent_platform.comprehend_medical import redact  # type: ignore
             return redact(text)
-        except Exception:
+        except Exception as exc:
+            if strict:
+                raise RealDataMaskingError(f"real-data NER pass unavailable/failed: {exc}") from exc
             # Fail closed: the already-deterministically-masked text stands.
             return text
     try:  # pragma: no cover - optional dependency path
         from hcls_agent_platform._ml_ner import redact  # type: ignore
 
         return redact(text)
-    except Exception:
+    except Exception as exc:
+        if strict:
+            raise RealDataMaskingError(f"real-data NER pass unavailable/failed: {exc}") from exc
         return text

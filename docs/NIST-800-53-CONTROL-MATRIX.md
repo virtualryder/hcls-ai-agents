@@ -19,7 +19,7 @@
 | **IR — Incident Response** | IR-4, IR-5, IR-6, IR-8 | IR runbook + audit evidence + notification flow | `INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md`, `runbooks/INCIDENT-RESPONSE.md` | Reference (process) |
 | **CP — Contingency Planning** | CP-9, CP-10 | WORM retention survives stack deletion; DR runbook | `data.yaml`, `runbooks/DR-RUNBOOK.md` | Reference + Customer |
 | **RA — Risk Assessment** | RA-3, RA-5 | Threat model; dependency pinning; (pen test customer-owned) | `THREAT-MODEL.md` | Reference + Customer (pen test) |
-| **SA — System & Services Acq** | SA-11, SA-15 | 575 automated tests incl. governance/red-team; CI gates every change | `make test`, `.github/workflows/ci.yml` | Reference |
+| **SA — System & Services Acq** | SA-11, SA-15 | 576 automated tests incl. governance/red-team; CI gates every change | `make test`, `.github/workflows/ci.yml` | Reference |
 | **PL/PM — Planning / Program** | PL-8, PM-* | Documented architecture, shared-responsibility, production-readiness | `SUITE-ARCHITECTURE.md`, `SHARED-RESPONSIBILITY-MATRIX.md` | Reference |
 | **PT/SI (privacy) — PHI** | HIPAA §164.312(a)(c)(e) | Access control, audit, integrity, transmission security; PHI masked before model/audit | `phi.py`, `policy.py`, `data.yaml` | Reference + Customer (BAA) |
 

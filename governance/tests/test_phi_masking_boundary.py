@@ -45,3 +45,14 @@ def test_masker_is_idempotent_and_fail_closed():
     once = mask(PHI)
     assert mask(once) == once            # safe to re-apply
     assert mask(None) == ""              # never returns unmasked input
+
+
+def test_real_data_mode_requires_ner_engine(monkeypatch):
+    """ALLOW_REAL_DATA without an NER engine must FAIL CLOSED (names would leak)."""
+    import pytest
+    from hcls_agent_platform.phi import mask, RealDataMaskingError
+    monkeypatch.setenv("ALLOW_REAL_DATA", "1")
+    monkeypatch.delenv("MASK_ENGINE", raising=False)
+    monkeypatch.delenv("PHI_ENGINE", raising=False)
+    with pytest.raises(RealDataMaskingError):
+        mask("Subject Jane Doe, DEA AB1234563, seen 2026-01-02")
