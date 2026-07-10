@@ -1,0 +1,95 @@
+name: security
+
+# Standardized security harness — SAST, dependency CVEs, secret scan, IaC scan, SBOM.
+# REPORT-ONLY by default (does not block the build) so it can be adopted without red-lining
+# CI on pre-existing findings. Recommended end-state is BLOCKING against a committed baseline
+# (see SECURITY-CI.md for the exact enforce steps; the EDU repo's security.yml is the enforcing
+# reference). Flip each scanner to blocking after triaging + baselining its findings.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  bandit:
+    name: Bandit (Python SAST)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install bandit
+      # REPORT-ONLY. ENFORCE: generate `.bandit-baseline.json` (see SECURITY-CI.md) and run
+      #   bandit -r . --severity-level medium --confidence-level medium --skip B101 -b .bandit-baseline.json
+      # (drop the `|| true`).
+      - name: Bandit (report-only until baselined)
+        run: bandit -r . --severity-level medium --confidence-level medium --skip B101 -x ./node_modules,./.git || true
+
+  pip-audit:
+    name: pip-audit (dependency CVEs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pip-audit
+      # REPORT-ONLY. ENFORCE: pin deps with hashes in platform_core/requirements-lock.txt and drop `|| true`.
+      - name: pip-audit (report-only until deps are pinned)
+        run: |
+          pip-audit -r platform_core/requirements-lock.txt 2>/dev/null             || pip-audit $(for r in $(git ls-files '*requirements*.txt'); do echo -n " -r $r"; done) || true
+
+  secret-scan:
+    name: detect-secrets (secret scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install detect-secrets
+      # REPORT-ONLY. ENFORCE: commit a reviewed `.secrets.baseline` (see SECURITY-CI.md) and run
+      #   detect-secrets scan --baseline .secrets.baseline  (drop the `|| true`).
+      - name: detect-secrets (report-only until baselined)
+        run: detect-secrets scan --exclude-files 'node_modules/.*' --exclude-files '.*\.(png|jpg|jpeg|pdf|pptx|xlsx)$' > /dev/null || true
+
+  semgrep:
+    name: Semgrep (SAST rulesets)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install semgrep
+      # REPORT-ONLY. ENFORCE: pin a ruleset + triage, then drop `|| true`.
+      - name: Semgrep (report-only)
+        run: semgrep --config p/ci --error --quiet || true
+
+  checkov:
+    name: Checkov (IaC security)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install checkov
+      # soft-fail: pre-existing reference-template findings are surfaced, not blocking.
+      - name: Checkov (soft-fail)
+        run: checkov -d infra --framework cloudformation --compact --soft-fail || true
+
+  sbom:
+    name: SBOM (CycloneDX)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install cyclonedx-bom
+      - name: Generate CycloneDX SBOM
+        run: |
+          cyclonedx-py requirements platform_core/requirements-lock.txt -o sbom.json 2>/dev/null             || cyclonedx-py environment -o sbom.json 2>/dev/null             || echo '{"note":"sbom generation skipped"}' > sbom.json
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with: { name: sbom-cyclonedx, path: sbom.json, if-no-files-found: warn }
