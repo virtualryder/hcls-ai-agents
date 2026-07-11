@@ -51,7 +51,7 @@ controls:                                     # repo/customer ownership per cont
   mcp_authorization_gateway: {designed: true, implemented: true, deployed: true, integration_tested: true, owner: Repo}
   deny_by_default_policy: {designed: true, implemented: true, deployed: true, integration_tested: true, owner: Repo}
   human_approval_sod: {designed: true, implemented: true, deployed: true, integration_tested: true, owner: Repo}
-  phi_pii_masking: {designed: true, implemented: true, deployed: false, integration_tested: false, owner: "Repo (unit-tested; not runtime-verified on AWS)"}
+  phi_pii_masking: {designed: true, implemented: true, deployed: true, integration_tested: false, owner: "Repo (NER runtime-verified on AWS 2026-07-11 via infra/golden-path-masking-verification: Comprehend Medical DetectPHI + Comprehend DetectPiiEntities mask before the audit write, fail-closed — see EVIDENCE.md. Wiring this module into the hero pipeline is the remaining integration step; regex Safe-Harbor still needed for site-specific MRN/ID formats)"}
   append_only_audit_worm: {designed: true, implemented: true, deployed: true, integration_tested: true, owner: "Repo (WORM retention config = Customer)"}
   bedrock_guardrails: {designed: true, implemented: true, deployed: false, owner: "Repo (Agent 02 real-Bedrock path exercised locally)"}
   live_connectors: {designed: true, implemented: true, deployed: false, owner: "Customer (fixtures + Agent 02 tier-3 openFDA; tier-4 = engagement)"}

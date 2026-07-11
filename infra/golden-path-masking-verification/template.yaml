@@ -1,0 +1,185 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Aegis runtime PII/PHI masking verification. Proves — live, on AWS — that the
+  NER masking control executes (fail-closed) BEFORE any audit write, using Amazon
+  Comprehend Medical (DetectPHI) for PHI and Amazon Comprehend (DetectPiiEntities)
+  for general PII. Reference/verification stack: deploy, run against synthetic data
+  in S3, capture evidence, tear down. NOT for real regulated data as-is.
+
+Parameters:
+  FailClosed:
+    Type: String
+    Default: "1"
+    AllowedValues: ["0", "1"]
+    Description: When 1 (default) any NER error blocks and writes NO audit record (fail-closed).
+
+Resources:
+  Cmk:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: eduverify/aegis masking-verification CMK
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: root
+            Effect: Allow
+            Principal: { AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
+            Action: "kms:*"
+            Resource: "*"
+
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref Cmk
+      OwnershipControls:
+        Rules: [{ ObjectOwnership: BucketOwnerEnforced }]
+
+  AuditTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{ AttributeName: audit_id, AttributeType: S }]
+      KeySchema: [{ AttributeName: audit_id, KeyType: HASH }]
+      PointInTimeRecoverySpecification: { PointInTimeRecoveryEnabled: true }
+      SSESpecification: { SSEEnabled: true, SSEType: KMS, KMSMasterKeyId: !Ref Cmk }
+
+  FnRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: masking-verify
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "arn:${AWS::Partition}:logs:*:${AWS::AccountId}:*"
+              # Comprehend / Comprehend Medical detection APIs do not support
+              # resource-level permissions; "*" is the required, expected scope.
+              - Effect: Allow
+                Action: [comprehendmedical:DetectPHI, comprehend:DetectPiiEntities]
+                Resource: "*"
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "${DataBucket.Arn}/*"
+              - Effect: Allow
+                Action: dynamodb:PutItem
+                Resource: !GetAtt AuditTable.Arn
+              # append-only: this role may never mutate or delete an audit record
+              - Effect: Deny
+                Action: [dynamodb:UpdateItem, dynamodb:DeleteItem, dynamodb:BatchWriteItem]
+                Resource: !GetAtt AuditTable.Arn
+              - Effect: Allow
+                Action: [kms:Encrypt, kms:Decrypt, kms:GenerateDataKey]
+                Resource: !GetAtt Cmk.Arn
+
+  Fn:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: aegis-masking-verify
+      Runtime: python3.12
+      Handler: index.handler
+      Timeout: 30
+      Role: !GetAtt FnRole.Arn
+      Environment:
+        Variables:
+          AUDIT_TABLE: !Ref AuditTable
+          DATA_BUCKET: !Ref DataBucket
+          FAIL_CLOSED: !Ref FailClosed
+      Code:
+        ZipFile: |
+          import json, os, time, hashlib, boto3
+          cm  = boto3.client("comprehendmedical")
+          cp  = boto3.client("comprehend")
+          ddb = boto3.client("dynamodb")
+          s3  = boto3.client("s3")
+          TABLE = os.environ["AUDIT_TABLE"]
+          BUCKET = os.environ.get("DATA_BUCKET", "")
+          FAIL_CLOSED = os.environ.get("FAIL_CLOSED", "1") == "1"
+
+          def _merge(spans):
+              # spans: list of (begin, end, label); merge overlaps, keep first label
+              spans = sorted(spans, key=lambda s: (s[0], -s[1]))
+              out = []
+              for b, e, lab in spans:
+                  if out and b <= out[-1][1]:
+                      pb, pe, plab = out[-1]
+                      out[-1] = (pb, max(pe, e), plab)
+                  else:
+                      out.append((b, e, lab))
+              return out
+
+          def _redact(text, spans):
+              for b, e, lab in sorted(_merge(spans), key=lambda s: s[0], reverse=True):
+                  text = text[:b] + "[" + lab + "]" + text[e:]
+              return text
+
+          def handler(event, context):
+              if event.get("s3_key"):
+                  body = s3.get_object(Bucket=BUCKET, Key=event["s3_key"])["Body"].read().decode("utf-8")
+              else:
+                  body = event.get("text", "")
+              # --- NER masking, FAIL-CLOSED: any engine error blocks the write ---
+              try:
+                  phi = cm.detect_phi(Text=body)["Entities"]
+                  pii = cp.detect_pii_entities(Text=body, LanguageCode="en")["Entities"]
+              except Exception as ex:
+                  if FAIL_CLOSED:
+                      # NOTHING is written; the caller sees a hard failure.
+                      raise RuntimeError("NER masking unavailable -> fail-closed, no audit written: %s" % ex)
+                  raise
+              spans  = [(e["BeginOffset"], e["EndOffset"], "PHI:" + e["Type"]) for e in phi]
+              spans += [(e["BeginOffset"], e["EndOffset"], "PII:" + e["Type"]) for e in pii]
+              masked = _redact(body, spans)
+              phi_types = sorted({e["Type"] for e in phi})
+              pii_types = sorted({e["Type"] for e in pii})
+              leaked = (masked == body) and bool(spans)  # sanity: something detected but nothing changed
+              aid = "AUD-" + hashlib.sha256((str(time.time()) + body).encode()).hexdigest()[:20]
+              # append-only write of the MASKED text only; raw body never persisted
+              ddb.put_item(
+                  TableName=TABLE,
+                  Item={
+                      "audit_id": {"S": aid},
+                      "ts": {"N": str(int(time.time()))},
+                      "engine": {"S": "comprehendmedical:DetectPHI + comprehend:DetectPiiEntities"},
+                      "phi_entity_count": {"N": str(len(phi))},
+                      "pii_entity_count": {"N": str(len(pii))},
+                      "phi_types": {"SS": phi_types or ["NONE"]},
+                      "pii_types": {"SS": pii_types or ["NONE"]},
+                      "masked_text": {"S": masked[:3500]},
+                      "masked_before_persist": {"BOOL": True},
+                  },
+                  ConditionExpression="attribute_not_exists(audit_id)",
+              )
+              return {
+                  "audit_id": aid,
+                  "engine": "comprehend-medical + comprehend",
+                  "phi_entity_count": len(phi),
+                  "pii_entity_count": len(pii),
+                  "phi_types": phi_types,
+                  "pii_types": pii_types,
+                  "masked_text": masked,
+                  "fail_closed": FAIL_CLOSED,
+                  "leak_detected": leaked,
+              }
+
+Outputs:
+  FunctionName: { Value: !Ref Fn }
+  DataBucketName: { Value: !Ref DataBucket }
+  AuditTableName: { Value: !Ref AuditTable }

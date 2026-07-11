@@ -1,0 +1,5 @@
+ICSR intake narrative (SYNTHETIC — not real patient data).
+Patient: Jordan A. Fakepatient, DOB 1978-04-12, MRN 00-FAKE-4471, SSN 123-45-6789.
+Contact: jordan.fake@example.org, phone (312) 555-0142, 200 Pretend Ave, Springfield, IL.
+Report: Patient reported severe headache and nausea two days after starting Examplezumab 50mg.
+Treating clinician Dr. Robin Notreal at Anytown General Hospital advised discontinuation.
