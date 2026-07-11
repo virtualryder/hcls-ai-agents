@@ -1,21 +1,57 @@
 {
- "_comment": "Hash-pinned prompt versions. Bump via: python -m governance.prompt_registry --update. CI fails if a registered prompt's text changes without a manifest bump (deliberate, reviewed change control).",
- "01-regulatory-writing:benefit_risk_section": {
-  "agent": "01-regulatory-writing",
-  "name": "benefit_risk_section",
-  "version": 1,
-  "sha256": "managed-by-prompt_registry --update"
- },
- "02-pharmacovigilance:icsr_narrative": {
-  "agent": "02-pharmacovigilance",
-  "name": "icsr_narrative",
-  "version": 1,
-  "sha256": "managed-by-prompt_registry --update"
- },
- "09-manufacturing-batch-review:exception_report": {
-  "agent": "09-manufacturing-batch-review",
-  "name": "exception_report",
-  "version": 1,
-  "sha256": "a27d5eaa9e349997a04d456947113cbe59b00101f69919b122e9e0ac786048d5"
- }
+  "_comment": "Hash-pinned prompt versions. Bump via: python -m governance.prompt_registry --update. CI fails if a registered prompt's text changes without a manifest bump (deliberate, reviewed change control).",
+  "01-regulatory-writing:benefit_risk_section": {
+    "version": 1,
+    "sha256": "e67f394de5a5bab681e8115ab65e4fdad799426083fe416a2b37763539bc8760",
+    "agent": "01-regulatory-writing",
+    "name": "benefit_risk_section"
+  },
+  "02-pharmacovigilance:icsr_narrative": {
+    "version": 1,
+    "sha256": "23868126419a0eebf6232939e7d40068af4b05576b7334621ded2ee2cb05263c",
+    "agent": "02-pharmacovigilance",
+    "name": "icsr_narrative"
+  },
+  "03-clinical-trial-ops:study_health_brief": {
+    "version": 1,
+    "sha256": "7dbaeeddbb6f474517a936e0ff40835c002054c620d9aeaf0c2315362bcc11a8",
+    "agent": "03-clinical-trial-ops",
+    "name": "study_health_brief"
+  },
+  "04-site-patient-matching:site_ranking_report": {
+    "version": 1,
+    "sha256": "d2729fe5285925dbf829ca771ed6583331cbdd682575f8aa974dc4b76a1053d2",
+    "agent": "04-site-patient-matching",
+    "name": "site_ranking_report"
+  },
+  "05-quality-capa:capa_plan": {
+    "version": 1,
+    "sha256": "22817063b39fc7b5843e12890ed0446c465205309d34d2aa3b8cd73f5f98ddce",
+    "agent": "05-quality-capa",
+    "name": "capa_plan"
+  },
+  "06-protocol-design:protocol_sections": {
+    "version": 1,
+    "sha256": "51c43e39db4e7b6f5ff09633e2eee01b5e0cf23bc56f411b811de54e0871a0ab",
+    "agent": "06-protocol-design",
+    "name": "protocol_sections"
+  },
+  "07-rwe-heor:rwe_synthesis": {
+    "version": 1,
+    "sha256": "689823ee0484459420fdf5000b3105dc0fe46a81247bba8d12777634b390024b",
+    "agent": "07-rwe-heor",
+    "name": "rwe_synthesis"
+  },
+  "08-medical-affairs-msl:msl_pre_call_brief": {
+    "version": 1,
+    "sha256": "704b00a7a37d61362f4beb2138a64c28fb194e55761f7b10cb5801bd54276178",
+    "agent": "08-medical-affairs-msl",
+    "name": "msl_pre_call_brief"
+  },
+  "09-manufacturing-batch-review:exception_report": {
+    "version": 1,
+    "sha256": "a27d5eaa9e349997a04d456947113cbe59b00101f69919b122e9e0ac786048d5",
+    "agent": "09-manufacturing-batch-review",
+    "name": "exception_report"
+  }
 }
