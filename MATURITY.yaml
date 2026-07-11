@@ -10,7 +10,7 @@ positioning: reference-accelerator            # not an AWS service; not certifie
 updated: 2026-07-09
 
 tests:
-  offline_total: 576                          # collected-test count; verified by tools/check_maturity.py
+  offline_total: 580                          # collected-test count; verified by tools/check_maturity.py
   suites: 20
   reproduce: "make test   # scripts/run_all_tests.sh — per-process, no API key, no AWS"
   last_verified: 2026-07-10

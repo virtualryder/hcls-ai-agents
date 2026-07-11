@@ -44,3 +44,65 @@ def test_prompt_registry_detects_drift():
     # No manifest entry for test-agent:p1 -> flagged as missing.
     problems = prompt_registry.verify_manifest()
     assert "test-agent:p1" in problems
+
+
+def test_prompt_manifest_pins_all_discovered_prompts():
+    # The shipped manifest must match every self-registering agent prompt exactly:
+    # discovery finds them, and each is pinned to its real SHA-256 (no placeholders).
+    prompt_registry._REGISTRY.clear()
+    prompt_registry._discover()
+    registered = prompt_registry.current_registry()
+    assert registered, "discovery registered no prompts — the gate would be vacuous"
+    assert len(registered) == 9, f"expected 9 registered prompts, got {len(registered)}"
+    assert prompt_registry.verify_manifest() == {}, "shipped manifest does not match registered prompts"
+
+
+def test_prompt_registry_flags_placeholder_pin(tmp_path, monkeypatch):
+    # A manifest entry that still holds a placeholder (not a real SHA-256) must fail
+    # the gate rather than silently passing a vacuous check.
+    import json
+
+    manifest = tmp_path / "prompt_manifest.json"
+    manifest.write_text(json.dumps({
+        "test-agent:p1": {"version": 1, "sha256": "managed-by-prompt_registry --update",
+                          "agent": "test-agent", "name": "p1"},
+    }))
+    monkeypatch.setattr(prompt_registry, "_MANIFEST", manifest)
+    prompt_registry._REGISTRY.clear()
+    prompt_registry.register("test-agent", "p1", v=1, text="original prompt text")
+    problems = prompt_registry.verify_manifest()
+    assert "test-agent:p1" in problems
+    assert "hash-pinned" in problems["test-agent:p1"]
+
+
+def test_prompt_registry_fails_on_vacuous_check(tmp_path, monkeypatch):
+    # Zero registered prompts is itself a failure: an empty gate checks nothing.
+    import json
+
+    manifest = tmp_path / "prompt_manifest.json"
+    manifest.write_text(json.dumps({}))
+    monkeypatch.setattr(prompt_registry, "_MANIFEST", manifest)
+    prompt_registry._REGISTRY.clear()
+    problems = prompt_registry.verify_manifest()
+    assert problems, "an empty registry must fail the change-control gate"
+
+
+def test_prompt_registry_detects_tampered_prompt(tmp_path, monkeypatch):
+    # A registered prompt whose text drifts from its pin must be flagged.
+    import json
+
+    prompt_registry._REGISTRY.clear()
+    prompt_registry.register("test-agent", "p1", v=1, text="original prompt text")
+    pinned = prompt_registry.current_registry()["test-agent:p1"]["sha256"]
+    manifest = tmp_path / "prompt_manifest.json"
+    manifest.write_text(json.dumps({
+        "test-agent:p1": {"version": 1, "sha256": pinned, "agent": "test-agent", "name": "p1"},
+    }))
+    monkeypatch.setattr(prompt_registry, "_MANIFEST", manifest)
+    assert prompt_registry.verify_manifest() == {}
+    # Tamper: same key, changed text -> different SHA-256.
+    prompt_registry._REGISTRY.clear()
+    prompt_registry.register("test-agent", "p1", v=1, text="TAMPERED prompt text")
+    problems = prompt_registry.verify_manifest()
+    assert "test-agent:p1" in problems
+    assert "changed" in problems["test-agent:p1"]
