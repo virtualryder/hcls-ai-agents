@@ -1,0 +1,2132 @@
+2026-07-10 23:19:24,447 [MainThread  ] [WARNI]  Failed to get the checkov mappings and guidelines from https://api0.prismacloud.io/bridgecrew/api/v2/guidelines. Skips using BC_* IDs will not work.
+Traceback (most recent call last):
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/connectionpool.py", line 774, in urlopen
+    self._prepare_proxy(conn)
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/connectionpool.py", line 1055, in _prepare_proxy
+    conn.connect()
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/connection.py", line 776, in connect
+    self._tunnel()
+  File "/usr/lib/python3.11/http/client.py", line 963, in _tunnel
+    raise OSError(f"Tunnel connection failed: {code} {message.strip()}")
+OSError: Tunnel connection failed: 403 Forbidden
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', OSError('Tunnel connection failed: 403 Forbidden'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/checkov/common/bridgecrew/platform_integration.py", line 1276, in get_public_run_config
+    request = self.http.request("GET", self.guidelines_api_url, headers=headers)  # type:ignore[no-untyped-call]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/_request_methods.py", line 135, in request
+    return self.request_encode_url(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/_request_methods.py", line 182, in request_encode_url
+    return self.urlopen(method, url, **extra_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/poolmanager.py", line 649, in urlopen
+    return super().urlopen(method, url, redirect=redirect, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/poolmanager.py", line 457, in urlopen
+    response = conn.urlopen(method, u.request_uri, **kw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/connectionpool.py", line 872, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/connectionpool.py", line 872, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/connectionpool.py", line 872, in urlopen
+    return self.urlopen(
+           ^^^^^^^^^^^^^
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/connectionpool.py", line 842, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/tmp/venv-hcls/lib/python3.11/site-packages/urllib3/util/retry.py", line 543, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api0.prismacloud.io', port=443): Max retries exceeded with url: /bridgecrew/api/v2/guidelines (Caused by ProxyError('Unable to connect to proxy', OSError('Tunnel connection failed: 403 Forbidden')))
+
+       _               _
+   ___| |__   ___  ___| | _______   __
+  / __| '_ \ / _ \/ __| |/ / _ \ \ / /
+ | (__| | | |  __/ (__|   < (_) \ V /
+  \___|_| |_|\___|\___|_|\_\___/ \_/
+
+By Prisma Cloud | version: 3.3.8 
+
+terraform scan results:
+
+Passed checks: 15, Failed checks: 7, Skipped checks: 0
+
+Check: CKV_AWS_41: "Ensure no hard coded AWS access key and secret key exists in provider"
+	PASSED for resource: aws.default
+	File: /terraform/envs/dev/main.tf:13-15
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	PASSED for resource: module.data.aws_dynamodb_table.audit
+	File: /terraform/modules/data/main.tf:4-14
+	Calling File: /terraform/envs/dev/main.tf:31-35
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: module.data.aws_dynamodb_table.audit
+	File: /terraform/modules/data/main.tf:4-14
+	Calling File: /terraform/envs/dev/main.tf:31-35
+Check: CKV_AWS_130: "Ensure VPC subnets do not assign public IP by default"
+	PASSED for resource: module.network.aws_subnet.private[0]
+	File: /terraform/modules/network/main.tf:14-20
+	Calling File: /terraform/envs/dev/main.tf:21-24
+Check: CKV_AWS_130: "Ensure VPC subnets do not assign public IP by default"
+	PASSED for resource: module.network.aws_subnet.private[1]
+	File: /terraform/modules/network/main.tf:14-20
+	Calling File: /terraform/envs/dev/main.tf:21-24
+Check: CKV_AWS_33: "Ensure KMS key policy does not contain wildcard (*) principal"
+	PASSED for resource: module.security.aws_kms_key.this
+	File: /terraform/modules/security/main.tf:3-6
+	Calling File: /terraform/envs/dev/main.tf:26-29
+Check: CKV_AWS_227: "Ensure KMS key is enabled"
+	PASSED for resource: module.security.aws_kms_key.this
+	File: /terraform/modules/security/main.tf:3-6
+	Calling File: /terraform/envs/dev/main.tf:26-29
+Check: CKV_AWS_7: "Ensure rotation for customer created CMKs is enabled"
+	PASSED for resource: module.security.aws_kms_key.this
+	File: /terraform/modules/security/main.tf:3-6
+	Calling File: /terraform/envs/dev/main.tf:26-29
+Check: CKV_AWS_61: "Ensure AWS IAM policy does not allow assume role permission across all services"
+	PASSED for resource: module.security.aws_iam_role.agent_exec
+	File: /terraform/modules/security/main.tf:18-28
+	Calling File: /terraform/envs/dev/main.tf:26-29
+Check: CKV_AWS_60: "Ensure IAM role allows only specific services or principals to assume it"
+	PASSED for resource: module.security.aws_iam_role.agent_exec
+	File: /terraform/modules/security/main.tf:18-28
+	Calling File: /terraform/envs/dev/main.tf:26-29
+Check: CKV_AWS_274: "Disallow IAM roles, users, and groups from using the AWS AdministratorAccess policy"
+	PASSED for resource: module.security.aws_iam_role.agent_exec
+	File: /terraform/modules/security/main.tf:18-28
+	Calling File: /terraform/envs/dev/main.tf:26-29
+Check: CKV_AWS_393: "Ensure AWS GitHub Actions OIDC authorization policies only allow safe claims and claim order on IAM role"
+	PASSED for resource: module.security.aws_iam_role.agent_exec
+	File: /terraform/modules/security/main.tf:18-28
+	Calling File: /terraform/envs/dev/main.tf:26-29
+Check: CKV2_AWS_56: "Ensure AWS Managed IAMFullAccess IAM policy is not used."
+	PASSED for resource: module.security.aws_iam_role.agent_exec
+	File: /terraform/modules/security/main.tf:18-28
+Check: CKV2_AWS_16: "Ensure that Auto Scaling is enabled on your DynamoDB tables"
+	PASSED for resource: module.data.aws_dynamodb_table.audit
+	File: /terraform/modules/data/main.tf:4-14
+Check: CKV2_AWS_16: "Ensure that Auto Scaling is enabled on your DynamoDB tables"
+	PASSED for resource: module.data.aws_dynamodb_table.review
+	File: /terraform/modules/data/main.tf:16-21
+Check: CKV_AWS_285: "Ensure State Machine has execution history logging enabled"
+	FAILED for resource: module.agent_service.aws_sfn_state_machine.this
+	File: /terraform/modules/agent_service/main.tf:12-26
+	Calling File: /terraform/envs/dev/main.tf:37-45
+Check: CKV_AWS_284: "Ensure State Machine has X-Ray tracing enabled"
+	FAILED for resource: module.agent_service.aws_sfn_state_machine.this
+	File: /terraform/modules/agent_service/main.tf:12-26
+	Calling File: /terraform/envs/dev/main.tf:37-45
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: module.data.aws_dynamodb_table.review
+	File: /terraform/modules/data/main.tf:16-21
+	Calling File: /terraform/envs/dev/main.tf:31-35
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: module.data.aws_dynamodb_table.review
+	File: /terraform/modules/data/main.tf:16-21
+	Calling File: /terraform/envs/dev/main.tf:31-35
+Check: CKV2_AWS_11: "Ensure VPC flow logging is enabled in all VPCs"
+	FAILED for resource: module.network.aws_vpc.this
+	File: /terraform/modules/network/main.tf:7-12
+Check: CKV2_AWS_12: "Ensure the default security group of every VPC restricts all traffic"
+	FAILED for resource: module.network.aws_vpc.this
+	File: /terraform/modules/network/main.tf:7-12
+Check: CKV2_AWS_64: "Ensure KMS key Policy is defined"
+	FAILED for resource: module.security.aws_kms_key.this
+	File: /terraform/modules/security/main.tf:3-6
+cloudformation scan results:
+
+Passed checks: 324, Failed checks: 337, Skipped checks: 0
+
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.RimConnector
+	File: /cloudformation/connectors.yaml:28-38
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.RimConnector
+	File: /cloudformation/connectors.yaml:28-38
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.DmsConnector
+	File: /cloudformation/connectors.yaml:40-50
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.DmsConnector
+	File: /cloudformation/connectors.yaml:40-50
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.SafetyConnector
+	File: /cloudformation/connectors.yaml:52-62
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.SafetyConnector
+	File: /cloudformation/connectors.yaml:52-62
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.MeddraConnector
+	File: /cloudformation/connectors.yaml:64-74
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.MeddraConnector
+	File: /cloudformation/connectors.yaml:64-74
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.WhodrugConnector
+	File: /cloudformation/connectors.yaml:76-86
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.WhodrugConnector
+	File: /cloudformation/connectors.yaml:76-86
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.EdcConnector
+	File: /cloudformation/connectors.yaml:88-98
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.EdcConnector
+	File: /cloudformation/connectors.yaml:88-98
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.CtmsConnector
+	File: /cloudformation/connectors.yaml:100-110
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.CtmsConnector
+	File: /cloudformation/connectors.yaml:100-110
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.EtmfConnector
+	File: /cloudformation/connectors.yaml:112-122
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.EtmfConnector
+	File: /cloudformation/connectors.yaml:112-122
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.RwdConnector
+	File: /cloudformation/connectors.yaml:124-134
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.RwdConnector
+	File: /cloudformation/connectors.yaml:124-134
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.QmsConnector
+	File: /cloudformation/connectors.yaml:136-146
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.QmsConnector
+	File: /cloudformation/connectors.yaml:136-146
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.CrmConnector
+	File: /cloudformation/connectors.yaml:148-158
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.CrmConnector
+	File: /cloudformation/connectors.yaml:148-158
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.MlrConnector
+	File: /cloudformation/connectors.yaml:160-170
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.MlrConnector
+	File: /cloudformation/connectors.yaml:160-170
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.MesConnector
+	File: /cloudformation/connectors.yaml:172-182
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.MesConnector
+	File: /cloudformation/connectors.yaml:172-182
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.LimsConnector
+	File: /cloudformation/connectors.yaml:184-194
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.LimsConnector
+	File: /cloudformation/connectors.yaml:184-194
+Check: CKV_AWS_24: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: AWS::EC2::SecurityGroup.AppSecurityGroup
+	File: /cloudformation/network.yaml:137-147
+Check: CKV_AWS_260: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 80"
+	PASSED for resource: AWS::EC2::SecurityGroup.AppSecurityGroup
+	File: /cloudformation/network.yaml:137-147
+Check: CKV_AWS_23: "Ensure every security groups rule has a description"
+	PASSED for resource: AWS::EC2::SecurityGroup.AppSecurityGroup
+	File: /cloudformation/network.yaml:137-147
+Check: CKV_AWS_25: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: AWS::EC2::SecurityGroup.AppSecurityGroup
+	File: /cloudformation/network.yaml:137-147
+Check: CKV_AWS_24: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: AWS::EC2::SecurityGroup.EndpointSecurityGroup
+	File: /cloudformation/network.yaml:155-171
+Check: CKV_AWS_260: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 80"
+	PASSED for resource: AWS::EC2::SecurityGroup.EndpointSecurityGroup
+	File: /cloudformation/network.yaml:155-171
+Check: CKV_AWS_23: "Ensure every security groups rule has a description"
+	PASSED for resource: AWS::EC2::SecurityGroup.EndpointSecurityGroup
+	File: /cloudformation/network.yaml:155-171
+Check: CKV_AWS_25: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: AWS::EC2::SecurityGroup.EndpointSecurityGroup
+	File: /cloudformation/network.yaml:155-171
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.FlowLogGroup
+	File: /cloudformation/network.yaml:258-264
+Check: CKV_AWS_61: "Ensure AWS IAM policy does not allow assume role permission across all services"
+	PASSED for resource: AWS::IAM::Role.FlowLogRole
+	File: /cloudformation/network.yaml:265-284
+Check: CKV_AWS_110: "Ensure IAM policies does not allow privilege escalation"
+	PASSED for resource: AWS::IAM::Role.FlowLogRole
+	File: /cloudformation/network.yaml:265-284
+Check: CKV_AWS_111: "Ensure IAM policies does not allow write access without constraints"
+	PASSED for resource: AWS::IAM::Role.FlowLogRole
+	File: /cloudformation/network.yaml:265-284
+Check: CKV_AWS_108: "Ensure IAM policies does not allow data exfiltration"
+	PASSED for resource: AWS::IAM::Role.FlowLogRole
+	File: /cloudformation/network.yaml:265-284
+Check: CKV_AWS_62: "Ensure no IAM policies that allow full "*-*" administrative privileges are not created"
+	PASSED for resource: AWS::IAM::Role.FlowLogRole
+	File: /cloudformation/network.yaml:265-284
+Check: CKV_AWS_109: "Ensure IAM policies does not allow permissions management without constraints"
+	PASSED for resource: AWS::IAM::Role.FlowLogRole
+	File: /cloudformation/network.yaml:265-284
+Check: CKV_AWS_107: "Ensure IAM policies does not allow credentials exposure"
+	PASSED for resource: AWS::IAM::Role.FlowLogRole
+	File: /cloudformation/network.yaml:265-284
+Check: CKV_AWS_63: "Ensure no IAM policies documents allow "*" as a statement's actions"
+	PASSED for resource: AWS::IAM::Role.FlowLogRole
+	File: /cloudformation/network.yaml:265-284
+Check: CKV_AWS_60: "Ensure IAM role allows only specific services or principals to assume it"
+	PASSED for resource: AWS::IAM::Role.FlowLogRole
+	File: /cloudformation/network.yaml:265-284
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /cloudformation/data.yaml:30-44
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /cloudformation/data.yaml:30-44
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	PASSED for resource: AWS::DynamoDB::Table.ReviewTable
+	File: /cloudformation/data.yaml:46-54
+Check: CKV_AWS_53: "Ensure S3 bucket has block public ACLs enabled"
+	PASSED for resource: AWS::S3::Bucket.WormBucket
+	File: /cloudformation/data.yaml:56-75
+Check: CKV_AWS_54: "Ensure S3 bucket has block public policy enabled"
+	PASSED for resource: AWS::S3::Bucket.WormBucket
+	File: /cloudformation/data.yaml:56-75
+Check: CKV_AWS_19: "Ensure the S3 bucket has server-side-encryption enabled"
+	PASSED for resource: AWS::S3::Bucket.WormBucket
+	File: /cloudformation/data.yaml:56-75
+Check: CKV_AWS_20: "Ensure the S3 bucket does not allow READ permissions to everyone"
+	PASSED for resource: AWS::S3::Bucket.WormBucket
+	File: /cloudformation/data.yaml:56-75
+Check: CKV_AWS_56: "Ensure S3 bucket has RestrictPublicBuckets enabled"
+	PASSED for resource: AWS::S3::Bucket.WormBucket
+	File: /cloudformation/data.yaml:56-75
+Check: CKV_AWS_57: "Ensure the S3 bucket does not allow WRITE permissions to everyone"
+	PASSED for resource: AWS::S3::Bucket.WormBucket
+	File: /cloudformation/data.yaml:56-75
+Check: CKV_AWS_55: "Ensure S3 bucket has ignore public ACLs enabled"
+	PASSED for resource: AWS::S3::Bucket.WormBucket
+	File: /cloudformation/data.yaml:56-75
+Check: CKV_AWS_21: "Ensure the S3 bucket has versioning enabled"
+	PASSED for resource: AWS::S3::Bucket.WormBucket
+	File: /cloudformation/data.yaml:56-75
+Check: CKV_AWS_192: "Ensure WAF prevents message lookup in Log4j2. See CVE-2021-44228 aka log4jshell"
+	PASSED for resource: AWS::WAFv2::WebACL.WebAcl
+	File: /cloudformation/edge.yaml:27-55
+Check: CKV_AWS_68: "CloudFront Distribution should have WAF enabled"
+	PASSED for resource: AWS::CloudFront::Distribution.Distribution
+	File: /cloudformation/edge.yaml:57-78
+Check: CKV_AWS_34: "Ensure CloudFront Distribution ViewerProtocolPolicy is set to HTTPS"
+	PASSED for resource: AWS::CloudFront::Distribution.Distribution
+	File: /cloudformation/edge.yaml:57-78
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.RimPerm
+	File: /cloudformation/gateway-portable.yaml:65-67
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.DmsPerm
+	File: /cloudformation/gateway-portable.yaml:75-77
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.SafetyPerm
+	File: /cloudformation/gateway-portable.yaml:85-87
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.MeddraPerm
+	File: /cloudformation/gateway-portable.yaml:95-97
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.WhodrugPerm
+	File: /cloudformation/gateway-portable.yaml:105-107
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.EdcPerm
+	File: /cloudformation/gateway-portable.yaml:115-117
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.CtmsPerm
+	File: /cloudformation/gateway-portable.yaml:125-127
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.EtmfPerm
+	File: /cloudformation/gateway-portable.yaml:135-137
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.RwdPerm
+	File: /cloudformation/gateway-portable.yaml:145-147
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.QmsPerm
+	File: /cloudformation/gateway-portable.yaml:155-157
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.CrmPerm
+	File: /cloudformation/gateway-portable.yaml:165-167
+Check: CKV_AWS_364: "Ensure that AWS Lambda function permissions delegated to AWS services are limited by SourceArn or SourceAccount"
+	PASSED for resource: AWS::Lambda::Permission.MlrPerm
+	File: /cloudformation/gateway-portable.yaml:175-177
+Check: CKV_AWS_61: "Ensure AWS IAM policy does not allow assume role permission across all services"
+	PASSED for resource: AWS::IAM::Role.StateMachineRole
+	File: /cloudformation/agent-service.yaml:63-78
+Check: CKV_AWS_110: "Ensure IAM policies does not allow privilege escalation"
+	PASSED for resource: AWS::IAM::Role.StateMachineRole
+	File: /cloudformation/agent-service.yaml:63-78
+Check: CKV_AWS_111: "Ensure IAM policies does not allow write access without constraints"
+	PASSED for resource: AWS::IAM::Role.StateMachineRole
+	File: /cloudformation/agent-service.yaml:63-78
+Check: CKV_AWS_108: "Ensure IAM policies does not allow data exfiltration"
+	PASSED for resource: AWS::IAM::Role.StateMachineRole
+	File: /cloudformation/agent-service.yaml:63-78
+Check: CKV_AWS_62: "Ensure no IAM policies that allow full "*-*" administrative privileges are not created"
+	PASSED for resource: AWS::IAM::Role.StateMachineRole
+	File: /cloudformation/agent-service.yaml:63-78
+Check: CKV_AWS_109: "Ensure IAM policies does not allow permissions management without constraints"
+	PASSED for resource: AWS::IAM::Role.StateMachineRole
+	File: /cloudformation/agent-service.yaml:63-78
+Check: CKV_AWS_107: "Ensure IAM policies does not allow credentials exposure"
+	PASSED for resource: AWS::IAM::Role.StateMachineRole
+	File: /cloudformation/agent-service.yaml:63-78
+Check: CKV_AWS_63: "Ensure no IAM policies documents allow "*" as a statement's actions"
+	PASSED for resource: AWS::IAM::Role.StateMachineRole
+	File: /cloudformation/agent-service.yaml:63-78
+Check: CKV_AWS_60: "Ensure IAM role allows only specific services or principals to assume it"
+	PASSED for resource: AWS::IAM::Role.StateMachineRole
+	File: /cloudformation/agent-service.yaml:63-78
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Lambda::Function.AssembleFunction
+	File: /cloudformation/agent-service.yaml:80-94
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	PASSED for resource: AWS::Lambda::Function.AssembleFunction
+	File: /cloudformation/agent-service.yaml:80-94
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.AssembleFunction
+	File: /cloudformation/agent-service.yaml:80-94
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.AssembleFunction
+	File: /cloudformation/agent-service.yaml:80-94
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Lambda::Function.DraftFunction
+	File: /cloudformation/agent-service.yaml:96-114
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.DraftFunction
+	File: /cloudformation/agent-service.yaml:96-114
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.DraftFunction
+	File: /cloudformation/agent-service.yaml:96-114
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Lambda::Function.CheckFunction
+	File: /cloudformation/agent-service.yaml:116-130
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	PASSED for resource: AWS::Lambda::Function.CheckFunction
+	File: /cloudformation/agent-service.yaml:116-130
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.CheckFunction
+	File: /cloudformation/agent-service.yaml:116-130
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.CheckFunction
+	File: /cloudformation/agent-service.yaml:116-130
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Lambda::Function.HitlNotifyFunction
+	File: /cloudformation/agent-service.yaml:132-147
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.HitlNotifyFunction
+	File: /cloudformation/agent-service.yaml:132-147
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.HitlNotifyFunction
+	File: /cloudformation/agent-service.yaml:132-147
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Lambda::Function.FinalizeFunction
+	File: /cloudformation/agent-service.yaml:149-163
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	PASSED for resource: AWS::Lambda::Function.FinalizeFunction
+	File: /cloudformation/agent-service.yaml:149-163
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.FinalizeFunction
+	File: /cloudformation/agent-service.yaml:149-163
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.FinalizeFunction
+	File: /cloudformation/agent-service.yaml:149-163
+Check: CKV_AWS_26: "Ensure all data stored in the SNS topic is encrypted"
+	PASSED for resource: AWS::SNS::Topic.SecurityAlarmTopic
+	File: /cloudformation/security-alarms.yaml:62-66
+Check: CKV_AWS_7: "Ensure rotation for customer created CMKs is enabled"
+	PASSED for resource: AWS::KMS::Key.AgentKmsKey
+	File: /cloudformation/security.yaml:45-57
+Check: CKV_AWS_33: "Ensure KMS key policy does not contain wildcard (*) principal"
+	PASSED for resource: AWS::KMS::Key.AgentKmsKey
+	File: /cloudformation/security.yaml:45-57
+Check: CKV_AWS_61: "Ensure AWS IAM policy does not allow assume role permission across all services"
+	PASSED for resource: AWS::IAM::Role.AgentExecutionRole
+	File: /cloudformation/security.yaml:165-248
+Check: CKV_AWS_110: "Ensure IAM policies does not allow privilege escalation"
+	PASSED for resource: AWS::IAM::Role.AgentExecutionRole
+	File: /cloudformation/security.yaml:165-248
+Check: CKV_AWS_108: "Ensure IAM policies does not allow data exfiltration"
+	PASSED for resource: AWS::IAM::Role.AgentExecutionRole
+	File: /cloudformation/security.yaml:165-248
+Check: CKV_AWS_62: "Ensure no IAM policies that allow full "*-*" administrative privileges are not created"
+	PASSED for resource: AWS::IAM::Role.AgentExecutionRole
+	File: /cloudformation/security.yaml:165-248
+Check: CKV_AWS_109: "Ensure IAM policies does not allow permissions management without constraints"
+	PASSED for resource: AWS::IAM::Role.AgentExecutionRole
+	File: /cloudformation/security.yaml:165-248
+Check: CKV_AWS_107: "Ensure IAM policies does not allow credentials exposure"
+	PASSED for resource: AWS::IAM::Role.AgentExecutionRole
+	File: /cloudformation/security.yaml:165-248
+Check: CKV_AWS_63: "Ensure no IAM policies documents allow "*" as a statement's actions"
+	PASSED for resource: AWS::IAM::Role.AgentExecutionRole
+	File: /cloudformation/security.yaml:165-248
+Check: CKV_AWS_60: "Ensure IAM role allows only specific services or principals to assume it"
+	PASSED for resource: AWS::IAM::Role.AgentExecutionRole
+	File: /cloudformation/security.yaml:165-248
+Check: CKV_AWS_61: "Ensure AWS IAM policy does not allow assume role permission across all services"
+	PASSED for resource: AWS::IAM::Role.AuditWriterRole
+	File: /cloudformation/security.yaml:257-277
+Check: CKV_AWS_110: "Ensure IAM policies does not allow privilege escalation"
+	PASSED for resource: AWS::IAM::Role.AuditWriterRole
+	File: /cloudformation/security.yaml:257-277
+Check: CKV_AWS_111: "Ensure IAM policies does not allow write access without constraints"
+	PASSED for resource: AWS::IAM::Role.AuditWriterRole
+	File: /cloudformation/security.yaml:257-277
+Check: CKV_AWS_108: "Ensure IAM policies does not allow data exfiltration"
+	PASSED for resource: AWS::IAM::Role.AuditWriterRole
+	File: /cloudformation/security.yaml:257-277
+Check: CKV_AWS_62: "Ensure no IAM policies that allow full "*-*" administrative privileges are not created"
+	PASSED for resource: AWS::IAM::Role.AuditWriterRole
+	File: /cloudformation/security.yaml:257-277
+Check: CKV_AWS_109: "Ensure IAM policies does not allow permissions management without constraints"
+	PASSED for resource: AWS::IAM::Role.AuditWriterRole
+	File: /cloudformation/security.yaml:257-277
+Check: CKV_AWS_107: "Ensure IAM policies does not allow credentials exposure"
+	PASSED for resource: AWS::IAM::Role.AuditWriterRole
+	File: /cloudformation/security.yaml:257-277
+Check: CKV_AWS_63: "Ensure no IAM policies documents allow "*" as a statement's actions"
+	PASSED for resource: AWS::IAM::Role.AuditWriterRole
+	File: /cloudformation/security.yaml:257-277
+Check: CKV_AWS_60: "Ensure IAM role allows only specific services or principals to assume it"
+	PASSED for resource: AWS::IAM::Role.AuditWriterRole
+	File: /cloudformation/security.yaml:257-277
+Check: CKV_AWS_61: "Ensure AWS IAM policy does not allow assume role permission across all services"
+	PASSED for resource: AWS::IAM::Role.ApprovalServiceRole
+	File: /cloudformation/security.yaml:279-298
+Check: CKV_AWS_110: "Ensure IAM policies does not allow privilege escalation"
+	PASSED for resource: AWS::IAM::Role.ApprovalServiceRole
+	File: /cloudformation/security.yaml:279-298
+Check: CKV_AWS_111: "Ensure IAM policies does not allow write access without constraints"
+	PASSED for resource: AWS::IAM::Role.ApprovalServiceRole
+	File: /cloudformation/security.yaml:279-298
+Check: CKV_AWS_108: "Ensure IAM policies does not allow data exfiltration"
+	PASSED for resource: AWS::IAM::Role.ApprovalServiceRole
+	File: /cloudformation/security.yaml:279-298
+Check: CKV_AWS_62: "Ensure no IAM policies that allow full "*-*" administrative privileges are not created"
+	PASSED for resource: AWS::IAM::Role.ApprovalServiceRole
+	File: /cloudformation/security.yaml:279-298
+Check: CKV_AWS_109: "Ensure IAM policies does not allow permissions management without constraints"
+	PASSED for resource: AWS::IAM::Role.ApprovalServiceRole
+	File: /cloudformation/security.yaml:279-298
+Check: CKV_AWS_107: "Ensure IAM policies does not allow credentials exposure"
+	PASSED for resource: AWS::IAM::Role.ApprovalServiceRole
+	File: /cloudformation/security.yaml:279-298
+Check: CKV_AWS_63: "Ensure no IAM policies documents allow "*" as a statement's actions"
+	PASSED for resource: AWS::IAM::Role.ApprovalServiceRole
+	File: /cloudformation/security.yaml:279-298
+Check: CKV_AWS_60: "Ensure IAM role allows only specific services or principals to assume it"
+	PASSED for resource: AWS::IAM::Role.ApprovalServiceRole
+	File: /cloudformation/security.yaml:279-298
+Check: CKV_AWS_61: "Ensure AWS IAM policy does not allow assume role permission across all services"
+	PASSED for resource: AWS::IAM::Role.WormExporterRole
+	File: /cloudformation/security.yaml:300-313
+Check: CKV_AWS_110: "Ensure IAM policies does not allow privilege escalation"
+	PASSED for resource: AWS::IAM::Role.WormExporterRole
+	File: /cloudformation/security.yaml:300-313
+Check: CKV_AWS_111: "Ensure IAM policies does not allow write access without constraints"
+	PASSED for resource: AWS::IAM::Role.WormExporterRole
+	File: /cloudformation/security.yaml:300-313
+Check: CKV_AWS_108: "Ensure IAM policies does not allow data exfiltration"
+	PASSED for resource: AWS::IAM::Role.WormExporterRole
+	File: /cloudformation/security.yaml:300-313
+Check: CKV_AWS_62: "Ensure no IAM policies that allow full "*-*" administrative privileges are not created"
+	PASSED for resource: AWS::IAM::Role.WormExporterRole
+	File: /cloudformation/security.yaml:300-313
+Check: CKV_AWS_109: "Ensure IAM policies does not allow permissions management without constraints"
+	PASSED for resource: AWS::IAM::Role.WormExporterRole
+	File: /cloudformation/security.yaml:300-313
+Check: CKV_AWS_107: "Ensure IAM policies does not allow credentials exposure"
+	PASSED for resource: AWS::IAM::Role.WormExporterRole
+	File: /cloudformation/security.yaml:300-313
+Check: CKV_AWS_63: "Ensure no IAM policies documents allow "*" as a statement's actions"
+	PASSED for resource: AWS::IAM::Role.WormExporterRole
+	File: /cloudformation/security.yaml:300-313
+Check: CKV_AWS_60: "Ensure IAM role allows only specific services or principals to assume it"
+	PASSED for resource: AWS::IAM::Role.WormExporterRole
+	File: /cloudformation/security.yaml:300-313
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-01-regulatory-writing/template.yaml:59-73
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-01-regulatory-writing/template.yaml:87-93
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-01-regulatory-writing/template.yaml:87-93
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-01-regulatory-writing/template.yaml:94-105
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-01-regulatory-writing/template.yaml:94-105
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-01-regulatory-writing/template.yaml:106-112
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-01-regulatory-writing/template.yaml:106-112
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-01-regulatory-writing/template.yaml:113-122
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-01-regulatory-writing/template.yaml:113-122
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-01-regulatory-writing/template.yaml:123-132
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-01-regulatory-writing/template.yaml:123-132
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-01-regulatory-writing/template.yaml:134-147
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-01-regulatory-writing/template.yaml:134-147
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	PASSED for resource: AWS::Serverless::HttpApi.GatewayApi
+	File: /golden-path-01-regulatory-writing/template.yaml:198-213
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-01-regulatory-writing/template.yaml:214-218
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-01-regulatory-writing/template.yaml:244-248
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-08-medical-affairs-msl/template.yaml:59-73
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:87-93
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:87-93
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:94-105
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:94-105
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:106-112
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:106-112
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:113-122
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:113-122
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:123-132
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:123-132
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:134-147
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:134-147
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	PASSED for resource: AWS::Serverless::HttpApi.GatewayApi
+	File: /golden-path-08-medical-affairs-msl/template.yaml:198-213
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-08-medical-affairs-msl/template.yaml:214-218
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-08-medical-affairs-msl/template.yaml:244-248
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-05-quality-capa/template.yaml:59-73
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-05-quality-capa/template.yaml:87-93
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-05-quality-capa/template.yaml:87-93
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-05-quality-capa/template.yaml:94-105
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-05-quality-capa/template.yaml:94-105
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-05-quality-capa/template.yaml:106-112
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-05-quality-capa/template.yaml:106-112
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-05-quality-capa/template.yaml:113-122
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-05-quality-capa/template.yaml:113-122
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-05-quality-capa/template.yaml:123-132
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-05-quality-capa/template.yaml:123-132
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-05-quality-capa/template.yaml:134-147
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-05-quality-capa/template.yaml:134-147
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	PASSED for resource: AWS::Serverless::HttpApi.GatewayApi
+	File: /golden-path-05-quality-capa/template.yaml:198-213
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-05-quality-capa/template.yaml:214-218
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-05-quality-capa/template.yaml:244-248
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.FirewallLogGroup
+	File: /golden-path-02-pharmacovigilance/egress-openfda.yaml:80-84
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.FwLogGroup
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:88-92
+Check: CKV_AWS_24: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: AWS::EC2::SecurityGroup.LambdaSg
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:151-157
+Check: CKV_AWS_260: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 80"
+	PASSED for resource: AWS::EC2::SecurityGroup.LambdaSg
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:151-157
+Check: CKV_AWS_23: "Ensure every security groups rule has a description"
+	PASSED for resource: AWS::EC2::SecurityGroup.LambdaSg
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:151-157
+Check: CKV_AWS_25: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: AWS::EC2::SecurityGroup.LambdaSg
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:151-157
+Check: CKV_AWS_61: "Ensure AWS IAM policy does not allow assume role permission across all services"
+	PASSED for resource: AWS::IAM::Role.LambdaRole
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:158-166
+Check: CKV_AWS_110: "Ensure IAM policies does not allow privilege escalation"
+	PASSED for resource: AWS::IAM::Role.LambdaRole
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:158-166
+Check: CKV_AWS_111: "Ensure IAM policies does not allow write access without constraints"
+	PASSED for resource: AWS::IAM::Role.LambdaRole
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:158-166
+Check: CKV_AWS_108: "Ensure IAM policies does not allow data exfiltration"
+	PASSED for resource: AWS::IAM::Role.LambdaRole
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:158-166
+Check: CKV_AWS_109: "Ensure IAM policies does not allow permissions management without constraints"
+	PASSED for resource: AWS::IAM::Role.LambdaRole
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:158-166
+Check: CKV_AWS_107: "Ensure IAM policies does not allow credentials exposure"
+	PASSED for resource: AWS::IAM::Role.LambdaRole
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:158-166
+Check: CKV_AWS_60: "Ensure IAM role allows only specific services or principals to assume it"
+	PASSED for resource: AWS::IAM::Role.LambdaRole
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:158-166
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Lambda::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:167-203
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Lambda::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:167-203
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Lambda::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:167-203
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-02-pharmacovigilance/template.yaml:91-105
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:133-139
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:133-139
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:133-139
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:140-151
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:140-151
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:140-151
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:152-158
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:152-158
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:152-158
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:159-175
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:159-175
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:159-175
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:176-188
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:176-188
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:176-188
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:190-207
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:190-207
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:190-207
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	PASSED for resource: AWS::Serverless::HttpApi.GatewayApi
+	File: /golden-path-02-pharmacovigilance/template.yaml:258-273
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-02-pharmacovigilance/template.yaml:274-278
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-02-pharmacovigilance/template.yaml:304-308
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:59-73
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:87-93
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:87-93
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:94-105
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:94-105
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:106-112
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:106-112
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:113-122
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:113-122
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:123-132
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:123-132
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:134-147
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:134-147
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	PASSED for resource: AWS::Serverless::HttpApi.GatewayApi
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:198-213
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:214-218
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:244-248
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-07-rwe-heor/template.yaml:59-73
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-07-rwe-heor/template.yaml:87-93
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-07-rwe-heor/template.yaml:87-93
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-07-rwe-heor/template.yaml:94-105
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-07-rwe-heor/template.yaml:94-105
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-07-rwe-heor/template.yaml:106-112
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-07-rwe-heor/template.yaml:106-112
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-07-rwe-heor/template.yaml:113-122
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-07-rwe-heor/template.yaml:113-122
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-07-rwe-heor/template.yaml:123-132
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-07-rwe-heor/template.yaml:123-132
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-07-rwe-heor/template.yaml:134-147
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-07-rwe-heor/template.yaml:134-147
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	PASSED for resource: AWS::Serverless::HttpApi.GatewayApi
+	File: /golden-path-07-rwe-heor/template.yaml:198-213
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-07-rwe-heor/template.yaml:214-218
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-07-rwe-heor/template.yaml:244-248
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-04-site-patient-matching/template.yaml:59-73
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-04-site-patient-matching/template.yaml:87-93
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-04-site-patient-matching/template.yaml:87-93
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-04-site-patient-matching/template.yaml:94-105
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-04-site-patient-matching/template.yaml:94-105
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-04-site-patient-matching/template.yaml:106-112
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-04-site-patient-matching/template.yaml:106-112
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-04-site-patient-matching/template.yaml:113-122
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-04-site-patient-matching/template.yaml:113-122
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-04-site-patient-matching/template.yaml:123-132
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-04-site-patient-matching/template.yaml:123-132
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-04-site-patient-matching/template.yaml:134-147
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-04-site-patient-matching/template.yaml:134-147
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	PASSED for resource: AWS::Serverless::HttpApi.GatewayApi
+	File: /golden-path-04-site-patient-matching/template.yaml:198-213
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-04-site-patient-matching/template.yaml:214-218
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-04-site-patient-matching/template.yaml:244-248
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-06-protocol-design/template.yaml:59-73
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-06-protocol-design/template.yaml:87-93
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-06-protocol-design/template.yaml:87-93
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-06-protocol-design/template.yaml:94-105
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-06-protocol-design/template.yaml:94-105
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-06-protocol-design/template.yaml:106-112
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-06-protocol-design/template.yaml:106-112
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-06-protocol-design/template.yaml:113-122
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-06-protocol-design/template.yaml:113-122
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-06-protocol-design/template.yaml:123-132
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-06-protocol-design/template.yaml:123-132
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-06-protocol-design/template.yaml:134-147
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-06-protocol-design/template.yaml:134-147
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	PASSED for resource: AWS::Serverless::HttpApi.GatewayApi
+	File: /golden-path-06-protocol-design/template.yaml:198-213
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-06-protocol-design/template.yaml:214-218
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-06-protocol-design/template.yaml:244-248
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	PASSED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-03-clinical-trial-ops/template.yaml:59-73
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:87-93
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:87-93
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:94-105
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:94-105
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:106-112
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:106-112
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:113-122
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:113-122
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:123-132
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:123-132
+Check: CKV_AWS_45: "Ensure no hard-coded secrets exist in Lambda environment"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:134-147
+Check: CKV_AWS_363: "Ensure Lambda Runtime is not deprecated"
+	PASSED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:134-147
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	PASSED for resource: AWS::Serverless::HttpApi.GatewayApi
+	File: /golden-path-03-clinical-trial-ops/template.yaml:198-213
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-03-clinical-trial-ops/template.yaml:214-218
+Check: CKV_AWS_66: "Ensure that CloudWatch Log Group specifies retention days"
+	PASSED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-03-clinical-trial-ops/template.yaml:244-248
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.RimConnector
+	File: /cloudformation/connectors.yaml:28-38
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.DmsConnector
+	File: /cloudformation/connectors.yaml:40-50
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.SafetyConnector
+	File: /cloudformation/connectors.yaml:52-62
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.MeddraConnector
+	File: /cloudformation/connectors.yaml:64-74
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.WhodrugConnector
+	File: /cloudformation/connectors.yaml:76-86
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.EdcConnector
+	File: /cloudformation/connectors.yaml:88-98
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.CtmsConnector
+	File: /cloudformation/connectors.yaml:100-110
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.EtmfConnector
+	File: /cloudformation/connectors.yaml:112-122
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.RwdConnector
+	File: /cloudformation/connectors.yaml:124-134
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.QmsConnector
+	File: /cloudformation/connectors.yaml:136-146
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.CrmConnector
+	File: /cloudformation/connectors.yaml:148-158
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.MlrConnector
+	File: /cloudformation/connectors.yaml:160-170
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.MesConnector
+	File: /cloudformation/connectors.yaml:172-182
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.LimsConnector
+	File: /cloudformation/connectors.yaml:184-194
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.AssembleFunction
+	File: /cloudformation/agent-service.yaml:80-94
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.DraftFunction
+	File: /cloudformation/agent-service.yaml:96-114
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.CheckFunction
+	File: /cloudformation/agent-service.yaml:116-130
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.HitlNotifyFunction
+	File: /cloudformation/agent-service.yaml:132-147
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.FinalizeFunction
+	File: /cloudformation/agent-service.yaml:149-163
+Check: CKV2_AWS_75: "Ensure no open CORS policy"
+	PASSED for resource: AWS::Lambda::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:167-203
+Check: CKV2_AWS_72: "Ensure AWS CloudFront origin protocol policy enforces HTTPS-only"
+	PASSED for resource: AWS::CloudFront::Distribution.Distribution
+	File: /cloudformation/edge.yaml:57-78
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.RimConnector
+	File: /cloudformation/connectors.yaml:28-38
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.RimConnector
+	File: /cloudformation/connectors.yaml:28-38
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.RimConnector
+	File: /cloudformation/connectors.yaml:28-38
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.RimConnector
+	File: /cloudformation/connectors.yaml:28-38
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.DmsConnector
+	File: /cloudformation/connectors.yaml:40-50
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.DmsConnector
+	File: /cloudformation/connectors.yaml:40-50
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.DmsConnector
+	File: /cloudformation/connectors.yaml:40-50
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.DmsConnector
+	File: /cloudformation/connectors.yaml:40-50
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.SafetyConnector
+	File: /cloudformation/connectors.yaml:52-62
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.SafetyConnector
+	File: /cloudformation/connectors.yaml:52-62
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.SafetyConnector
+	File: /cloudformation/connectors.yaml:52-62
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.SafetyConnector
+	File: /cloudformation/connectors.yaml:52-62
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.MeddraConnector
+	File: /cloudformation/connectors.yaml:64-74
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.MeddraConnector
+	File: /cloudformation/connectors.yaml:64-74
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.MeddraConnector
+	File: /cloudformation/connectors.yaml:64-74
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.MeddraConnector
+	File: /cloudformation/connectors.yaml:64-74
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.WhodrugConnector
+	File: /cloudformation/connectors.yaml:76-86
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.WhodrugConnector
+	File: /cloudformation/connectors.yaml:76-86
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.WhodrugConnector
+	File: /cloudformation/connectors.yaml:76-86
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.WhodrugConnector
+	File: /cloudformation/connectors.yaml:76-86
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.EdcConnector
+	File: /cloudformation/connectors.yaml:88-98
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.EdcConnector
+	File: /cloudformation/connectors.yaml:88-98
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.EdcConnector
+	File: /cloudformation/connectors.yaml:88-98
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.EdcConnector
+	File: /cloudformation/connectors.yaml:88-98
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.CtmsConnector
+	File: /cloudformation/connectors.yaml:100-110
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.CtmsConnector
+	File: /cloudformation/connectors.yaml:100-110
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.CtmsConnector
+	File: /cloudformation/connectors.yaml:100-110
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.CtmsConnector
+	File: /cloudformation/connectors.yaml:100-110
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.EtmfConnector
+	File: /cloudformation/connectors.yaml:112-122
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.EtmfConnector
+	File: /cloudformation/connectors.yaml:112-122
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.EtmfConnector
+	File: /cloudformation/connectors.yaml:112-122
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.EtmfConnector
+	File: /cloudformation/connectors.yaml:112-122
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.RwdConnector
+	File: /cloudformation/connectors.yaml:124-134
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.RwdConnector
+	File: /cloudformation/connectors.yaml:124-134
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.RwdConnector
+	File: /cloudformation/connectors.yaml:124-134
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.RwdConnector
+	File: /cloudformation/connectors.yaml:124-134
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.QmsConnector
+	File: /cloudformation/connectors.yaml:136-146
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.QmsConnector
+	File: /cloudformation/connectors.yaml:136-146
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.QmsConnector
+	File: /cloudformation/connectors.yaml:136-146
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.QmsConnector
+	File: /cloudformation/connectors.yaml:136-146
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.CrmConnector
+	File: /cloudformation/connectors.yaml:148-158
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.CrmConnector
+	File: /cloudformation/connectors.yaml:148-158
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.CrmConnector
+	File: /cloudformation/connectors.yaml:148-158
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.CrmConnector
+	File: /cloudformation/connectors.yaml:148-158
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.MlrConnector
+	File: /cloudformation/connectors.yaml:160-170
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.MlrConnector
+	File: /cloudformation/connectors.yaml:160-170
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.MlrConnector
+	File: /cloudformation/connectors.yaml:160-170
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.MlrConnector
+	File: /cloudformation/connectors.yaml:160-170
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.MesConnector
+	File: /cloudformation/connectors.yaml:172-182
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.MesConnector
+	File: /cloudformation/connectors.yaml:172-182
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.MesConnector
+	File: /cloudformation/connectors.yaml:172-182
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.MesConnector
+	File: /cloudformation/connectors.yaml:172-182
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.LimsConnector
+	File: /cloudformation/connectors.yaml:184-194
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Lambda::Function.LimsConnector
+	File: /cloudformation/connectors.yaml:184-194
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.LimsConnector
+	File: /cloudformation/connectors.yaml:184-194
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.LimsConnector
+	File: /cloudformation/connectors.yaml:184-194
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.FlowLogGroup
+	File: /cloudformation/network.yaml:258-264
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.ReviewTable
+	File: /cloudformation/data.yaml:46-54
+Check: CKV_AWS_18: "Ensure the S3 bucket has access logging enabled"
+	FAILED for resource: AWS::S3::Bucket.WormBucket
+	File: /cloudformation/data.yaml:56-75
+Check: CKV_AWS_86: "Ensure CloudFront Distribution has Access Logging enabled"
+	FAILED for resource: AWS::CloudFront::Distribution.Distribution
+	File: /cloudformation/edge.yaml:57-78
+Check: CKV_AWS_174: "Verify CloudFront Distribution Viewer Certificate is using TLS v1.2 or higher"
+	FAILED for resource: AWS::CloudFront::Distribution.Distribution
+	File: /cloudformation/edge.yaml:57-78
+Check: CKV_AWS_95: "Ensure API Gateway V2 has Access Logging enabled"
+	FAILED for resource: AWS::ApiGatewayV2::Stage.Stage
+	File: /cloudformation/gateway-portable.yaml:51-56
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.AssembleFunction
+	File: /cloudformation/agent-service.yaml:80-94
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.AssembleFunction
+	File: /cloudformation/agent-service.yaml:80-94
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.DraftFunction
+	File: /cloudformation/agent-service.yaml:96-114
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.DraftFunction
+	File: /cloudformation/agent-service.yaml:96-114
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.DraftFunction
+	File: /cloudformation/agent-service.yaml:96-114
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.CheckFunction
+	File: /cloudformation/agent-service.yaml:116-130
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.CheckFunction
+	File: /cloudformation/agent-service.yaml:116-130
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.HitlNotifyFunction
+	File: /cloudformation/agent-service.yaml:132-147
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.HitlNotifyFunction
+	File: /cloudformation/agent-service.yaml:132-147
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.HitlNotifyFunction
+	File: /cloudformation/agent-service.yaml:132-147
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.FinalizeFunction
+	File: /cloudformation/agent-service.yaml:149-163
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.FinalizeFunction
+	File: /cloudformation/agent-service.yaml:149-163
+Check: CKV_AWS_111: "Ensure IAM policies does not allow write access without constraints"
+	FAILED for resource: AWS::IAM::Role.AgentExecutionRole
+	File: /cloudformation/security.yaml:165-248
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-01-regulatory-writing/template.yaml:59-73
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-01-regulatory-writing/template.yaml:75-85
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-01-regulatory-writing/template.yaml:75-85
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-01-regulatory-writing/template.yaml:87-93
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-01-regulatory-writing/template.yaml:87-93
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-01-regulatory-writing/template.yaml:87-93
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-01-regulatory-writing/template.yaml:87-93
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-01-regulatory-writing/template.yaml:94-105
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-01-regulatory-writing/template.yaml:94-105
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-01-regulatory-writing/template.yaml:94-105
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-01-regulatory-writing/template.yaml:94-105
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-01-regulatory-writing/template.yaml:106-112
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-01-regulatory-writing/template.yaml:106-112
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-01-regulatory-writing/template.yaml:106-112
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-01-regulatory-writing/template.yaml:106-112
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-01-regulatory-writing/template.yaml:113-122
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-01-regulatory-writing/template.yaml:113-122
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-01-regulatory-writing/template.yaml:113-122
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-01-regulatory-writing/template.yaml:113-122
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-01-regulatory-writing/template.yaml:123-132
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-01-regulatory-writing/template.yaml:123-132
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-01-regulatory-writing/template.yaml:123-132
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-01-regulatory-writing/template.yaml:123-132
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-01-regulatory-writing/template.yaml:134-147
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-01-regulatory-writing/template.yaml:134-147
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-01-regulatory-writing/template.yaml:134-147
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-01-regulatory-writing/template.yaml:134-147
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-01-regulatory-writing/template.yaml:214-218
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-01-regulatory-writing/template.yaml:244-248
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-08-medical-affairs-msl/template.yaml:59-73
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-08-medical-affairs-msl/template.yaml:75-85
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-08-medical-affairs-msl/template.yaml:75-85
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:87-93
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:87-93
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:87-93
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:87-93
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:94-105
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:94-105
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:94-105
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:94-105
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:106-112
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:106-112
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:106-112
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:106-112
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:113-122
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:113-122
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:113-122
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:113-122
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:123-132
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:123-132
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:123-132
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:123-132
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:134-147
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:134-147
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:134-147
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-08-medical-affairs-msl/template.yaml:134-147
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-08-medical-affairs-msl/template.yaml:214-218
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-08-medical-affairs-msl/template.yaml:244-248
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-05-quality-capa/template.yaml:59-73
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-05-quality-capa/template.yaml:75-85
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-05-quality-capa/template.yaml:75-85
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-05-quality-capa/template.yaml:87-93
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-05-quality-capa/template.yaml:87-93
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-05-quality-capa/template.yaml:87-93
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-05-quality-capa/template.yaml:87-93
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-05-quality-capa/template.yaml:94-105
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-05-quality-capa/template.yaml:94-105
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-05-quality-capa/template.yaml:94-105
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-05-quality-capa/template.yaml:94-105
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-05-quality-capa/template.yaml:106-112
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-05-quality-capa/template.yaml:106-112
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-05-quality-capa/template.yaml:106-112
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-05-quality-capa/template.yaml:106-112
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-05-quality-capa/template.yaml:113-122
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-05-quality-capa/template.yaml:113-122
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-05-quality-capa/template.yaml:113-122
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-05-quality-capa/template.yaml:113-122
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-05-quality-capa/template.yaml:123-132
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-05-quality-capa/template.yaml:123-132
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-05-quality-capa/template.yaml:123-132
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-05-quality-capa/template.yaml:123-132
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-05-quality-capa/template.yaml:134-147
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-05-quality-capa/template.yaml:134-147
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-05-quality-capa/template.yaml:134-147
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-05-quality-capa/template.yaml:134-147
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-05-quality-capa/template.yaml:214-218
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-05-quality-capa/template.yaml:244-248
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.FirewallLogGroup
+	File: /golden-path-02-pharmacovigilance/egress-openfda.yaml:80-84
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.FwLogGroup
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:88-92
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Lambda::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:167-203
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Lambda::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:167-203
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Lambda::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/evidence-openfda.yaml:167-203
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-02-pharmacovigilance/template.yaml:91-105
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-02-pharmacovigilance/template.yaml:107-117
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-02-pharmacovigilance/template.yaml:107-117
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.ApprovalConsumptionTable
+	File: /golden-path-02-pharmacovigilance/template.yaml:121-131
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.ApprovalConsumptionTable
+	File: /golden-path-02-pharmacovigilance/template.yaml:121-131
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:133-139
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:133-139
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:133-139
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:140-151
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:140-151
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:140-151
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:152-158
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:152-158
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:152-158
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:159-175
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:159-175
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:159-175
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:176-188
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:176-188
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:176-188
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:190-207
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:190-207
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-02-pharmacovigilance/template.yaml:190-207
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-02-pharmacovigilance/template.yaml:274-278
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-02-pharmacovigilance/template.yaml:304-308
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:59-73
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:75-85
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:75-85
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:87-93
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:87-93
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:87-93
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:87-93
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:94-105
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:94-105
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:94-105
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:94-105
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:106-112
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:106-112
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:106-112
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:106-112
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:113-122
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:113-122
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:113-122
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:113-122
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:123-132
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:123-132
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:123-132
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:123-132
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:134-147
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:134-147
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:134-147
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:134-147
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:214-218
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-09-manufacturing-batch-review/template.yaml:244-248
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-07-rwe-heor/template.yaml:59-73
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-07-rwe-heor/template.yaml:75-85
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-07-rwe-heor/template.yaml:75-85
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-07-rwe-heor/template.yaml:87-93
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-07-rwe-heor/template.yaml:87-93
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-07-rwe-heor/template.yaml:87-93
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-07-rwe-heor/template.yaml:87-93
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-07-rwe-heor/template.yaml:94-105
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-07-rwe-heor/template.yaml:94-105
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-07-rwe-heor/template.yaml:94-105
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-07-rwe-heor/template.yaml:94-105
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-07-rwe-heor/template.yaml:106-112
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-07-rwe-heor/template.yaml:106-112
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-07-rwe-heor/template.yaml:106-112
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-07-rwe-heor/template.yaml:106-112
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-07-rwe-heor/template.yaml:113-122
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-07-rwe-heor/template.yaml:113-122
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-07-rwe-heor/template.yaml:113-122
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-07-rwe-heor/template.yaml:113-122
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-07-rwe-heor/template.yaml:123-132
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-07-rwe-heor/template.yaml:123-132
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-07-rwe-heor/template.yaml:123-132
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-07-rwe-heor/template.yaml:123-132
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-07-rwe-heor/template.yaml:134-147
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-07-rwe-heor/template.yaml:134-147
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-07-rwe-heor/template.yaml:134-147
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-07-rwe-heor/template.yaml:134-147
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-07-rwe-heor/template.yaml:214-218
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-07-rwe-heor/template.yaml:244-248
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-04-site-patient-matching/template.yaml:59-73
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-04-site-patient-matching/template.yaml:75-85
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-04-site-patient-matching/template.yaml:75-85
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-04-site-patient-matching/template.yaml:87-93
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-04-site-patient-matching/template.yaml:87-93
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-04-site-patient-matching/template.yaml:87-93
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-04-site-patient-matching/template.yaml:87-93
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-04-site-patient-matching/template.yaml:94-105
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-04-site-patient-matching/template.yaml:94-105
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-04-site-patient-matching/template.yaml:94-105
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-04-site-patient-matching/template.yaml:94-105
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-04-site-patient-matching/template.yaml:106-112
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-04-site-patient-matching/template.yaml:106-112
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-04-site-patient-matching/template.yaml:106-112
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-04-site-patient-matching/template.yaml:106-112
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-04-site-patient-matching/template.yaml:113-122
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-04-site-patient-matching/template.yaml:113-122
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-04-site-patient-matching/template.yaml:113-122
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-04-site-patient-matching/template.yaml:113-122
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-04-site-patient-matching/template.yaml:123-132
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-04-site-patient-matching/template.yaml:123-132
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-04-site-patient-matching/template.yaml:123-132
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-04-site-patient-matching/template.yaml:123-132
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-04-site-patient-matching/template.yaml:134-147
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-04-site-patient-matching/template.yaml:134-147
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-04-site-patient-matching/template.yaml:134-147
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-04-site-patient-matching/template.yaml:134-147
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-04-site-patient-matching/template.yaml:214-218
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-04-site-patient-matching/template.yaml:244-248
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-06-protocol-design/template.yaml:59-73
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-06-protocol-design/template.yaml:75-85
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-06-protocol-design/template.yaml:75-85
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-06-protocol-design/template.yaml:87-93
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-06-protocol-design/template.yaml:87-93
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-06-protocol-design/template.yaml:87-93
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-06-protocol-design/template.yaml:87-93
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-06-protocol-design/template.yaml:94-105
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-06-protocol-design/template.yaml:94-105
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-06-protocol-design/template.yaml:94-105
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-06-protocol-design/template.yaml:94-105
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-06-protocol-design/template.yaml:106-112
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-06-protocol-design/template.yaml:106-112
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-06-protocol-design/template.yaml:106-112
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-06-protocol-design/template.yaml:106-112
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-06-protocol-design/template.yaml:113-122
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-06-protocol-design/template.yaml:113-122
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-06-protocol-design/template.yaml:113-122
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-06-protocol-design/template.yaml:113-122
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-06-protocol-design/template.yaml:123-132
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-06-protocol-design/template.yaml:123-132
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-06-protocol-design/template.yaml:123-132
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-06-protocol-design/template.yaml:123-132
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-06-protocol-design/template.yaml:134-147
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-06-protocol-design/template.yaml:134-147
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-06-protocol-design/template.yaml:134-147
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-06-protocol-design/template.yaml:134-147
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-06-protocol-design/template.yaml:214-218
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-06-protocol-design/template.yaml:244-248
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.AuditTable
+	File: /golden-path-03-clinical-trial-ops/template.yaml:59-73
+Check: CKV_AWS_119: "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-03-clinical-trial-ops/template.yaml:75-85
+Check: CKV_AWS_28: "Ensure DynamoDB point in time recovery (backup) is enabled"
+	FAILED for resource: AWS::DynamoDB::Table.PendingApprovalsTable
+	File: /golden-path-03-clinical-trial-ops/template.yaml:75-85
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:87-93
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:87-93
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:87-93
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.AssembleFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:87-93
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:94-105
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:94-105
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:94-105
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.DraftFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:94-105
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:106-112
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:106-112
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:106-112
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.CheckFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:106-112
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:113-122
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:113-122
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:113-122
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.FinalizeFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:113-122
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:123-132
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:123-132
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:123-132
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.HitlNotifyFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:123-132
+Check: CKV_AWS_116: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:134-147
+Check: CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:134-147
+Check: CKV_AWS_115: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:134-147
+Check: CKV_AWS_173: "Check encryption settings for Lambda environment variable"
+	FAILED for resource: AWS::Serverless::Function.ConnectorFn
+	File: /golden-path-03-clinical-trial-ops/template.yaml:134-147
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.GatewayAccessLogs
+	File: /golden-path-03-clinical-trial-ops/template.yaml:214-218
+Check: CKV_AWS_158: "Ensure that CloudWatch Log Group is encrypted by KMS"
+	FAILED for resource: AWS::Logs::LogGroup.StateMachineLogs
+	File: /golden-path-03-clinical-trial-ops/template.yaml:244-248
+

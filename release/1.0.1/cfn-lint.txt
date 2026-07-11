@@ -1,0 +1,1 @@
+PASS: cfn-lint exited 0 with no output (no findings).
