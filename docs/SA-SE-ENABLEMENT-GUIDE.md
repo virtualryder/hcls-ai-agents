@@ -50,7 +50,7 @@ it points you at the right artifact for every moment of a deal.
 | Objection | Response |
 |---|---|
 | "It's not finished." | Correct — and that's normal for governed AI on regulated GxP records. The gaps are named on the shortfalls slide and scoped on the backlog slide. |
-| "Why not just use a vendor SaaS?" | A SaaS can't take your GxP / Part 11 accountability, and it sends your data to a third-party service. Here Bedrock is a regional AWS service reached only over AWS PrivateLink under your BAA, and PHI is masked before any model call — no egress to external AI APIs. |
+| "Why not just use a vendor SaaS?" | A SaaS can't take your GxP / Part 11 accountability, and it sends your data to a third-party service. Here Bedrock is a regional AWS service reached only over AWS PrivateLink under your BAA, and PHI is masked at the audit and model-output boundaries (input filterable by Bedrock Guardrails, not blanket pre-scrubbed) — no egress to external AI APIs. |
 | "Bedrock vs. best model of the week?" | The LLM factory abstracts the model — swap without re-architecting. VPC-private inference + IAM governance won the trade. |
 | "This is a lot of work." | It's the same list for *any* governed AI build — the difference is here it's written down and scoped, not discovered mid-project. |
 
