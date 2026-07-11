@@ -5,7 +5,11 @@ set -euo pipefail
 cd "$(dirname "$0")"
 STACK="${1:-hcls-09-dev}"
 REGION="${AWS_REGION:-us-east-1}"
-export APPROVAL_TOKEN_SECRET="${APPROVAL_TOKEN_SECRET:-dev-only-not-for-production}"
+# Per-run token secret. Reuse it from the deploy step (export TOKEN_SECRET) so the locally-minted
+# approval matches the deployed GATEWAY_TOKEN_SECRET/APPROVAL_TOKEN_SECRET; otherwise generate one.
+TOKEN_SECRET="${TOKEN_SECRET:-$(python3 -c "import secrets;print(secrets.token_hex(32))")}"
+export APPROVAL_TOKEN_SECRET="$TOKEN_SECRET"
+export GATEWAY_TOKEN_SECRET="$TOKEN_SECRET"
 
 SM_ARN=$(aws cloudformation describe-stacks --stack-name "$STACK" --region "$REGION" \
   --query "Stacks[0].Outputs[?OutputKey=='StateMachineArn'].OutputValue" --output text)

@@ -18,7 +18,11 @@ if not token:
     print("NO_TOKEN status=", sfn.describe_execution(executionArn=exec_arn)["status"]); sys.exit(1)
 
 # 2. this agent's reviewer stand-in mints the approval/decision
-env = dict(os.environ, APPROVAL_TOKEN_SECRET=os.environ.get("APPROVAL_TOKEN_SECRET", "dev-only-not-for-production"))
+if not os.environ.get("APPROVAL_TOKEN_SECRET"):
+    sys.exit("APPROVAL_TOKEN_SECRET must be set to the strong per-deploy secret used at deploy time "
+             "(no committed default). Reuse the value from deploy.sh/smoke_test.sh so the minted "
+             "approval matches the deployed GATEWAY_TOKEN_SECRET.")
+env = dict(os.environ)
 out = subprocess.run([sys.executable, "mint_approval.py"], cwd=gp, capture_output=True, text=True, env=env)
 approval = out.stdout.strip()
 if not approval:

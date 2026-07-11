@@ -5,7 +5,10 @@ import json, os, sys, time, boto3
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(REPO, "platform_core"))
-os.environ.setdefault("APPROVAL_TOKEN_SECRET", "dev-only-not-for-production")
+if not os.environ.get("APPROVAL_TOKEN_SECRET"):
+    sys.exit("APPROVAL_TOKEN_SECRET must be set to the strong per-deploy secret used at deploy time "
+             "(no committed default). Reuse the value from deploy.sh/smoke_test.sh so the minted "
+             "approval matches the deployed GATEWAY_TOKEN_SECRET.")
 from hcls_agent_platform.mcp_gateway import approvals
 
 region = os.environ.get("AWS_REGION", "us-east-1")
