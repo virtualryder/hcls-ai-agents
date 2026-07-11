@@ -40,6 +40,7 @@ Globals:
         GATEWAY_TOKEN_SECRET: !Ref TokenSecret
         APPROVAL_TOKEN_SECRET: !Ref TokenSecret
         STRICT_APPROVAL: !Ref StrictApproval
+        APPROVAL_CONSUMPTION_TABLE: !Ref ApprovalConsumptionTable
         LLM_PROVIDER: bedrock
         BEDROCK_GUARDRAIL_ID: !Ref AgentGuardrail
         BEDROCK_GUARDRAIL_VERSION: DRAFT
@@ -84,6 +85,20 @@ Resources:
       TimeToLiveSpecification: { AttributeName: ttl, Enabled: true }
       SSESpecification: { SSEEnabled: true }
 
+  # round-2 #1: durable, single-use approval-token registry (replay protection that
+  # survives cold starts / separate Lambda environments). Claimed by conditional PutItem.
+  ApprovalConsumptionTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "hcls-05-${Environment}-approval-consumption"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [ { AttributeName: jti, AttributeType: S } ]
+      KeySchema: [ { AttributeName: jti, KeyType: HASH } ]
+      TimeToLiveSpecification: { AttributeName: ttl, Enabled: true }
+      SSESpecification: { SSEEnabled: true }
+
   AssembleFn:
     Type: AWS::Serverless::Function
     Properties:
@@ -120,6 +135,7 @@ Resources:
         - AWSLambdaBasicExecutionRole
         - Statement:
             - { Effect: Allow, Action: [dynamodb:PutItem], Resource: !GetAtt AuditTable.Arn }
+            - { Effect: Allow, Action: [dynamodb:PutItem, dynamodb:GetItem], Resource: !GetAtt ApprovalConsumptionTable.Arn }
   HitlNotifyFn:
     Type: AWS::Serverless::Function
     Properties:
@@ -141,6 +157,7 @@ Resources:
         - AWSLambdaBasicExecutionRole
         - Statement:
             - { Effect: Allow, Action: [dynamodb:PutItem], Resource: !GetAtt AuditTable.Arn }
+            - { Effect: Allow, Action: [dynamodb:PutItem, dynamodb:GetItem], Resource: !GetAtt ApprovalConsumptionTable.Arn }
       Events:
         Tool:
           Type: HttpApi
