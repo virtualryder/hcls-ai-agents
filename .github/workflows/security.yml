@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install bandit
+      - run: pip install bandit==1.9.4
       # REPORT-ONLY. ENFORCE: generate `.bandit-baseline.json` (see SECURITY-CI.md) and run
       #   bandit -r . --severity-level medium --confidence-level medium --skip B101 -b .bandit-baseline.json
       # (drop the `|| true`).
