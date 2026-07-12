@@ -1,0 +1,15 @@
+# gitleaks configuration
+# Extends the default gitleaks ruleset and allowlists the detect-secrets
+# baseline: `.secrets.baseline` stores SHA-1 HASHES of already-triaged,
+# synthetic/example findings (CFN "secret"-keyword params, .env.example
+# placeholders, test-fixture JWTs, prompt-manifest checksums) — not live
+# secrets. Those hashes trip gitleaks' generic-api-key entropy rule, so the
+# file is excluded from scanning. New real secrets elsewhere still fail.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "detect-secrets baseline holds hashes of triaged findings, not live secrets"
+paths = [
+  '''\.secrets\.baseline$''',
+]
