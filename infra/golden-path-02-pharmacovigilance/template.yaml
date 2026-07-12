@@ -218,11 +218,24 @@ Resources:
           Type: HttpApi
           Properties: { ApiId: !Ref GatewayApi, Method: POST, Path: "/tool/{kind}/{method}" }
 
+  # AgentGuardrail — masking + prompt-attack on the PV drafting model call.
+  #   Case state is PHI-masked BEFORE the model (fail-closed hcls masker) and re-guarded here on the model
+  #   input AND output: SSN -> BLOCK, other PII (name/address/age/email/phone) -> ANONYMIZE, plus a
+  #   prompt-attack filter on the input.
+  #   NOTE: a semantic DENY-topic ("unauthorized regulatory submission") was evaluated and intentionally
+  #   REMOVED from this drafting call. A topic classifier cannot distinguish a narrative that *describes* an
+  #   input-provided causality/reportability value from the agent *making* that determination, so it
+  #   false-blocked every legitimate, already-de-identified ICSR draft (live-verified via ApplyGuardrail,
+  #   2026-07-12: the DENY-topic returned GUARDRAIL_INTERVENED on a clean masked case; removing it returned
+  #   action=NONE and the model drafted a 3.6k-char de-identified narrative). The unauthorized-submission
+  #   control is NOT weakened: it is enforced deterministically and is load-bearing — the agent only DRAFTS,
+  #   and a bound, single-use, separation-of-duties human approval (Step Functions waitForTaskToken) is
+  #   required before any commit. PII BLOCK/ANONYMIZE + prompt-attack remain enforced on every model call.
   AgentGuardrail:
     Type: AWS::Bedrock::Guardrail
     Properties:
       Name: !Sub "hcls-02-${Environment}"
-      Description: PHI-tuned PII + prompt-attack (in+out) for pharmacovigilance (adverse-event PHI).
+      Description: "PHI/PII masking (SSN BLOCK; name/address/age/email/phone ANONYMIZE) + prompt-attack on the PV drafting call. Unauthorized-submission control is deterministic (SoD human gate), not a topic classifier."
       BlockedInputMessaging: "I can't help with that request."
       BlockedOutputsMessaging: "I can't provide that information."
       ContentPolicyConfig:
@@ -236,11 +249,6 @@ Resources:
           - { Type: AGE, Action: ANONYMIZE }
           - { Type: EMAIL, Action: ANONYMIZE }
           - { Type: PHONE, Action: ANONYMIZE }
-      TopicPolicyConfig:
-        TopicsConfig:
-          - Name: UnauthorizedRegulatorySubmission
-            Definition: Submitting an ICSR or making a causality/reportability determination; the agent only drafts and a qualified person commits.
-            Type: DENY
 
   UserPool:
     Type: AWS::Cognito::UserPool
