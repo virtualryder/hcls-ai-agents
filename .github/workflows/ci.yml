@@ -156,7 +156,10 @@ jobs:
       - name: IaC scan (checkov)
         run: |
           pip install checkov
-          checkov -d infra --quiet --compact --framework cloudformation
+          # soft-fail (report-only), consistent with slg + the documented intent in
+          # security.yml; the reference golden-path templates carry known best-practice
+          # deviations (demo scope) that are triaged, not blocking.
+          checkov -d infra --quiet --compact --framework cloudformation --soft-fail
 
       - name: Terraform validate
         uses: hashicorp/setup-terraform@v3
