@@ -9,7 +9,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 |---|---|
 | Agents | **9**, all built to flagship depth (01–08 core lifecycle + 09 Manufacturing Batch-Review) |
 | AWS-native rebuilds | **9** (Strands + Step Functions, `waitForTaskToken` HITL) |
-| Automated tests passing | **580** (last-recorded per-suite split: platform 50 · governance 7 · agents 277 · native 185 — run `make test` for the authoritative total), verified in one command via `make test`; **all 9 golden paths also deployed + run end-to-end in a clean AWS account** |
+| Automated tests passing | **583** (last-recorded per-suite split: platform 50 · governance 7 · agents 277 · native 185 — run `make test` for the authoritative total), verified in one command via `make test`; **all 9 golden paths also deployed + run end-to-end in a clean AWS account** |
 | LLM | Anthropic Claude / in-account Amazon Bedrock + Guardrails / deterministic demo |
 | MCP layer | Portable gateway (API Gateway + Cognito JWT) is the **supported default**; a **managed Bedrock AgentCore Gateway** path is **experimental** (each target additionally requires a ToolSchema — `agentcore-gateway.yaml`). Both front shared connector Lambdas (reference logic in `platform_core`) |
 | IaC | One-command CloudFormation quick-deploy: connectors + dual gateway + native/container agent, deployable in a new account in **supported AWS Regions** (where Bedrock/model/PrivateLink and, for AgentCore mode, AgentCore are available) (`scripts/build_lambdas.sh` + `scripts/deploy.sh`) + Terraform reference skeleton (not at parity — see docs/TERRAFORM-AND-GOVCLOUD-STATUS.md) |
@@ -19,7 +19,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 | Roadmap agents | **1** cited deck + design spec at Documented maturity — 10 Scientific Intelligence & Target Discovery (R&D); see `docs/specs/`. (09 was promoted to a built agent.) |
 | Maturity | Demonstrated + Deployable-by-design (production-readiness = engagement) |
 
-> **On the test count:** **580** = `scripts/run_all_tests.sh` green total across 20 suites run in isolated processes; a plain root `pytest` collects **576** (the openFDA live test skips without `RUN_LIVE_OPENFDA=1` and suites share package names). `MATURITY.yaml` `offline_total` is canonical.
+> **On the test count:** **583** = `scripts/run_all_tests.sh` green total across 20 suites run in isolated processes; a plain root `pytest` collects **576** (the openFDA live test skips without `RUN_LIVE_OPENFDA=1` and suites share package names). `MATURITY.yaml` `offline_total` is canonical.
 
 ## What "flagship depth" means (every agent)
 
@@ -35,7 +35,7 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
 
 ## Changelog (most recent first)
 
-- **Live AWS deploy validation (all 9 golden paths)** — every per-agent SAM golden path was deployed into a clean account (us-east-1), ran the full governed workflow (Assemble→…→`waitForTaskToken` human gate→bound separation-of-duties approval→Finalize) to **SUCCEEDED**, and was torn down. Surfaced + fixed ~10 deploy/runtime issues invisible to cfn-lint (layer staging incl. `strands_agent`, Bedrock `PROMPT_ATTACK`=NONE, two ASL data contracts, identity lineage, the **human-authority commit** path for withheld consequential tools, SAM state-machine update-on-content-change, 07 `Synthesize`→`DraftFn`). New `docs/GOLDEN-PATH-DEPLOY-NOTES.md`; generic `infra/_smoke/resume_any.py`. Suite **580** green.
+- **Live AWS deploy validation (all 9 golden paths)** — every per-agent SAM golden path was deployed into a clean account (us-east-1), ran the full governed workflow (Assemble→…→`waitForTaskToken` human gate→bound separation-of-duties approval→Finalize) to **SUCCEEDED**, and was torn down. Surfaced + fixed ~10 deploy/runtime issues invisible to cfn-lint (layer staging incl. `strands_agent`, Bedrock `PROMPT_ATTACK`=NONE, two ASL data contracts, identity lineage, the **human-authority commit** path for withheld consequential tools, SAM state-machine update-on-content-change, 07 `Synthesize`→`DraftFn`). New `docs/GOLDEN-PATH-DEPLOY-NOTES.md`; generic `infra/_smoke/resume_any.py`. Suite **583** green.
 
 - **External-review remediation (P0)** — an independent review (58/100) found gaps between the control
   narrative and the *deployed* path; all P0 items closed and verified one-command:
@@ -44,12 +44,12 @@ ENTERPRISE-PLATFORM, SOLUTION-FIELD-GUIDE, and per-agent docs reflect this state
   **immutable fail-closed audit** (conditional `PutItem`, no Update/BatchWrite IAM); **customer IdP federation** (Cognito
   SAML/OIDC provider + `docs/IDP-FEDERATION-RUNBOOK.md`); **VPC PrivateLink isolation** (gateway + interface endpoints,
   flow logs, 443-only egress, VPC-attached Lambdas) with the VPC claim corrected to accurate framing; **container path**
-  completed (internal ALB + `/ping`), SAM golden path canonical; **CI fail-closed**. Suite **492 → 503 → 536 → 580** (see `MATURITY.yaml`; run `make test`).
+  completed (internal ALB + `/ping`), SAM golden path canonical; **CI fail-closed**. Suite **492 → 503 → 536 → 583** (see `MATURITY.yaml`; run `make test`).
 
 - **Security & deployability deepening (SLG-parity pass)** — closed the gaps where SLG-AI-Agents went deeper, so HCLS now exceeds it on every axis:
   - **CISO/CIO security answer kit:** `SECURITY.md` + `docs/THREAT-MODEL.md` (STRIDE→control→file) + `docs/NIST-800-53-CONTROL-MATRIX.md` + `docs/OWASP-LLM-ATLAS-MAPPING.md` + `docs/INCIDENT-RESPONSE-AND-KEY-MANAGEMENT.md` + `docs/PRODUCTION-READINESS-AND-SHARED-RESPONSIBILITY.md`, plus a README "CISO/CIO question index".
   - **Defense-in-depth in code:** the irreversible commit (`safety.submit_report`/`qms.close_capa`/`mes.record_disposition`) is **withheld from every agent grant** (`policy.CONSEQUENTIAL_COMMITS`), enforced by `test_consequential_actions_withheld_from_agents`; a bound human-approval primitive (`mcp_gateway/approvals.py`: single-use, separation-of-duties, args-bound; `STRICT_APPROVAL` for prod). 02/09 finalize now write reversible drafts.
-  - **One-command test harness:** `make test` / `scripts/run_all_tests.sh` runs all **580** tests across 20 suites and prints one total; root `conftest.py` + `pytest.ini`.
+  - **One-command test harness:** `make test` / `scripts/run_all_tests.sh` runs all **583** tests across 20 suites and prints one total; root `conftest.py` + `pytest.ini`.
   - **Deploy ergonomics:** `infra/cloudformation/edge.yaml` (CloudFront + WAF) closes the edge-in-IaC gap; **per-agent SAM golden paths** (`infra/golden-path-<agent>/` × 9: `template.yaml` + `deploy.sh` + `destroy.sh` + `smoke_test.sh` + `mint_approval.py` + layer) so an SA deploys one agent from a single folder — all cfn-lint clean. Index: `infra/GOLDEN-PATHS.md`.
   - **Hygiene:** `CHANGELOG.md`, `VERSION`, `SOURCES.md`; `decks/leave-behinds/HCLS-AI-Agent-Suite-COMBINED.pdf` (77-page all-in-one); `09-manufacturing-batch-review` added to the Lambda build list.
 

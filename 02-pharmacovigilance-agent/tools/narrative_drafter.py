@@ -120,10 +120,27 @@ def draft_narrative(state: Dict[str, Any]) -> Dict[str, str]:
             expectedness=state.get("expectedness") or "UNKNOWN",
             causality_assessment=state.get("causality_assessment") or "UNKNOWN",
         )
+    except Exception:
+        return {"narrative_text": _demo_narrative(state), "narrative_drafted_by": "demo-stub-fallback"}
+
+    # --- Mask PII/PHI BEFORE the model sees the prompt. FAIL-CLOSED: a masking failure
+    # in real-data mode (ALLOW_REAL_DATA=1) raises RealDataMaskingError and blocks the
+    # draft; it must NEVER fall back to sending raw case fields to the model. Regex
+    # Safe-Harbor is always applied; Comprehend Medical + Comprehend NER is added in
+    # real-data / MASK_NER mode (proven live — see infra/golden-path-masking-verification/).
+    from hcls_agent_platform.pii_masker import mask  # RealDataMaskingError propagates by design
+    masked = mask(prompt)
+
+    try:
         llm = get_llm("narrative")
-        resp = llm.invoke([("system", SYSTEM_PROMPT), ("human", prompt)])
+        resp = llm.invoke([("system", SYSTEM_PROMPT), ("human", masked.text)])
         text = getattr(resp, "content", None) or str(resp)
         provider = os.getenv("LLM_PROVIDER", "anthropic")
-        return {"narrative_text": str(text), "narrative_drafted_by": provider}
+        return {
+            "narrative_text": str(text),
+            "narrative_drafted_by": provider,
+            "prompt_masked": masked.changed,
+            "masked_entity_types": ",".join(masked.entity_types),
+        }
     except Exception:
         return {"narrative_text": _demo_narrative(state), "narrative_drafted_by": "demo-stub-fallback"}
