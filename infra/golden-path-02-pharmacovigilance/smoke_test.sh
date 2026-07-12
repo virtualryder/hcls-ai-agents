@@ -45,7 +45,14 @@ for i in $(seq 1 30); do
   [ "$STATUS" != "RUNNING" ] && break; sleep 2
 done
 OUT=$(aws stepfunctions describe-execution --execution-arn "$EXEC_ARN" --region "$REGION" --query output --output text)
-CASE=$(printf '%s' "$OUT" | python3 -c "import sys,json;b=json.load(sys.stdin);print(b.get('case_status') or json.loads(b.get('body','{}')).get('case_status',''))" 2>/dev/null || echo "")
+CASE=$(printf '%s' "$OUT" | python3 -c "import sys,json
+b=json.load(sys.stdin)
+body=b.get('body')
+if isinstance(body,str):
+    try: body=json.loads(body)
+    except Exception: body={}
+if not isinstance(body,dict): body={}
+print(b.get('case_status') or body.get('case_status',''))" 2>/dev/null || echo "")
 echo "status=$STATUS case_status=$CASE"
 if [ "$STATUS" = "SUCCEEDED" ] && [ "$CASE" = "SUBMITTED" ]; then
   echo "PASS: governed human gate honored a BOUND approval and the case was SUBMITTED."; exit 0

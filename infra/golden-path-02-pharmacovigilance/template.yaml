@@ -77,6 +77,7 @@ Globals:
         BEDROCK_GUARDRAIL_VERSION: DRAFT
         BEDROCK_NARRATIVE_MODEL_ID: !Ref BedrockModelId
         BEDROCK_REGION: !Ref AWS::Region
+        MASK_NER: "1"   # enable Comprehend NER (name masking) in the draft's masking-before-model pass
 
 Resources:
   SharedLayer:
@@ -156,6 +157,10 @@ Resources:
                 - !Sub "arn:${AWS::Partition}:bedrock:*:${AWS::AccountId}:inference-profile/*"
         - Statement:
             - { Effect: Allow, Action: [bedrock:ApplyGuardrail], Resource: !GetAtt AgentGuardrail.GuardrailArn }
+        - Statement:
+            # Masking-before-model: NER (names) via Comprehend + PHI via Comprehend Medical. These
+            # detect APIs do not support resource-level IAM, so the resource is "*" (the required scope).
+            - { Effect: Allow, Action: [comprehend:DetectPiiEntities, comprehendmedical:DetectPHI], Resource: "*" }
   CheckFn:
     Type: AWS::Serverless::Function
     Properties:

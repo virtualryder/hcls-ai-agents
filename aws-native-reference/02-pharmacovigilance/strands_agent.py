@@ -55,9 +55,23 @@ def _bedrock_draft(case_state: Dict[str, Any]) -> str:
     import boto3
 
     client = boto3.client("bedrock-runtime", region_name=os.getenv("BEDROCK_REGION", "us-east-1"))
+    # Mask PHI/PII BEFORE the model sees it: de-identifies patient/reporter names, IDs, and dates so the
+    # narrative is de-identified and the Bedrock Guardrail passes (an unmasked prompt is correctly blocked
+    # by the PHI-tuned Guardrail). Uses the reviewed hcls masker (regex Safe-Harbor + Comprehend NER when
+    # MASK_NER/ALLOW_REAL_DATA). Fail-closed in real-data mode; regex best-effort otherwise.
+    raw = json.dumps(case_state, default=str)
+    try:
+        from hcls_agent_platform.pii_masker import mask as _pii_mask
+        masked_case = _pii_mask(raw).text
+    except Exception:
+        if os.getenv("ALLOW_REAL_DATA", "").strip().lower() in ("1", "true", "yes"):
+            raise  # never send raw PHI to the model in real-data mode
+        masked_case = raw
     prompt = (
-        "Draft a complete ICSR narrative for a qualified medical reviewer from the following "
-        "case state (JSON):\n" + json.dumps(case_state, default=str)
+        "Draft a complete, de-identified ICSR narrative for a qualified medical reviewer from the "
+        "following de-identified case state (JSON). Redaction tokens like [PII:NAME] are intentional — "
+        "write the narrative around them, referring to 'the reporter' / 'the patient' rather than names:\n"
+        + masked_case
     )
     kwargs: Dict[str, Any] = dict(
         modelId=_model_id(),
