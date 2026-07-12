@@ -61,7 +61,10 @@ jobs:
             --exclude-files '\.git/.*' \
             --exclude-files '.*\.pytest_cache/.*' \
             --exclude-files '.*\.(png|jpg|jpeg|pdf|pptx|xlsx)$'
-          diff -q .secrets.baseline.orig .secrets.baseline || { echo 'New secrets not in baseline — audit .secrets.baseline'; exit 1; }
+          # Compare ignoring the volatile "generated_at" timestamp, which detect-secrets
+          # rewrites on every scan; any NEW/changed secret still fails the gate.
+          diff <(grep -v '"generated_at"' .secrets.baseline.orig) <(grep -v '"generated_at"' .secrets.baseline) \
+            || { echo 'New secrets not in baseline — audit .secrets.baseline'; exit 1; }
 
   semgrep:
     name: Semgrep (SAST rulesets)
