@@ -1,5 +1,33 @@
 # HCLS AI Agent Suite
 
+> ### 🛡️ Part of the Aegis Governed-Agent Portfolio — one solution, five repositories
+> This repository is **1 of 5 that form a single, review-as-one solution**: the **Aegis** governance
+> platform (the control plane) plus four vertical agent packs. All five conform to one versioned
+> governance contract — **AGP v1.0** — and one deploy pattern, so a CIO / CISO reviews and approves them
+> **together** for pilot.
+>
+> | # | Repository | Role |
+> |--:|---|---|
+> | 1 | **`aegis-ai-governance-platform-aws`** | Governance **platform & pattern** (deny-by-default control plane) |
+> | 2 | **`hcls-ai-agents`** | **Life sciences** — pharma / biotech / CRO |
+> | 3 | **`slg-ai-agents`** | **State & local government** |
+> | 4 | **`healthcare_ai_agents`** (**HPP**) | **Healthcare payer / provider** |
+> | 5 | **`edu-ai-agents`** | **Education** — K-12 & higher-ed |
+>
+> **▶ You are here: `hcls-ai-agents`.**
+>
+> **New to the portfolio?** Start in the **`aegis-ai-governance-platform-aws`** repo:
+> `PORTFOLIO-EXECUTIVE-SUMMARY.md` (10-minute front door) → `SA-DEPLOYMENT-RUNBOOK.md` (deploy the
+> platform + heroes in a new AWS account) → `PORTFOLIO-MATURITY-SCORECARD.md` (what's proven) →
+> `DO-NOT-CLAIM.md` (the honesty boundary).
+>
+> **Naming:** **`healthcare_ai_agents` = HPP** (payer / provider: claims, prior-auth, denials) and
+> **`hcls-ai-agents` = life sciences** (pharmacovigilance, clinical, regulatory) are **distinct
+> products**; the underscore-vs-hyphen naming is historical.
+>
+> ---
+
+
 > ⚠️ **Before you cite anything here:** read [**What we will *not* claim**](NOT-CLAIMS.md) — this is an independent reference accelerator that runs on AWS. It is **not** an AWS service, **not** AWS-supported, **not** an official AWS solution, and **not** a compliance certification. That page governs if any wording elsewhere reads stronger.
 
 > 📊 **Honest status, one source of truth:** per-agent maturity, clean-account evidence, connector tiers, and the test count live in machine-readable [`MATURITY.yaml`](MATURITY.yaml); the four connector-maturity terms are defined in [`docs/CONNECTOR-MATURITY.md`](docs/CONNECTOR-MATURITY.md). Prose defers to `MATURITY.yaml`; a portfolio drift-checker (`tools/check_maturity.py`) keeps them aligned.
@@ -21,7 +49,9 @@ A large systems integrator deploying AI in a pharmaceutical, biotech, medtech, o
 
 The result is a deployable accelerator — not a certified product — that gives an SI engagement team a credible, compliant starting point across nine high-value life-sciences workflows.
 
-**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **576 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + a portable MCP gateway (AgentCore mode is experimental — see `infra/cloudformation/agentcore-gateway.yaml`) + native/container agent) deployable in a new customer account in **supported AWS Regions** (where the required Bedrock, model, PrivateLink, and — for AgentCore mode — AgentCore services are available) · **all 9 golden paths deployed and run end-to-end in a clean AWS account (us-east-1) — full Assemble→…→human gate→bound approval→Finalize to SUCCEEDED — then torn down** · Terraform reference skeleton (not at parity — see [`docs/TERRAFORM-AND-GOVCLOUD-STATUS.md`](docs/TERRAFORM-AND-GOVCLOUD-STATUS.md)) · executive deck, 5-slide customer teaser, and one-page leave-behind included · **external-review hardening (P0):** deployed-path human-approval enforcement (bound, single-use, separation-of-duties, args-bound tokens; `STRICT_APPROVAL` fails closed), authenticated-authorizer-only identity, immutable fail-closed audit, customer IdP (SAML/OIDC) federation, VPC PrivateLink isolation, and fail-closed CI.
+**Repository status (current):** all 9 agents built to flagship depth · 9 AWS-native rebuilds (Strands + Step Functions) · a live Amazon Bedrock + real-connector reference path (Agent 02) · **580 automated tests passing** with no API key · one-command CloudFormation quick-deploy (connector Lambdas + a portable MCP gateway (AgentCore mode is experimental — see `infra/cloudformation/agentcore-gateway.yaml`) + native/container agent) deployable in a new customer account in **supported AWS Regions** (where the required Bedrock, model, PrivateLink, and — for AgentCore mode — AgentCore services are available) · **all 9 golden paths deployed and run end-to-end in a clean AWS account (us-east-1) — full Assemble→…→human gate→bound approval→Finalize to SUCCEEDED — then torn down** · Terraform reference skeleton (not at parity — see [`docs/TERRAFORM-AND-GOVCLOUD-STATUS.md`](docs/TERRAFORM-AND-GOVCLOUD-STATUS.md)) · executive deck, 5-slide customer teaser, and one-page leave-behind included · **external-review hardening (P0):** deployed-path human-approval enforcement (bound, single-use, separation-of-duties, args-bound tokens; `STRICT_APPROVAL` fails closed), authenticated-authorizer-only identity, immutable fail-closed audit, customer IdP (SAML/OIDC) federation, VPC PrivateLink isolation, and fail-closed CI.
+
+> **On the test count:** **580** is the `scripts/run_all_tests.sh` green total across 20 suites run in isolated processes (equal to `MATURITY.yaml` `offline_total`, which is canonical). A plain root `pytest` collects **576** because the openFDA live-connector test skips without `RUN_LIVE_OPENFDA=1` and the suites share package names — expected, not a discrepancy.
 
 ---
 
