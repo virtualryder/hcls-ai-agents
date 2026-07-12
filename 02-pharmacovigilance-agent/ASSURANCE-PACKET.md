@@ -114,7 +114,11 @@ the gate catches bad data.
 - **Reference connector is public/read-only.** openFDA/FAERS proves the pattern against a *real* system
   but is **not** the customer's production safety database; the tier-4 Argus/Veeva integration is
   engagement work under a BAA.
-- **PHI masking is unit-tested, not runtime-verified on AWS.** Runtime verification is a pilot task.
+- **PHI masking — precise status.** The runtime masking control is **live-verified in a standalone AWS
+  verification stack** (Comprehend Medical `DetectPHI` + Comprehend `DetectPiiEntities`, masks synthetic
+  PHI/PII before the audit write, fail-closed — `infra/golden-path-masking-verification/`). It is now
+  **wired into this hero pipeline** (masks the narrative prompt before the model, fail-closed, unit-tested),
+  but the **hero path itself is not yet exercised live on AWS** — that integration test is a pilot task.
 - **Bedrock model invocation is not asserted in the clean-account smoke** (the smoke exercises the
   governed workflow + audit, with a deterministic fallback; the real-Bedrock path is exercised locally).
 - **Not CSV/CSA-validated, not HITRUST/SOC 2 certified.** 21 CFR Part 11 controls are *supported by

@@ -19,12 +19,31 @@ _RAW_SSN = "123-45-6789"
 _RAW_EMAIL = "jane.reporter@example.org"
 
 
-def test_masker_redacts_structured_identifiers():
+def test_masker_redacts_structured_identifiers(monkeypatch):
     r = mask(f"Reporter SSN {_RAW_SSN}, email {_RAW_EMAIL}, phone 312-555-0142, DOB 1980-01-02.")
     assert r.changed
     assert _RAW_SSN not in r.text and _RAW_EMAIL not in r.text
     assert "[PII:SSN]" in r.text and "[PII:EMAIL]" in r.text
     assert "PII:SSN" in r.entity_types and "PII:PHONE" in r.entity_types
+
+    # Regex ID pass tuned to real-world MRN/account/member/patient label variants (not just "MRN:").
+    for raw, ident in [
+        ("MR# 12-345678", "12-345678"),
+        ("Patient ID: A0093281", "A0093281"),
+        ("Member No 55521234", "55521234"),
+        ("medical record number 0098213", "0098213"),
+        ("Acct #: 4471209", "4471209"),
+    ]:
+        m = mask(f"Admission note — {raw} — severe headache.")
+        assert ident not in m.text, f"{raw!r} left the id {ident!r} in the clear"
+        assert "[PII:MRN]" in m.text
+
+    # A bare all-digit run is NOT masked by default (avoids false positives on quantities/doses)...
+    assert mask("Dispensed 12345678 units").changed is False
+    # ...until a site injects its own bare MRN format via HCLS_MRN_PATTERNS (site-tunable, no code change).
+    monkeypatch.setenv("HCLS_MRN_PATTERNS", r"\b\d{8}\b")
+    sited = mask("Epic MRN on the chart is 12345678 for this case")
+    assert "12345678" not in sited.text and "[PII:MRN]" in sited.text
 
 
 class _FakeResp:

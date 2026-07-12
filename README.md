@@ -90,7 +90,7 @@ Live-AWS cells reflect the 2026-06-29/30 clean-account run: all 9 golden paths (
 | MCP / tool authorization gateway | ✅ | ✅ | ✅ | ✅ | ◻ | Repo (portable gateway is the supported default; AgentCore mode experimental) |
 | Policy enforcement (deny-by-default) | ✅ | ✅ | ✅ | ✅ | ◻ | Repo |
 | Human approval (SoD, single-use) | ✅ | ✅ | ✅ | ✅ | ◻ | Repo (bound, single-use, SoD approval exercised live to `SUCCEEDED`) |
-| PII/PHI masking | ✅ | ✅ | ◻ | ◻ | ◻ | Repo (unit-tested; not runtime-verified on AWS) |
+| PII/PHI masking | ✅ | ✅ | ✅ | ◻ | ◻ | Repo (runtime masking control **live-verified in a standalone AWS verification stack** — Comprehend Medical `DetectPHI` + Comprehend `DetectPiiEntities`, masks synthetic PHI/PII before the audit write, fail-closed: `infra/golden-path-masking-verification/`, 2026-07-11. **Now wired into the Agent 02 hero pipeline** — masks the narrative prompt before the model, fail-closed, unit-tested — but that hero path is **not yet exercised live on AWS** (integration-test-on-AWS pending)) |
 | Audit (append-only + WORM) | ✅ | ✅ | ✅ | ✅ | ◻ | Repo (immutable `INTENT → COMMITTED` audit written live; WORM retention configuration: Customer) |
 | Bedrock + Guardrails | ✅ | ✅ | ◻ | ◻ | ◻ | Repo (Agent 02 real-Bedrock live path exercised locally; model invocation not asserted in the clean-account smoke) |
 | IaC deploy (golden path) | ✅ | ✅ | ✅ | ✅ | ◻ | Repo (all 9 golden paths) |
