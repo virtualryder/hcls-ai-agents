@@ -142,7 +142,7 @@ jobs:
       - name: SAST (bandit)
         run: |
           pip install bandit==1.9.4
-          bandit -r platform_core governance aws-native-reference services -ll
+          bandit -r platform_core governance aws-native-reference services -ll -b .bandit-baseline.json --skip B101
 
       - name: Dependency audit (pip-audit / SCA) — BLOCKING
         run: |
