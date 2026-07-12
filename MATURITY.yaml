@@ -14,7 +14,7 @@ tests:
   suites: 20
   reproduce: "make test   # scripts/run_all_tests.sh — per-process, no API key, no AWS"
   last_verified: 2026-07-10
-  note: "576 collected across 20 suites (575 pass offline; the openFDA live-connector test skips without RUN_LIVE_OPENFDA=1). Prior stale counts: 452/503/519/536."
+  note: "Canonical offline suite: 580 passed across 20 isolated suites — verified 2026-07-12 by `bash scripts/run_all_tests.sh` (machine-checked by tools/check_maturity.py). A plain root `pytest` collects 576 (575 pass, 1 skip — the openFDA live-connector test skips without RUN_LIVE_OPENFDA=1) because reused package names collapse at root; MATURITY.yaml is the single source of truth. Prior stale counts: 452/503/519/536."
 
 clean_account_deploy:
   status: all-golden-paths-validated          # strongest evidence tier in the portfolio
