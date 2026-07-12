@@ -118,9 +118,15 @@ the gate catches bad data.
   verification stack** (Comprehend Medical `DetectPHI` + Comprehend `DetectPiiEntities`, masks synthetic
   PHI/PII before the audit write, fail-closed — `infra/golden-path-masking-verification/`). It is now
   **wired into this hero pipeline** (masks the narrative prompt before the model, fail-closed, unit-tested),
-  but the **hero path itself is not yet exercised live on AWS** — that integration test is a pilot task.
-- **Bedrock model invocation is not asserted in the clean-account smoke** (the smoke exercises the
-  governed workflow + audit, with a deterministic fallback; the real-Bedrock path is exercised locally).
+  and the **hero path is now exercised live on AWS end-to-end** (2026-07-12): the Agent 02 golden path
+  deployed to a clean account, the wired masker ran fail-closed before a real Bedrock draft, and the
+  governed workflow produced a de-identified ~3.6k-char ICSR narrative (PII redacted) through the SoD
+  human gate, then torn down.
+- **Bedrock model invocation is now asserted live** (2026-07-12) via `infra/golden-path-02-pharmacovigilance/verify_narrative.sh`,
+  which runs the governed workflow and asserts the drafted narrative is a real de-identified ICSR
+  (`drafted_by=bedrock`, ~3.6k chars) rather than a Guardrail refusal. The routine clean-account
+  `smoke_test.sh` still asserts the governed workflow + audit with a deterministic fallback, so the
+  suite never blocks on model availability.
 - **Not CSV/CSA-validated, not HITRUST/SOC 2 certified.** 21 CFR Part 11 controls are *supported by
   design*; the customer owns validation, IdP integration, and quality-system approval.
 - **Federated IdP login not proven end-to-end** (authenticated-authorizer-only identity is deployed).
