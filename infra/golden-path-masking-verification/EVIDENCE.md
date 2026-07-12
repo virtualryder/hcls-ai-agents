@@ -39,6 +39,16 @@ catches the free-text names, addresses, and dates regex cannot. Neither alone is
 runs both and fails closed. For real regulated data a customer tunes the regex ID patterns to their
 site's MRN/account formats during the pilot. This is disclosed, not hidden.
 
+**Update (2026-07-12): the hero masker's regex ID pass is now tuned for this class of format.**
+`platform_core/hcls_agent_platform/pii_masker.py` broadens the label-anchored pass to the common
+real-world variants — `MR` / `MR#` / `MRN`, `medical record no|number|#`, `acct|account`,
+`patient id|no|number`, `member id|number`, `record no|number` — so labeled IDs like `MRN 00-FAKE-4471`,
+`Patient ID: A0093281`, and `Member No 55521234` mask deterministically. For *bare* (unlabeled) site
+formats — e.g. an 8-digit Epic MRN or an `AB-0001234` accession, which are too false-positive-prone to
+hard-code globally — a pilot injects its exact pattern(s) via the `HCLS_MRN_PATTERNS` env var (one regex
+per line, applied in the always-on Safe-Harbor pass, no code change). Bare all-digit runs stay unmasked by
+default to avoid clobbering doses/quantities. Covered by `02-pharmacovigilance-agent/tests/test_prompt_masking.py`.
+
 ## Fail-closed
 `FAIL_CLOSED=1` (default): if either NER call errors, the handler raises and **no audit record is
 written** — the pipeline blocks rather than persisting under-masked data.

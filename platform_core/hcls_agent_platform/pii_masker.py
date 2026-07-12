@@ -32,12 +32,46 @@ _PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), "SSN"),
     (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"), "EMAIL"),
     (re.compile(r"\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"), "PHONE"),
-    # label-anchored MRN / medical-record / account numbers (site-tunable)
-    (re.compile(r"\b(?:MRN|medical[-\s]?record(?:\s*(?:no|number|#))?|acct|account)\s*[:#]?\s*[A-Za-z0-9-]{4,}", re.I), "MRN"),
+    # label-anchored MRN / medical-record / account / member / patient IDs (site-tunable).
+    # Broadened to the common real-world label variants: MR / MR# / MRN, "medical record no|number|#",
+    # acct|account, "patient id|no|number", "member id|number", "record no|number". The label may be
+    # followed by an optional separator (:, #, -, space) and then a 4+ char alphanumeric id (with
+    # optional internal hyphens), so "MR# 12-345678", "Patient ID: A0093281", "Member No 55521234" all mask.
+    (re.compile(
+        r"\b(?:MRN|MR|medical[-\s]?record|acct|account|patient|member|record)"
+        r"(?:\s*(?:id|no\.?|number|#))?\s*[:#-]?\s*[A-Za-z0-9][A-Za-z0-9-]{3,}",
+        re.I), "MRN"),
     # DOB-style dates: YYYY-MM-DD and M/D/YYYY
     (re.compile(r"\b\d{4}-\d{2}-\d{2}\b"), "DATE"),
     (re.compile(r"\b\d{1,2}/\d{1,2}/\d{2,4}\b"), "DATE"),
 ]
+
+
+def _site_patterns() -> list[tuple[re.Pattern, str]]:
+    """Site-specific *bare* MRN/account formats, injected at deploy time without a code change.
+
+    Real sites often write MRNs with no label (e.g. an 8-digit Epic MRN, or a "AB-0001234"
+    accession). Those are too false-positive-prone to hard-code globally (a bare 8-digit run could
+    be a quantity), so a pilot supplies its exact format(s) via the HCLS_MRN_PATTERNS env var — one
+    regex per line (newline-separated). Each is applied in the always-on Safe-Harbor pass. An
+    un-compilable entry is skipped (it must never crash the masker), but is surfaced on stderr so a
+    misconfigured pattern is visible rather than silently dropping coverage.
+
+    Example (Epic 8-digit MRN + a hyphenated accession):
+        HCLS_MRN_PATTERNS="\\b\\d{8}\\b\n\\b[A-Z]{2}-\\d{7}\\b"
+    """
+    raw = os.getenv("HCLS_MRN_PATTERNS", "")
+    out: list[tuple[re.Pattern, str]] = []
+    for line in raw.splitlines():
+        pat = line.strip()
+        if not pat:
+            continue
+        try:
+            out.append((re.compile(pat), "MRN"))
+        except re.error as exc:  # never crash the masker on a bad site pattern; make it visible
+            import sys
+            print(f"[pii_masker] ignoring invalid HCLS_MRN_PATTERNS entry {pat!r}: {exc}", file=sys.stderr)
+    return out
 
 
 class RealDataMaskingError(RuntimeError):
@@ -62,7 +96,7 @@ def _ner_requested() -> bool:
 
 def _regex_spans(text: str) -> list[tuple[int, int, str]]:
     spans: list[tuple[int, int, str]] = []
-    for pat, label in _PATTERNS:
+    for pat, label in (*_PATTERNS, *_site_patterns()):
         for m in pat.finditer(text):
             spans.append((m.start(), m.end(), "PII:" + label))
     return spans
