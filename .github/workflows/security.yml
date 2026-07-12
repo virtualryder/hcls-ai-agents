@@ -64,6 +64,7 @@ jobs:
         with:
           name: secrets-baseline-canonical
           path: .secrets.baseline
+          include-hidden-files: true
 
   semgrep:
     name: Semgrep (SAST rulesets)
