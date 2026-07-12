@@ -20,7 +20,7 @@ Parameters:
   # AND a controlled egress path to api.fda.gov — deploy egress-openfda.yaml
   # (AWS Network Firewall FQDN allow-list) and route the connector subnet through it.
   SafetySource: { Type: String, Default: "", AllowedValues: ["", "openfda"], Description: "Empty = fixture/reference safety service. 'openfda' = real read-only FAERS via api.fda.gov (needs ConnectorMode=live + egress-openfda.yaml)." }
-  BedrockModelId: { Type: String, Default: anthropic.claude-3-5-sonnet-20240620-v1:0 }
+  BedrockModelId: { Type: String, Default: us.anthropic.claude-sonnet-4-5-20250929-v1:0 }
   TokenSecret:
     Type: String
     NoEcho: true
@@ -146,7 +146,14 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
         - Statement:
-            - { Effect: Allow, Action: [bedrock:InvokeModel], Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}" }
+            # InvokeModel via boto3 Converse. Cross-region inference profiles route to the
+            # underlying foundation models in several regions, so allow both the account's
+            # inference profiles and the anthropic foundation models across regions.
+            - Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream]
+              Resource:
+                - !Sub "arn:${AWS::Partition}:bedrock:*::foundation-model/anthropic.*"
+                - !Sub "arn:${AWS::Partition}:bedrock:*:${AWS::AccountId}:inference-profile/*"
         - Statement:
             - { Effect: Allow, Action: [bedrock:ApplyGuardrail], Resource: !GetAtt AgentGuardrail.GuardrailArn }
   CheckFn:

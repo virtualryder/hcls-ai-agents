@@ -13,6 +13,9 @@ echo "==> generate a strong per-deploy token secret (never committed)"
 TOKEN_SECRET=$(python3 -c "import secrets;print(secrets.token_hex(32))")
 export APPROVAL_TOKEN_SECRET="$TOKEN_SECRET"
 export GATEWAY_TOKEN_SECRET="$TOKEN_SECRET"
+# Persist it locally (gitignored) so smoke_test.sh mints an approval that matches this deploy's
+# gateway secret. Deleted by destroy.sh. NEVER commit this file.
+umask 077; printf '%s' "$TOKEN_SECRET" > ".token_secret.$STACK"
 echo "==> sam deploy (stack: $STACK, region: $REGION)"
 sam deploy --stack-name "$STACK" --region "$REGION" \
   --capabilities CAPABILITY_IAM --resolve-s3 --no-confirm-changeset \

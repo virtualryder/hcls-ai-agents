@@ -5,8 +5,13 @@ set -euo pipefail
 cd "$(dirname "$0")"
 STACK="${1:-hcls-02-dev}"
 REGION="${AWS_REGION:-us-east-1}"
-# Per-run token secret. Reuse it from the deploy step (export TOKEN_SECRET) so the locally-minted
-# approval matches the deployed GATEWAY_TOKEN_SECRET/APPROVAL_TOKEN_SECRET; otherwise generate one.
+# Per-run token secret. Reuse the exact secret the deploy step baked into the gateway so the
+# locally-minted approval matches GATEWAY_TOKEN_SECRET/APPROVAL_TOKEN_SECRET. Resolution order:
+# explicit env > the file deploy.sh persisted (.token_secret.<stack>) > a fresh one (will only
+# validate if the stack was deployed with that same secret).
+if [ -z "${TOKEN_SECRET:-}" ] && [ -f ".token_secret.$STACK" ]; then
+  TOKEN_SECRET="$(cat ".token_secret.$STACK")"
+fi
 TOKEN_SECRET="${TOKEN_SECRET:-$(python3 -c "import secrets;print(secrets.token_hex(32))")}"
 export APPROVAL_TOKEN_SECRET="$TOKEN_SECRET"
 export GATEWAY_TOKEN_SECRET="$TOKEN_SECRET"
@@ -23,10 +28,10 @@ echo "Started: $EXEC_ARN"
 
 echo "==> waiting for the human gate (waitForTaskToken)…"
 TOKEN=""
-for i in $(seq 1 30); do
+for i in $(seq 1 90); do   # up to ~180s: the draft step calls Bedrock (real model) and can be slow
   TOKEN=$(aws stepfunctions get-execution-history --execution-arn "$EXEC_ARN" --region "$REGION" \
     --query "events[?type=='TaskScheduled'].taskScheduledEventDetails.parameters" --output text 2>/dev/null | \
-    grep -o '"Token":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
+    grep -o '"task_token":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
   [ -n "$TOKEN" ] && break; sleep 2
 done
 [ -n "$TOKEN" ] || { echo "FAIL: human-gate task token never appeared"; exit 1; }

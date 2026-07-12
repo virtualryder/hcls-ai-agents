@@ -1,0 +1,3 @@
+
+# Per-deploy HMAC secret persisted by deploy.sh for smoke_test.sh; never commit.
+.token_secret.*

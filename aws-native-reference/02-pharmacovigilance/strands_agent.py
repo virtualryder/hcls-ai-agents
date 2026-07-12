@@ -1,10 +1,16 @@
 """
-Strands/Bedrock ICSR narrative drafter — LLM DRAFTING layer for the PV native rebuild.
+Bedrock ICSR narrative drafter — LLM DRAFTING layer for the PV native rebuild.
 
 Drafts a CIOMS/E2B(R3)-style ICSR narrative from assembled, coded case state.
 It does NOT decide seriousness, causality, routing, or whether to submit —
 those are core.py (deterministic) and a PV Medical Reviewer (HITL via
 Step Functions waitForTaskToken).
+
+Model-in-the-loop: this calls Amazon Bedrock via the **boto3 `bedrock-runtime` Converse
+API** (already present in the Lambda runtime — no third-party SDK to bundle), applying the
+deployed Bedrock Guardrail on the request/response. If Bedrock is unavailable or errors, it
+falls back to a deterministic, grounding-safe demo narrative and records why, so the governed
+workflow never blocks on the model.
 
 Demo fallback: set EXTRACT_MODE=demo to run without an AWS account or API key.
 The demo narrative is fully deterministic and grounding-safe:
@@ -15,7 +21,9 @@ The demo narrative is fully deterministic and grounding-safe:
 """
 from __future__ import annotations
 
+import json
 import os
+import sys
 from typing import Any, Dict
 
 SYSTEM_PROMPT = (
@@ -29,20 +37,46 @@ SYSTEM_PROMPT = (
     "been made."
 )
 
+# Active, on-demand-capable inference profile by default. Override with BEDROCK_NARRATIVE_MODEL_ID
+# (the name the golden-path template sets) or BEDROCK_MODEL_ID.
+_DEFAULT_MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
-def _bedrock_model():
-    from strands.models import BedrockModel
 
+def _model_id() -> str:
+    return (
+        os.getenv("BEDROCK_NARRATIVE_MODEL_ID")
+        or os.getenv("BEDROCK_MODEL_ID")
+        or _DEFAULT_MODEL_ID
+    )
+
+
+def _bedrock_draft(case_state: Dict[str, Any]) -> str:
+    """Draft the narrative with the real model via boto3 Converse + the deployed Guardrail."""
+    import boto3
+
+    client = boto3.client("bedrock-runtime", region_name=os.getenv("BEDROCK_REGION", "us-east-1"))
+    prompt = (
+        "Draft a complete ICSR narrative for a qualified medical reviewer from the following "
+        "case state (JSON):\n" + json.dumps(case_state, default=str)
+    )
     kwargs: Dict[str, Any] = dict(
-        model_id=os.getenv("BEDROCK_MODEL_ID", "us.anthropic.claude-sonnet-4-6-20260601-v1:0"),
-        region_name=os.getenv("BEDROCK_REGION", "us-east-1"),
-        temperature=0.0,
+        modelId=_model_id(),
+        system=[{"text": SYSTEM_PROMPT}],
+        messages=[{"role": "user", "content": [{"text": prompt}]}],
+        inferenceConfig={"temperature": 0.0, "maxTokens": 1200},
     )
     gid = os.getenv("BEDROCK_GUARDRAIL_ID", "")
     if gid:
-        kwargs["guardrail_id"] = gid
-        kwargs["guardrail_version"] = os.getenv("BEDROCK_GUARDRAIL_VERSION", "DRAFT")
-    return BedrockModel(**kwargs)
+        kwargs["guardrailConfig"] = {
+            "guardrailIdentifier": gid,
+            "guardrailVersion": os.getenv("BEDROCK_GUARDRAIL_VERSION", "DRAFT"),
+        }
+    resp = client.converse(**kwargs)
+    parts = resp["output"]["message"]["content"]
+    text = "".join(p.get("text", "") for p in parts).strip()
+    if not text:
+        raise RuntimeError("Bedrock returned an empty narrative")
+    return text
 
 
 def _demo_narrative(case_state: Dict[str, Any]) -> str:
@@ -104,26 +138,19 @@ def _demo_narrative(case_state: Dict[str, Any]) -> str:
 def draft_narrative(case_state: Dict[str, Any]) -> Dict[str, Any]:
     """
     Return {narrative_text, drafted_by}.
-    Uses Bedrock via Strands when credentials are present; demo fallback otherwise.
+    Uses real Bedrock (boto3 Converse + Guardrail) unless EXTRACT_MODE=demo; on any Bedrock
+    error it falls back to the deterministic demo narrative and records the reason on stderr.
     """
     if os.getenv("EXTRACT_MODE", "").strip().lower() == "demo":
         return {"narrative_text": _demo_narrative(case_state), "drafted_by": "demo-stub"}
 
     try:
-        from strands import Agent
-
-        agent = Agent(
-            model=_bedrock_model(),
-            system_prompt=SYSTEM_PROMPT,
-            callback_handler=None,
-        )
-        prompt = (
-            "Draft a complete ICSR narrative for a qualified medical reviewer "
-            "from the following case state:\n"
-            f"{case_state}"
-        )
-        result = agent(prompt)
-        text = getattr(result, "message", None) or str(result)
+        text = _bedrock_draft(case_state)
         return {"narrative_text": str(text), "drafted_by": "bedrock"}
-    except Exception:
+    except Exception as exc:  # never block the governed workflow on a model error
+        print(
+            f"[draft] Bedrock draft failed ({type(exc).__name__}: {exc}); "
+            "using deterministic fallback",
+            file=sys.stderr,
+        )
         return {"narrative_text": _demo_narrative(case_state), "drafted_by": "demo-stub-fallback"}
