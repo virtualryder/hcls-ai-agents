@@ -56,8 +56,19 @@ jobs:
       - name: detect-secrets (BLOCKING vs committed .secrets.baseline)
         run: |
           cp .secrets.baseline .secrets.baseline.orig
-          detect-secrets scan --baseline .secrets.baseline --exclude-files 'node_modules/.*' --exclude-files '.*\.(png|jpg|jpeg|pdf|pptx|xlsx)$'
+          detect-secrets scan --baseline .secrets.baseline \
+            --exclude-files 'node_modules/.*' \
+            --exclude-files '\.git/.*' \
+            --exclude-files '.*\.pytest_cache/.*' \
+            --exclude-files '.*\.(png|jpg|jpeg|pdf|pptx|xlsx)$'
           diff -q .secrets.baseline.orig .secrets.baseline || { echo 'New secrets not in baseline — audit .secrets.baseline'; exit 1; }
+      - name: upload canonical baseline (diagnostic)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: secrets-baseline-canonical
+          path: .secrets.baseline
+          include-hidden-files: true
 
   semgrep:
     name: Semgrep (SAST rulesets)
