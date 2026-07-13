@@ -1,3 +1,9 @@
 
 # Per-deploy HMAC secret persisted by deploy.sh for smoke_test.sh; never commit.
 .token_secret.*
+
+# Transient deploy/verify artifacts (this session's Guardrail-tuning evidence run)
+_hist.json
+deploy_retune.log
+verify_narrative.log
+destroy_retune.log

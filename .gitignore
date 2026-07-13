@@ -70,3 +70,4 @@ infra/golden-path-*/.aws-sam/
 exec_arn.txt
 .aws-sam/
 _qa*/
+infra/golden-path-masking-verification/out.json

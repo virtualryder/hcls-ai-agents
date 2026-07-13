@@ -30,5 +30,14 @@ for T in "hcls-02-${ENVIRONMENT}-audit" "hcls-02-${ENVIRONMENT}-pending-approval
     && echo "removed retained table $T" || true
 done
 
+# Remove Lambda-auto-created CloudWatch log groups (/aws/lambda/hcls-02-<env>-*). Lambda creates these
+# on first invocation OUTSIDE CloudFormation, so `sam delete` leaves them behind — delete them for a
+# zero-residual teardown.
+for LG in $(aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/hcls-02-${ENVIRONMENT}-" \
+    --region "$REGION" --query "logGroups[].logGroupName" --output text 2>/dev/null); do
+  aws logs delete-log-group --log-group-name "$LG" --region "$REGION" >/dev/null 2>&1 \
+    && echo "removed lambda log group $LG" || true
+done
+
 rm -f ".token_secret.$STACK"
-echo "Deleted $STACK and its retained tables; removed local token secret."
+echo "Deleted $STACK, its retained tables, and Lambda log groups; removed local token secret."
